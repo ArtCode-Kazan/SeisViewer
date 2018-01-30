@@ -1,0 +1,1129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>507</width>
+    <height>544</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>503</width>
+      <height>521</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Расчет 2D-спектрограмм</string>
+     </attribute>
+     <widget class="QCheckBox" name="cbFullSpectrogram">
+      <property name="geometry">
+       <rect>
+        <x>278</x>
+        <y>136</y>
+        <width>201</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Строить спектрограмму полностью</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbCalculate">
+      <property name="geometry">
+       <rect>
+        <x>216</x>
+        <y>294</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Расчет</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="geometry">
+       <rect>
+        <x>258</x>
+        <y>210</y>
+        <width>211</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Визуализация</string>
+      </property>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Минимальная частота</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Максимальная частота</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="sbMinFrequency">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>15</y>
+         <width>66</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="sbMaxFrequency">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>45</y>
+         <width>66</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>20.000000000000000</double>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>136</y>
+        <width>211</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Интервал создания спектрограмм (часы)</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbSelectDirectory">
+      <property name="geometry">
+       <rect>
+        <x>412</x>
+        <y>4</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Выбор папки</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="dsbTimeInterval">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>134</y>
+        <width>51</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <double>2.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>60</y>
+        <width>481</width>
+        <height>67</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры сигнала</string>
+      </property>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>131</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Частота дискретизации</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbSignalFrequency">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>10</y>
+         <width>66</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>136</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Частота ресемплирования</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbResampleFrequency">
+       <property name="geometry">
+        <rect>
+         <x>146</x>
+         <y>38</y>
+         <width>71</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>10</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Тип записи</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="leRecordType_2">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>10</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ZXY</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbNoResampleSignal">
+       <property name="geometry">
+        <rect>
+         <x>222</x>
+         <y>40</y>
+         <width>161</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>не ресемплировать сигнал</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>7</x>
+        <y>5</y>
+        <width>131</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Папка с данными сверки</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leDirectoryPath">
+      <property name="geometry">
+       <rect>
+        <x>137</x>
+        <y>5</y>
+        <width>269</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>210</y>
+        <width>241</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры расчета</string>
+      </property>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Размер окна (отсчеты)</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbNoverlapSize">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>50</y>
+         <width>91</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>256</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbWindowSize">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>20</y>
+         <width>91</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>8192</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Сдвиг окна (отсчеты)</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>36</y>
+        <width>65</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Тип файлов</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cbFiletype">
+      <property name="geometry">
+       <rect>
+        <x>74</x>
+        <y>32</y>
+        <width>97</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Baikal7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bailkal8</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QTextEdit" name="teLog">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>318</y>
+        <width>483</width>
+        <height>173</height>
+       </rect>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_6">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>160</y>
+        <width>473</width>
+        <height>43</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Компоненты для обработки</string>
+      </property>
+      <widget class="QCheckBox" name="cbXComponent">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>20</y>
+         <width>93</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>X-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbYComponent">
+       <property name="geometry">
+        <rect>
+         <x>108</x>
+         <y>20</y>
+         <width>95</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Y-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbZComponent">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>20</y>
+         <width>93</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Z-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Расчет спектров и корреляций</string>
+     </attribute>
+     <widget class="QGroupBox" name="gbVisualizeParams">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>336</y>
+        <width>237</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры визуализации спектров</string>
+      </property>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Минимальная частота (Гц)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Максимальная частота (Гц)</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="dsbMinFrequencyVisualize">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>20</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="dsbMaxFrequencyVisualize">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>50</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>10.000000000000000</double>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QTextEdit" name="teLog_2">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>444</y>
+        <width>495</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leReviseFolder">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>6</y>
+        <width>257</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_11">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>6</y>
+        <width>129</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Папка c данными сверки</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbCalculation">
+      <property name="geometry">
+       <rect>
+        <x>206</x>
+        <y>418</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Расчет</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>172</y>
+        <width>481</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Интервал чистого участка сигнала</string>
+      </property>
+      <widget class="QLabel" name="label_14">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Левая граница (секунды)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_15">
+       <property name="geometry">
+        <rect>
+         <x>222</x>
+         <y>18</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Правая граница (секунды)</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbTimeBegin">
+       <property name="geometry">
+        <rect>
+         <x>152</x>
+         <y>18</y>
+         <width>61</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>10000000</number>
+       </property>
+       <property name="value">
+        <number>600</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbTimeEnd">
+       <property name="geometry">
+        <rect>
+         <x>362</x>
+         <y>18</y>
+         <width>61</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>10000000</number>
+       </property>
+       <property name="value">
+        <number>1200</number>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="gbCorrelationParams">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>336</y>
+        <width>241</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры расчета коэф-тов корреляции</string>
+      </property>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Минимальная частота (Гц)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_18">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Максимальная частота (Гц)</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="dsbMinFrequencyCorrelation">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>20</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="dsbMaxFrequencyCorrelation">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>50</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <double>10.000000000000000</double>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="pbOpenFolder">
+      <property name="geometry">
+       <rect>
+        <x>402</x>
+        <y>4</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Открыть</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_5">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>224</y>
+        <width>481</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры расчета спектров</string>
+      </property>
+      <widget class="QLabel" name="label_20">
+       <property name="geometry">
+        <rect>
+         <x>8</x>
+         <y>22</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Размер окна (отсчеты)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_21">
+       <property name="geometry">
+        <rect>
+         <x>198</x>
+         <y>24</y>
+         <width>115</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Сдвиг окна (отсчеты)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_22">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>52</y>
+         <width>171</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Параметр медианного фильтра</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_23">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>151</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Параметр marmett-фильтра</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbWindowSize_2">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>20</y>
+         <width>61</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>8192</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbNoverlapSize_2">
+       <property name="geometry">
+        <rect>
+         <x>316</x>
+         <y>20</y>
+         <width>71</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>10000</number>
+       </property>
+       <property name="value">
+        <number>4096</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbMedianFilterValue">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>50</y>
+         <width>51</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="singleStep">
+        <number>2</number>
+       </property>
+       <property name="value">
+        <number>7</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbMarmettFilterValue">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>80</y>
+         <width>51</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <number>7</number>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbIsUsingMedianFilter">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>50</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>использовать</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbIUsingMarmettFilter">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>80</y>
+         <width>91</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>использовать</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label_25">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>34</y>
+        <width>65</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Тип файлов</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cbFiletype_2">
+      <property name="geometry">
+       <rect>
+        <x>76</x>
+        <y>30</y>
+        <width>97</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Baikal7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bailkal8</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_7">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>54</y>
+        <width>481</width>
+        <height>67</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Параметры сигнала</string>
+      </property>
+      <widget class="QLabel" name="label_26">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>131</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Частота дискретизации</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbSignalFrequency_3">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>10</y>
+         <width>66</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_27">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>136</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Частота ресемплирования</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbResampleFrequency_3">
+       <property name="geometry">
+        <rect>
+         <x>146</x>
+         <y>38</y>
+         <width>71</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_28">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>10</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Тип записи</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="leRecordType_3">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>10</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ZXY</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbNoResampleSignal_2">
+       <property name="geometry">
+        <rect>
+         <x>222</x>
+         <y>40</y>
+         <width>161</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>не ресемплировать сигнал</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_8">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>126</y>
+        <width>485</width>
+        <height>43</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Компоненты для обработки</string>
+      </property>
+      <widget class="QCheckBox" name="cbXComponent_2">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>20</y>
+         <width>93</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>X-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbYComponent_2">
+       <property name="geometry">
+        <rect>
+         <x>108</x>
+         <y>20</y>
+         <width>95</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Y-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbZComponent_2">
+       <property name="geometry">
+        <rect>
+         <x>206</x>
+         <y>20</y>
+         <width>93</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Z-компонента</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
