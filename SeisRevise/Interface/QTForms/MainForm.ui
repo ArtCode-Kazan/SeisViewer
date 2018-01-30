@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>507</width>
-    <height>544</height>
+    <height>545</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -46,7 +46,7 @@
      <widget class="QPushButton" name="pbCalculate">
       <property name="geometry">
        <rect>
-        <x>216</x>
+        <x>208</x>
         <y>294</y>
         <width>75</width>
         <height>23</height>
@@ -189,6 +189,9 @@
        </property>
       </widget>
       <widget class="QSpinBox" name="sbSignalFrequency">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>140</x>
@@ -399,7 +402,7 @@
       </item>
       <item>
        <property name="text">
-        <string>Bailkal8</string>
+        <string>Baikal8</string>
        </property>
       </item>
      </widget>
