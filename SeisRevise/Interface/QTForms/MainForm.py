@@ -119,6 +119,7 @@ class Ui_MainWindow(object):
         self.teLog = QtWidgets.QTextEdit(self.tab)
         self.teLog.setGeometry(QtCore.QRect(8, 318, 483, 173))
         self.teLog.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.teLog.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.teLog.setReadOnly(True)
         self.teLog.setObjectName("teLog")
         self.groupBox_6 = QtWidgets.QGroupBox(self.tab)
