@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.colors import BoundaryNorm
-from matplotlib.ticker import MaxNLocator
 
 from SeisCore import specgram
 from SeisCore.MSICore.DrawingFunctions.Spectrogram import scale
@@ -27,25 +25,38 @@ def plot_spectrogram(signal, frequency, window_size,
     # расчет параметров шкалы
     cmap, cnorm = scale(amplitudes)
 
-    # размер поля для вывода графика
-    mpl.rcParams['figure.figsize'] = (12, 9)
-    mpl.rcParams['figure.dpi'] = 96  # разрешение отображения графика
     # настройка шрифта (для отображения русских букв)
     mpl.rc('font', family='Verdana')
-    plt.subplot(111)  # подготовка плота
+
+    # настройка отступов полей
+    mpl.rcParams['figure.subplot.left'] = 0.07
+    mpl.rcParams['figure.subplot.right'] = 0.97
+    mpl.rcParams['figure.subplot.bottom'] = 0.05
+    mpl.rcParams['figure.subplot.top'] = 0.95
+
+    # создание бланка графика
+    fig = plt.figure()
+
+    # размер плота в дюймах
+    fig.set_size_inches(12,9)
+    # разрешение отображения графика
+    fig.dpi = 96
+    # подготовка осей
+    axes = fig.add_subplot(111)
+
     # отображение спектрограммы в виде децибелов=20*lg(|amp|)
-    plt.pcolormesh(times, frequencies, 20 * np.log10(abs(amplitudes)),
+    axes.pcolormesh(times, frequencies, 20 * np.log10(abs(amplitudes)),
                    cmap=cmap, norm=cnorm)
     # заголовки осей
     x_label = u'Время, с'
     y_label = u'Частота, Гц'
-    plt.ylabel(y_label)
-    plt.xlabel(x_label)
-    # подпись графика
-    plt.title(output_name, fontsize=10)
+    axes.set_ylabel(y_label)
+    axes.set_xlabel(x_label)
 
+    # подпись графика
+    axes.set_title(output_name, fontsize=10)
     # сохранение графика в png
     plt.savefig(output_folder + '/' + output_name + '.png', dpi=96)
 
-    # очистка плота для построения нового графика
-    plt.gcf().clear()
+    # закрытие плота
+    plt.close()

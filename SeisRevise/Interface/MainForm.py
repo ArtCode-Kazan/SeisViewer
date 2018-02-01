@@ -340,7 +340,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                     '{}\t    - Спектрограммы {} - {} сек построены'.format(
                     datetime.now(), start_time_sec, end_time_sec))
                 QApplication.processEvents()
-        self.teLog.append('{}\t обработка завершена'.format(datetime.now()))
+        self.teLog.append('{}\t Обработка завершена'.format(datetime.now()))
         QApplication.processEvents()
 
 def run():
