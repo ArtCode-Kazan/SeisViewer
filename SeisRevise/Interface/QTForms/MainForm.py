@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(720, 594)
+        MainWindow.resize(718, 594)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
@@ -315,7 +315,7 @@ class Ui_MainWindow(object):
         self.cbGraphCorrelate.setGeometry(QtCore.QRect(14, 60, 221, 17))
         self.cbGraphCorrelate.setObjectName("cbGraphCorrelate")
         self.cbOneSpectrums = QtWidgets.QCheckBox(self.groupBox_9)
-        self.cbOneSpectrums.setGeometry(QtCore.QRect(410, 22, 301, 17))
+        self.cbOneSpectrums.setGeometry(QtCore.QRect(410, 22, 277, 17))
         self.cbOneSpectrums.setObjectName("cbOneSpectrums")
         self.cb_generalSpectrums = QtWidgets.QCheckBox(self.groupBox_9)
         self.cb_generalSpectrums.setGeometry(QtCore.QRect(14, 40, 225, 17))
@@ -336,7 +336,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

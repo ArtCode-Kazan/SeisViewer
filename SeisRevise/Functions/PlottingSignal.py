@@ -49,7 +49,7 @@ def drawing_signal(left_edge, frequency, signal, label, output_folder,
     time_array = np.linspace(start=t_min, stop=t_max, num=signal.shape[0])
 
     # построение графика
-    plt.plot(time_array, signal, lw=0.5, color='#FF0000')
+    axes.plot(time_array, signal, lw=0.5, color='#FF0000')
 
     # заголовки осей
     x_label = u'Время, с'
@@ -65,4 +65,4 @@ def drawing_signal(left_edge, frequency, signal, label, output_folder,
     plt.savefig(output_folder + '/' + output_name + '.png', dpi=96)
 
     # закрытие плота
-    plt.close()
+    plt.close(fig)

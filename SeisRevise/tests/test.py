@@ -1,15 +1,18 @@
-import numpy as np
+import os
 
-s=np.array([0,1,2,3,4])
-a=np.array([[0,1],[1,2],[2,3],[3,4],[4,5]])
+directory_path=r'D:\AppsBuilding\TestingData\BinData'
 
-a1=1<s
-b1=s<5
-c=a1 * b1
-print(a1)
-print(b1)
-print(c)
-print(a[(1<s)*(s<5)])
+bin_files_list = list()
+folder_struct = os.walk(directory_path)
+for root_folder, folders, files in folder_struct:
+    for file in files:
+        name, extention = file.split('.')
+        # поиск bin-файла
+        if extention in ['00', 'xx']:
+            # получение полного пути к bin-файлу
+            bin_file_path = os.path.join(root_folder, file)
+            bin_files_list.append(bin_file_path)
 
+print(bin_files_list)
 
 

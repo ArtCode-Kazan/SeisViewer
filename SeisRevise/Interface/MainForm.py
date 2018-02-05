@@ -13,12 +13,17 @@ from SeisPars import rsf8
 from SeisPars.Parsers.BinarySeisReader import get_main_header
 
 from SeisCore import average_spectrum
+from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
 from SeisRevise.Functions.MomentsIntervals import moments_intervals
 from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
 from SeisRevise.Functions.CrossCorrelate import cross_correlation
 from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
-from SeisRevise.Functions.DrawingSignal import drawing_signal
+from SeisRevise.Functions.PlottingSignal import drawing_signal
+from SeisRevise.Functions.PlottingSpectrum import drawing_spectrum
+from SeisRevise.Functions.PlottingAllSpectrums import drawing_all_smooth_cumulative_spectrums
+from SeisRevise.Functions.CorrelationToFile import correlation_to_file
+from SeisRevise.Functions.PlottingCorrelation import drawing_correlation
 
 
 class SpectrogramForm(QMainWindow, Ui_MainWindow):
@@ -762,15 +767,17 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
 
                 # запись сглаженного осредненного спектра
                 averspectrum_data[component, 1, :, file_number] = \
-                    av_spec_smooth_component[:, 1].copy()
+                    av_spec_smooth_component[:, 1]
 
         self.teLog_2.append('{}\tРасчет осредненных спектров завершен'.format(datetime.now()))
         QApplication.processEvents()
 
         # расчет коэф-тов корреляции для каждой компоненты и для каждой пары
         #  приборов
+        result_correlate_matrix = np.empty(
+            (3, bin_files_count, bin_files_count), dtype=np.float32)
         for component in range(component_count):
-            correlation_matrix = cross_correlation(
+            result_correlate_matrix[component, :, :] = cross_correlation(
                 frequency=frequencies_list,
                 f_min_analysis=min_frequency_correlation,
                 f_max_analysis=max_frequency_correlation,
@@ -780,7 +787,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                             'завершен'.format(datetime.now()))
         QApplication.processEvents()
 
-        # процесс экспорта результаатов в виде файлов
+        # процесс экспорта результатов в виде файлов по каждому прибору
         for file_number in range(bin_files_count):
             # получение имени файла
             file_path = bin_files_list[file_number]
@@ -805,13 +812,13 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
 
                 # выгрузка чистых участков сигнала в виде файла
                 if self.cbWriteSignalToFile.isChecked():
-                    dat_file_name = '{}-ClearSignal {} Component.dat'.format(
+                    dat_file_name = '{}-ClearSignal {} Component'.format(
                         bin_file_name, components[component_number])
                     write_part_of_signal(
                         signal=selection_signals[component_number, :, file_number],
                         left_edge=left_edge,
-                        output_file_path=os.path.join(
-                            file_processing_result_folder,dat_file_name))
+                        output_folder=file_processing_result_folder,
+                        output_name=dat_file_name)
                     self.teLog_2.append(
                         '{}\t        - Экспорт чистого участка '
                         'завершен'.format(
@@ -820,7 +827,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
 
                 # сохранение чистых участков сигнала в виде графиков
                 if self.cbSignalGraph.isChecked():
-                    png_file_name = '{}-ClearSignal {} Graph'.format(
+                    png_file_name = '{}-ClearSignal {} Component Graph'.format(
                         bin_file_name, components[component_number])
                     drawing_signal(left_edge=left_edge,
                                    frequency=resample_frequency,
@@ -834,6 +841,72 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                         'завершен'.format(
                             datetime.now()))
                     QApplication.processEvents()
+
+                # сохранение рисунков спектров для каждого прибора
+                if self.cbOneSpectrums.isChecked():
+                    png_file_name = '{}-Average Spectrum {} Component Graph'.format(
+                        bin_file_name, components[component_number])
+                    drawing_spectrum(frequency=frequencies_list,
+                                     spectrum_begin_amplitudes=averspectrum_data[component_number, 0, :, file_number],
+                                     spectrum_smooth_amplitudes=averspectrum_data[component_number, 1, :, file_number],
+                                     f_min=min_frequency_visuality,
+                                     f_max=max_frequency_visuality,
+                                     output_folder=file_processing_result_folder,
+                                     output_name=png_file_name)
+                    self.teLog_2.append(
+                        '{}\t        - Экспорт графика спектров '
+                        'завершен'.format(
+                            datetime.now()))
+                    QApplication.processEvents()
+
+        # сохранение обобщенных данных для всех приборов
+
+        # генерация набора цветов для каждого прибора
+        colors = random_hex_colors_generators(bin_files_count)
+
+        # получение списка с именами файлов без расширения
+        bin_file_name_list = list()
+        for el in bin_files_list:
+            el = os.path.split(el)[-1].split('.')[0]
+            bin_file_name_list.append(el)
+
+        # сохранение наборов данных идет покомпонентно
+        for component_number in range(component_count):
+            # сохранение набора осредненных спектров
+            if self.cb_generalSpectrums.isChecked():
+                file_name = 'SmoothSpectrums {} Component'.format(
+                    components[component_number])
+                drawing_all_smooth_cumulative_spectrums(
+                    spectrums_name_list=bin_file_name_list,
+                    frequency=frequencies_list,
+                    spectrum_data=averspectrum_data[component_number, 1, :,
+                                  :],
+                f_min_visualize=min_frequency_visuality,
+                f_max_visualize=max_frequency_visuality,
+                colors=colors,
+                output_folder=folder_with_result,
+                output_name=file_name)
+
+            # сохранение матрицы коэ-тов корреляции в файл формата dat
+            if self.cbCorrelateToFile.isChecked():
+                file_name = 'CorrelationMatrix {} Component'.format(
+                    components[component_number])
+                correlation_to_file(devices=bin_file_name_list,
+                                    correlation_matrix=result_correlate_matrix[component_number],
+                                    output_folder=folder_with_result,
+                                    output_name=file_name)
+
+            # сохранение коэф-тов корреляции в виде графиков
+            if self.cbGraphCorrelate.isChecked():
+                file_name = 'Correlations {} Component'.format(
+                    components[component_number])
+                drawing_correlation(devices=bin_file_name_list,
+                                    colors=colors,
+                                    correlation_matrix=result_correlate_matrix[component_number],
+                                    output_folder=folder_with_result,
+                                    output_name=file_name)
+        self.teLog_2.append('Обработка завершена')
+        QApplication.processEvents()
 
 
 def run():
