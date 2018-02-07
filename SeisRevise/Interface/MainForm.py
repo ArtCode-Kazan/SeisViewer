@@ -118,7 +118,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         # тип файлов
         file_type = self.cbFiletype.currentText()
         # тип записи
-        record_type = self.leRecordType_2.text()
+        record_type = self.cbRecordType.currentText()
 
         # частота записи сигнала
         if file_type == "Baikal7":
@@ -457,7 +457,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         # тип файлов
         file_type = self.cbFiletype_2.currentText()
         # тип записи
-        record_type = self.leRecordType_3.text()
+        record_type = self.cbRecordType_2.currentText()
 
         # частота записи сигнала
         if file_type == "Baikal7":
