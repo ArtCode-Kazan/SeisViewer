@@ -21,9 +21,11 @@ from SeisRevise.Functions.CrossCorrelate import cross_correlation
 from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
 from SeisRevise.Functions.PlottingSignal import drawing_signal
 from SeisRevise.Functions.PlottingSpectrum import drawing_spectrum
-from SeisRevise.Functions.PlottingAllSpectrums import drawing_all_smooth_cumulative_spectrums
+from SeisRevise.Functions.PlottingAllSpectrums import \
+    drawing_all_smooth_cumulative_spectrums
 from SeisRevise.Functions.CorrelationToFile import correlation_to_file
 from SeisRevise.Functions.PlottingCorrelation import drawing_correlation
+from SeisRevise.Functions.ExportFolder import export_folder_generate
 
 
 class SpectrogramForm(QMainWindow, Ui_MainWindow):
@@ -157,6 +159,12 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         # максимальная частота визуализации
         max_frequency = self.sbMaxFrequency.value()
 
+        # структура папок для экспорта
+        if self.rbHourStructure.isChecked():
+            export_folder_structure = 'HourStructure'
+        if self.rbDeviceStructure.isChecked():
+            export_folder_structure = 'DeviceStructure'
+
         # проверка введенных параметров
         errors = list()
         if not os.path.isdir(directory_path):
@@ -199,9 +207,22 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                 name, extention = file.split('.')
                 # поиск bin-файла
                 if extention in ['00', 'xx']:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
+                    # проверка, что имя файла и папки совпадают
+                    if name == os.path.basename(root_folder):
+                        # получение полного пути к bin-файлу
+                        bin_file_path = os.path.join(root_folder, file)
+                        bin_files_list.append(bin_file_path)
+                    else:
+                        bin_files_list = None
+                        break
+
+        if bin_files_list is None:
+            self.teLog.append('{}\tНеверная структура '
+                              'папок. Не совпадают имена '
+                              'папок и файлов'.format(
+                datetime.now()))
+            QApplication.processEvents()
+            return None
 
         if len(bin_files_list) == 0:
             self.teLog.append('{}\tАнализ папки завершен. Bin-файлов '
@@ -215,17 +236,9 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                           ''.format(datetime.now(), len(bin_files_list)))
         QApplication.processEvents()
 
-        # создание папки с результатами расчетов
-        for i in range(99):
-            folder_name = '2DSpectrograms_vers_{}'.format(i + 1)
-            folder_with_result = os.path.join(directory_path, folder_name)
-            if not os.path.exists(folder_with_result):
-                os.mkdir(folder_with_result)
-                break
-
         # запись файла с параметрами вычислений
-        option_file_name = 'options.dat'
-        option_file_path = os.path.join(folder_with_result, option_file_name)
+        option_file_name = 'options_2DSpectrums.dat'
+        option_file_path = os.path.join(directory_path, option_file_name)
         f = open(option_file_path, 'w')
         s = '[Revise Folder]={}\n'.format(directory_path)
         f.write(s)
@@ -312,62 +325,63 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                 # вычисление времени в секундах конца временного интервала
                 end_time_sec = right_edge // bin_data.frequency
 
-                # построение спектрограмм для компоненты X (если она выбрана)
-                if 'X' in components:
-                    # имя для png-файла складывается как имя
-                    # bin-файла+начальная секудна интервала+конечная секунда
-                    #  интервала
-                    output_file_name = 'X_Component_{}_{}-{}_sec'.format(
-                        bin_file_name, start_time_sec, end_time_sec)
-                    plot_spectrogram(
-                        signal=selection_signal[:, x_channel_number],
+                # Построение спектрограмм по компонентам
+                for component in components:
+                    # имя для png-файла складывается как название компоненты
+                    #  имя bin-файла+начальная секудна интервала+конечная
+                    # секунда интервала
+                    output_file_name = '{}_Component_{}_{}-{}_sec'.format(
+                        component, bin_file_name, start_time_sec, end_time_sec)
+
+                    # генерация пути к папке, куда будет сохраняться результат
+                    # в зависимости от типа структуры папок экспорта
+                    export_folder = export_folder_generate(
+                        root_folder=directory_path,
+                        structure_type=export_folder_structure,
+                        component=component,
+                        bin_file_name=bin_file_name,
+                        start_time_sec=start_time_sec,
+                        end_time_sec=end_time_sec)
+
+                    # проверка создания каталога экспорта
+                    if export_folder_structure is None:
+                        self.teLog.append(
+                            '{}\t Ошибка создания каталога экспорта'.format(
+                                datetime.now()))
+                        QApplication.processEvents()
+                        return None
+
+                    # определение номера канала компоненты исходя из текущей
+                    #  компоненты
+                    if component == 'X':
+                        channel_number = x_channel_number
+                    if component == 'Y':
+                        channel_number = y_channel_number
+                    if component == 'Z':
+                        channel_number = z_channel_number
+
+                    # построение спектрограммы
+                    is_correct = plot_spectrogram(
+                        signal=selection_signal[:, channel_number],
                         frequency=bin_data.frequency,
                         window_size=window_size,
                         noverlap_size=noverlap_size,
                         min_frequency_visulize=min_frequncy,
                         max_frequency_visualize=max_frequency,
-                        output_folder=folder_with_result,
+                        output_folder=export_folder,
                         output_name=output_file_name,
                         time_start_sec=start_time_sec
                     )
 
-                # построение спектрограмм для компоненты Y (если она выбрана)
-                if 'Y' in components:
-                    # имя для png-файла складывается как имя
-                    # bin-файла+начальная секудна интервала+конечная секунда
-                    #  интервала
-                    output_file_name = 'Y_Component_{}_{}-{}_sec'.format(
-                        bin_file_name, start_time_sec, end_time_sec)
-                    plot_spectrogram(
-                        signal=selection_signal[:, y_channel_number],
-                        frequency=bin_data.frequency,
-                        window_size=window_size,
-                        noverlap_size=noverlap_size,
-                        min_frequency_visulize=min_frequncy,
-                        max_frequency_visualize=max_frequency,
-                        output_folder=folder_with_result,
-                        output_name=output_file_name,
-                        time_start_sec=start_time_sec
-                    )
+                    # проверка создания спектрограммы
+                    if not is_correct:
+                        self.teLog.append(
+                            '{}\t    - Ошибка построения '
+                            'спектрограммы: возможно, неверные '
+                            'параметры построения'.format(datetime.now()))
+                        QApplication.processEvents()
+                        break
 
-                # построение спектрограмм для компоненты Z (если она выбрана)
-                if 'Z' in components:
-                    # имя для png-файла складывается как имя
-                    # bin-файла+начальная секудна интервала+конечная секунда
-                    #  интервала
-                    output_file_name = 'Z_Component_{}_{}-{}_sec'.format(
-                        bin_file_name, start_time_sec, end_time_sec)
-                    plot_spectrogram(
-                        signal=selection_signal[:, x_channel_number],
-                        frequency=bin_data.frequency,
-                        window_size=window_size,
-                        noverlap_size=noverlap_size,
-                        min_frequency_visulize=min_frequncy,
-                        max_frequency_visualize=max_frequency,
-                        output_folder=folder_with_result,
-                        output_name=output_file_name,
-                        time_start_sec=start_time_sec
-                    )
                 self.teLog.append(
                     '{}\t    - Спектрограммы {} - {} сек построены'.format(
                         datetime.now(), start_time_sec, end_time_sec))
@@ -736,7 +750,8 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         frequency_count = frequencies_list.shape[0]
 
         averspectrum_data = np.empty(
-            (component_count, 2, frequency_count, bin_files_count), dtype=np.float32)
+            (component_count, 2, frequency_count, bin_files_count),
+            dtype=np.float32)
 
         # расчет осредненных спектров с параметрами сглаживания и без
         # по каждой компоненте
@@ -763,13 +778,14 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
 
                 # запись несглаженного осредненного спектра
                 averspectrum_data[component, 0, :, file_number] = \
-                   av_spec_simple_component[:, 1]
+                    av_spec_simple_component[:, 1]
 
                 # запись сглаженного осредненного спектра
                 averspectrum_data[component, 1, :, file_number] = \
                     av_spec_smooth_component[:, 1]
 
-        self.teLog_2.append('{}\tРасчет осредненных спектров завершен'.format(datetime.now()))
+        self.teLog_2.append(
+            '{}\tРасчет осредненных спектров завершен'.format(datetime.now()))
         QApplication.processEvents()
 
         # расчет коэф-тов корреляции для каждой компоненты и для каждой пары
@@ -807,7 +823,7 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
             for component_number in range(component_count):
                 self.teLog_2.append(
                     '{}\t   - Экспорт результатов по {} компоненте...'.format(
-                        datetime.now(),components[component_number]))
+                        datetime.now(), components[component_number]))
                 QApplication.processEvents()
 
                 # выгрузка чистых участков сигнала в виде файла
@@ -815,7 +831,8 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                     dat_file_name = '{}-ClearSignal {} Component'.format(
                         bin_file_name, components[component_number])
                     write_part_of_signal(
-                        signal=selection_signals[component_number, :, file_number],
+                        signal=selection_signals[component_number, :,
+                               file_number],
                         left_edge=left_edge,
                         output_folder=file_processing_result_folder,
                         output_name=dat_file_name)
@@ -847,8 +864,14 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                     png_file_name = '{}-Average Spectrum {} Component Graph'.format(
                         bin_file_name, components[component_number])
                     drawing_spectrum(frequency=frequencies_list,
-                                     spectrum_begin_amplitudes=averspectrum_data[component_number, 0, :, file_number],
-                                     spectrum_smooth_amplitudes=averspectrum_data[component_number, 1, :, file_number],
+                                     spectrum_begin_amplitudes=averspectrum_data[
+                                                               component_number,
+                                                               0, :,
+                                                               file_number],
+                                     spectrum_smooth_amplitudes=averspectrum_data[
+                                                                component_number,
+                                                                1, :,
+                                                                file_number],
                                      f_min=min_frequency_visuality,
                                      f_max=max_frequency_visuality,
                                      output_folder=file_processing_result_folder,
@@ -881,18 +904,19 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                     frequency=frequencies_list,
                     spectrum_data=averspectrum_data[component_number, 1, :,
                                   :],
-                f_min_visualize=min_frequency_visuality,
-                f_max_visualize=max_frequency_visuality,
-                colors=colors,
-                output_folder=folder_with_result,
-                output_name=file_name)
+                    f_min_visualize=min_frequency_visuality,
+                    f_max_visualize=max_frequency_visuality,
+                    colors=colors,
+                    output_folder=folder_with_result,
+                    output_name=file_name)
 
             # сохранение матрицы коэ-тов корреляции в файл формата dat
             if self.cbCorrelateToFile.isChecked():
                 file_name = 'CorrelationMatrix {} Component'.format(
                     components[component_number])
                 correlation_to_file(devices=bin_file_name_list,
-                                    correlation_matrix=result_correlate_matrix[component_number],
+                                    correlation_matrix=result_correlate_matrix[
+                                        component_number],
                                     output_folder=folder_with_result,
                                     output_name=file_name)
 
@@ -902,7 +926,8 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
                     components[component_number])
                 drawing_correlation(devices=bin_file_name_list,
                                     colors=colors,
-                                    correlation_matrix=result_correlate_matrix[component_number],
+                                    correlation_matrix=result_correlate_matrix[
+                                        component_number],
                                     output_folder=folder_with_result,
                                     output_name=file_name)
         self.teLog_2.append('Обработка завершена')

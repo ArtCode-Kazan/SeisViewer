@@ -1,3 +1,5 @@
+
+
 def moments_intervals(array_length, frequency, step_time=None):
     """
     Функция для расчета номеров индексов отсчетов для разбития на интервалы
