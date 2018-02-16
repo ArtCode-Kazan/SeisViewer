@@ -1,7 +1,10 @@
-import os
+import re
 
-directory_path='D:/AppsBuilding/TestingData/BinData/0-3600_sec/X_component'
+s='BinData-sss'
 
-os.mkdir(directory_path)
 
+if re.match('[a-zA-Z0-9-_]*$',s):
+    print('Ok')
+else:
+    print('None')
 

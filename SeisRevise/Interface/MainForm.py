@@ -3,6 +3,7 @@ import sys
 from datetime import datetime
 import numpy as np
 from numpy.fft import rfftfreq
+import re
 
 from PyQt5.QtWidgets import *
 
@@ -13,6 +14,7 @@ from SeisPars import rsf8
 from SeisPars.Parsers.BinarySeisReader import get_main_header
 
 from SeisCore import average_spectrum
+from SeisCore import checking_name
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
 from SeisRevise.Functions.MomentsIntervals import moments_intervals
@@ -203,26 +205,35 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         bin_files_list = list()
         folder_struct = os.walk(directory_path)
         for root_folder, folders, files in folder_struct:
+            # имя папки
+            root_folder_name = os.path.basename(root_folder)
+            # проверка имени папки на допустимые символы
+            if not checking_name(root_folder_name):
+                # прерывание расчета в случае неверного имени папки
+                self.teLog.append('{}\tНеверное имя папки {} - '
+                                  'содержит недопустимые символы. '
+                                  'Обработка прервана'.format(
+                    datetime.now(),root_folder_name))
+                QApplication.processEvents()
+                return None
+
             for file in files:
                 name, extention = file.split('.')
                 # поиск bin-файла
                 if extention in ['00', 'xx']:
                     # проверка, что имя файла и папки совпадают
-                    if name == os.path.basename(root_folder):
+                    if name == root_folder_name:
                         # получение полного пути к bin-файлу
                         bin_file_path = os.path.join(root_folder, file)
                         bin_files_list.append(bin_file_path)
                     else:
-                        bin_files_list = None
-                        break
-
-        if bin_files_list is None:
-            self.teLog.append('{}\tНеверная структура '
-                              'папок. Не совпадают имена '
-                              'папок и файлов'.format(
-                datetime.now()))
-            QApplication.processEvents()
-            return None
+                        # прерывание расчета в случае неверной структуры папок
+                        self.teLog.append('{}\tНеверная структура '
+                                          'папок. Не совпадают имена '
+                                          'папок и файлов'.format(
+                            datetime.now()))
+                        QApplication.processEvents()
+                        return None
 
         if len(bin_files_list) == 0:
             self.teLog.append('{}\tАнализ папки завершен. Bin-файлов '
@@ -231,163 +242,163 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
             QApplication.processEvents()
             return False
 
-        # Если bin-файлы есть, то работа продолжается
-        self.teLog.append('{}\tАнализ папки завершен. Всего найдено {} файлов'
-                          ''.format(datetime.now(), len(bin_files_list)))
-        QApplication.processEvents()
-
-        # запись файла с параметрами вычислений
-        option_file_name = 'options_2DSpectrums.dat'
-        option_file_path = os.path.join(directory_path, option_file_name)
-        f = open(option_file_path, 'w')
-        s = '[Revise Folder]={}\n'.format(directory_path)
-        f.write(s)
-        s = '[File Types]={}\n'.format(file_type)
-        f.write(s)
-        s = '[Record Type]={}\n'.format(record_type)
-        f.write(s)
-        s = '[Signal Frequency, Hz]={}\n'.format(signal_frequency)
-        f.write(s)
-        s = '[Resample Frequency, Hz]={}\n'.format(resample_frequency)
-        f.write(s)
-        s = '[Time Interval, Hour]={}\n'.format(time_interval)
-        f.write(s)
-        s = '[X Component]={}\n'.format(self.cbXComponent.isChecked())
-        f.write(s)
-        s = '[Y Component]={}\n'.format(self.cbYComponent.isChecked())
-        f.write(s)
-        s = '[Z Component]={}\n'.format(self.cbZComponent.isChecked())
-        f.write(s)
-        s = '[Windows Size, Moment]={}\n'.format(window_size)
-        f.write(s)
-        s = '[Noverlap Size, Moment]={}\n'.format(noverlap_size)
-        f.write(s)
-        s = '[Min frequency visualize, Hz]={}\n'.format(min_frequncy)
-        f.write(s)
-        s = '[Max frequency visualize, Hz]={}\n'.format(max_frequency)
-        f.write(s)
-        f.close()
-
-        # парсинг типа записи
-        x_channel_number = record_type.index('X')
-        y_channel_number = record_type.index('Y')
-        z_channel_number = record_type.index('Z')
-
-        # запуск процесса построения спектрограмм
-        for file_path in bin_files_list:
-            # считывание файла
-            if file_type == 'Baikal7':
-                bin_data = rsf7(file_path=file_path,
-                                resample_frequency=resample_frequency)
-            if file_type == 'Baikal8':
-                bin_data = rsf8(file_path=file_path,
-                                signal_frequency=signal_frequency,
-                                resample_frequency=resample_frequency)
-
-            # получение имени файла
-            bin_file_name = os.path.split(file_path)[-1].split('.')[0]
-
-            # проверка, что данные считались корректно
-            if bin_data is not None:
-                self.teLog.append(
-                    '{}\tФайл {} успешно считан'.format(datetime.now(),
-                                                        bin_file_name))
-                QApplication.processEvents()
-            else:
-                self.teLog.append(
-                    '{}\tОшибка считывания файла {} - исключен из '
-                    'обработки'.format(
-                        datetime.now(), bin_file_name))
-                QApplication.processEvents()
-                continue
-
-            # получение границ отсчетов для каждого временного интервала
-            # в случае, если временной интервал задан
-            if time_interval is not None:
-                time_steps = moments_intervals(
-                    array_length=bin_data.signals.shape[0],
-                    frequency=bin_data.frequency,
-                    step_time=time_interval)
-            # в случае, если временной интервал НЕ задан
-            else:
-                time_steps = moments_intervals(
-                    array_length=bin_data.signals.shape[0],
-                    frequency=bin_data.frequency,
-                    step_time=None)
-
-            # обработка идет по каждому временному интервалу
-            for left_edge, right_edge in time_steps:
-                # выборка сигнала (всех трех компонент) для текущего
-                # временного интервала
-                selection_signal = bin_data.signals[left_edge:right_edge, :]
-                # вычисление времени в секундах начала временного интервала
-                start_time_sec = left_edge // bin_data.frequency
-                # вычисление времени в секундах конца временного интервала
-                end_time_sec = right_edge // bin_data.frequency
-
-                # Построение спектрограмм по компонентам
-                for component in components:
-                    # имя для png-файла складывается как название компоненты
-                    #  имя bin-файла+начальная секудна интервала+конечная
-                    # секунда интервала
-                    output_file_name = '{}_Component_{}_{}-{}_sec'.format(
-                        component, bin_file_name, start_time_sec, end_time_sec)
-
-                    # генерация пути к папке, куда будет сохраняться результат
-                    # в зависимости от типа структуры папок экспорта
-                    export_folder = export_folder_generate(
-                        root_folder=directory_path,
-                        structure_type=export_folder_structure,
-                        component=component,
-                        bin_file_name=bin_file_name,
-                        start_time_sec=start_time_sec,
-                        end_time_sec=end_time_sec)
-
-                    # проверка создания каталога экспорта
-                    if export_folder_structure is None:
-                        self.teLog.append(
-                            '{}\t Ошибка создания каталога экспорта'.format(
-                                datetime.now()))
-                        QApplication.processEvents()
-                        return None
-
-                    # определение номера канала компоненты исходя из текущей
-                    #  компоненты
-                    if component == 'X':
-                        channel_number = x_channel_number
-                    if component == 'Y':
-                        channel_number = y_channel_number
-                    if component == 'Z':
-                        channel_number = z_channel_number
-
-                    # построение спектрограммы
-                    is_correct = plot_spectrogram(
-                        signal=selection_signal[:, channel_number],
-                        frequency=bin_data.frequency,
-                        window_size=window_size,
-                        noverlap_size=noverlap_size,
-                        min_frequency_visulize=min_frequncy,
-                        max_frequency_visualize=max_frequency,
-                        output_folder=export_folder,
-                        output_name=output_file_name,
-                        time_start_sec=start_time_sec
-                    )
-
-                    # проверка создания спектрограммы
-                    if not is_correct:
-                        self.teLog.append(
-                            '{}\t    - Ошибка построения '
-                            'спектрограммы: возможно, неверные '
-                            'параметры построения'.format(datetime.now()))
-                        QApplication.processEvents()
-                        break
-
-                self.teLog.append(
-                    '{}\t    - Спектрограммы {} - {} сек построены'.format(
-                        datetime.now(), start_time_sec, end_time_sec))
-                QApplication.processEvents()
-        self.teLog.append('{}\t Обработка завершена'.format(datetime.now()))
-        QApplication.processEvents()
+        # # Если bin-файлы есть, то работа продолжается
+        # self.teLog.append('{}\tАнализ папки завершен. Всего найдено {} файлов'
+        #                   ''.format(datetime.now(), len(bin_files_list)))
+        # QApplication.processEvents()
+        #
+        # # запись файла с параметрами вычислений
+        # option_file_name = 'options_2DSpectrums.dat'
+        # option_file_path = os.path.join(directory_path, option_file_name)
+        # f = open(option_file_path, 'w')
+        # s = '[Revise Folder]={}\n'.format(directory_path)
+        # f.write(s)
+        # s = '[File Types]={}\n'.format(file_type)
+        # f.write(s)
+        # s = '[Record Type]={}\n'.format(record_type)
+        # f.write(s)
+        # s = '[Signal Frequency, Hz]={}\n'.format(signal_frequency)
+        # f.write(s)
+        # s = '[Resample Frequency, Hz]={}\n'.format(resample_frequency)
+        # f.write(s)
+        # s = '[Time Interval, Hour]={}\n'.format(time_interval)
+        # f.write(s)
+        # s = '[X Component]={}\n'.format(self.cbXComponent.isChecked())
+        # f.write(s)
+        # s = '[Y Component]={}\n'.format(self.cbYComponent.isChecked())
+        # f.write(s)
+        # s = '[Z Component]={}\n'.format(self.cbZComponent.isChecked())
+        # f.write(s)
+        # s = '[Windows Size, Moment]={}\n'.format(window_size)
+        # f.write(s)
+        # s = '[Noverlap Size, Moment]={}\n'.format(noverlap_size)
+        # f.write(s)
+        # s = '[Min frequency visualize, Hz]={}\n'.format(min_frequncy)
+        # f.write(s)
+        # s = '[Max frequency visualize, Hz]={}\n'.format(max_frequency)
+        # f.write(s)
+        # f.close()
+        #
+        # # парсинг типа записи
+        # x_channel_number = record_type.index('X')
+        # y_channel_number = record_type.index('Y')
+        # z_channel_number = record_type.index('Z')
+        #
+        # # запуск процесса построения спектрограмм
+        # for file_path in bin_files_list:
+        #     # считывание файла
+        #     if file_type == 'Baikal7':
+        #         bin_data = rsf7(file_path=file_path,
+        #                         resample_frequency=resample_frequency)
+        #     if file_type == 'Baikal8':
+        #         bin_data = rsf8(file_path=file_path,
+        #                         signal_frequency=signal_frequency,
+        #                         resample_frequency=resample_frequency)
+        #
+        #     # получение имени файла
+        #     bin_file_name = os.path.split(file_path)[-1].split('.')[0]
+        #
+        #     # проверка, что данные считались корректно
+        #     if bin_data is not None:
+        #         self.teLog.append(
+        #             '{}\tФайл {} успешно считан'.format(datetime.now(),
+        #                                                 bin_file_name))
+        #         QApplication.processEvents()
+        #     else:
+        #         self.teLog.append(
+        #             '{}\tОшибка считывания файла {} - исключен из '
+        #             'обработки'.format(
+        #                 datetime.now(), bin_file_name))
+        #         QApplication.processEvents()
+        #         continue
+        #
+        #     # получение границ отсчетов для каждого временного интервала
+        #     # в случае, если временной интервал задан
+        #     if time_interval is not None:
+        #         time_steps = moments_intervals(
+        #             array_length=bin_data.signals.shape[0],
+        #             frequency=bin_data.frequency,
+        #             step_time=time_interval)
+        #     # в случае, если временной интервал НЕ задан
+        #     else:
+        #         time_steps = moments_intervals(
+        #             array_length=bin_data.signals.shape[0],
+        #             frequency=bin_data.frequency,
+        #             step_time=None)
+        #
+        #     # обработка идет по каждому временному интервалу
+        #     for left_edge, right_edge in time_steps:
+        #         # выборка сигнала (всех трех компонент) для текущего
+        #         # временного интервала
+        #         selection_signal = bin_data.signals[left_edge:right_edge, :]
+        #         # вычисление времени в секундах начала временного интервала
+        #         start_time_sec = left_edge // bin_data.frequency
+        #         # вычисление времени в секундах конца временного интервала
+        #         end_time_sec = right_edge // bin_data.frequency
+        #
+        #         # Построение спектрограмм по компонентам
+        #         for component in components:
+        #             # имя для png-файла складывается как название компоненты
+        #             #  имя bin-файла+начальная секудна интервала+конечная
+        #             # секунда интервала
+        #             output_file_name = '{}_Component_{}_{}-{}_sec'.format(
+        #                 component, bin_file_name, start_time_sec, end_time_sec)
+        #
+        #             # генерация пути к папке, куда будет сохраняться результат
+        #             # в зависимости от типа структуры папок экспорта
+        #             export_folder = export_folder_generate(
+        #                 root_folder=directory_path,
+        #                 structure_type=export_folder_structure,
+        #                 component=component,
+        #                 bin_file_name=bin_file_name,
+        #                 start_time_sec=start_time_sec,
+        #                 end_time_sec=end_time_sec)
+        #
+        #             # проверка создания каталога экспорта
+        #             if export_folder_structure is None:
+        #                 self.teLog.append(
+        #                     '{}\t Ошибка создания каталога экспорта'.format(
+        #                         datetime.now()))
+        #                 QApplication.processEvents()
+        #                 return None
+        #
+        #             # определение номера канала компоненты исходя из текущей
+        #             #  компоненты
+        #             if component == 'X':
+        #                 channel_number = x_channel_number
+        #             if component == 'Y':
+        #                 channel_number = y_channel_number
+        #             if component == 'Z':
+        #                 channel_number = z_channel_number
+        #
+        #             # построение спектрограммы
+        #             is_correct = plot_spectrogram(
+        #                 signal=selection_signal[:, channel_number],
+        #                 frequency=bin_data.frequency,
+        #                 window_size=window_size,
+        #                 noverlap_size=noverlap_size,
+        #                 min_frequency_visulize=min_frequncy,
+        #                 max_frequency_visualize=max_frequency,
+        #                 output_folder=export_folder,
+        #                 output_name=output_file_name,
+        #                 time_start_sec=start_time_sec
+        #             )
+        #
+        #             # проверка создания спектрограммы
+        #             if not is_correct:
+        #                 self.teLog.append(
+        #                     '{}\t    - Ошибка построения '
+        #                     'спектрограммы: возможно, неверные '
+        #                     'параметры построения'.format(datetime.now()))
+        #                 QApplication.processEvents()
+        #                 break
+        #
+        #         self.teLog.append(
+        #             '{}\t    - Спектрограммы {} - {} сек построены'.format(
+        #                 datetime.now(), start_time_sec, end_time_sec))
+        #         QApplication.processEvents()
+        # self.teLog.append('{}\t Обработка завершена'.format(datetime.now()))
+        # QApplication.processEvents()
 
     # вкладка Расчет корреляций приборов и кумулятивных спектров
     # ------------------------------------------------------------------
