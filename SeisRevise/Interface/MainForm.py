@@ -3,7 +3,6 @@ import sys
 from datetime import datetime
 import numpy as np
 from numpy.fft import rfftfreq
-import re
 
 from PyQt5.QtWidgets import *
 
@@ -579,15 +578,39 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
         # анализ папки с данными сверки - получение полных путей к bin-файлам
         bin_files_list = list()
         folder_struct = os.walk(directory_path)
+
         for root_folder, folders, files in folder_struct:
+            # имя папки
+            root_folder_name = os.path.basename(root_folder)
+            # проверка имени папки на допустимые символы
+            if not checking_name(root_folder_name):
+                # прерывание расчета в случае неверного имени папки
+                self.teLog_2.append('{}\tНеверное имя папки {} - '
+                                  'содержит недопустимые символы. '
+                                  'Обработка прервана'.format(
+                    datetime.now(),root_folder_name))
+                QApplication.processEvents()
+                return None
+
             for file in files:
                 name, extention = file.split('.')
                 # поиск bin-файла
                 if extention in ['00', 'xx']:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
+                    # проверка, что имя файла и папки совпадают
+                    if name == root_folder_name:
+                        # получение полного пути к bin-файлу
+                        bin_file_path = os.path.join(root_folder, file)
+                        bin_files_list.append(bin_file_path)
+                    else:
+                        # прерывание расчета в случае неверной структуры папок
+                        self.teLog_2.append('{}\tНеверная структура '
+                                          'папок. Не совпадают имена '
+                                          'папок и файлов'.format(
+                                           datetime.now()))
+                        QApplication.processEvents()
+                        return None
 
+        # Проверка наличия bin-файлов
         if len(bin_files_list) == 0:
             self.teLog_2.append('{}\tАнализ папки завершен. Bin-файлов '
                                 'не найдено. Обработка прервана'.format(
