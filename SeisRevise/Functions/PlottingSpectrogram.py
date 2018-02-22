@@ -24,8 +24,7 @@ def plot_spectrogram(signal, frequency, window_size,
     :return: True, если функция успешно завершена, False, если произошли
     ошибки
     """
-
-    # расчет спектрограммы
+   # расчет спектрограммы
     # проба расчета, в случае ошибки функция вернет False
     try:
         times, frequencies, amplitudes = specgram(

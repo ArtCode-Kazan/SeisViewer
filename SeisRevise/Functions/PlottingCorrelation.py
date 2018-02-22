@@ -21,7 +21,7 @@ def drawing_correlation(devices, colors,correlation_matrix,
     # настройка отступов полей
     mpl.rcParams['figure.subplot.left'] = 0.07
     mpl.rcParams['figure.subplot.right'] = 0.8
-    mpl.rcParams['figure.subplot.bottom'] = 0.05
+    mpl.rcParams['figure.subplot.bottom'] = 0.15
     mpl.rcParams['figure.subplot.top'] = 0.95
 
     # создание бланка графика
