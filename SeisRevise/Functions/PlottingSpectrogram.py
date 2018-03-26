@@ -3,7 +3,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from SeisCore import specgram
-from SeisCore.MSICore.DrawingFunctions.Spectrogram import scale
+from SeisCore.MSICore.PlottingFunctions.Spectrogram import scale
 
 
 def plot_spectrogram(signal, frequency, window_size,

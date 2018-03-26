@@ -30,24 +30,11 @@
      <attribute name="title">
       <string>Расчет 2D-спектрограмм</string>
      </attribute>
-     <widget class="QCheckBox" name="cbFullSpectrogram">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>78</y>
-        <width>201</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Строить спектрограмму полностью</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="pbCalculate">
       <property name="geometry">
        <rect>
-        <x>314</x>
-        <y>300</y>
+        <x>312</x>
+        <y>200</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -59,9 +46,9 @@
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
-        <x>8</x>
-        <y>206</y>
-        <width>693</width>
+        <x>4</x>
+        <y>150</y>
+        <width>439</width>
         <height>43</height>
        </rect>
       </property>
@@ -190,7 +177,7 @@
       </widget>
       <widget class="QSpinBox" name="sbSignalFrequency">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -312,10 +299,10 @@
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>152</y>
-        <width>693</width>
-        <height>49</height>
+        <x>304</x>
+        <y>102</y>
+        <width>369</width>
+        <height>43</height>
        </rect>
       </property>
       <property name="title">
@@ -325,7 +312,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>16</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -338,7 +325,7 @@
        <property name="geometry">
         <rect>
          <x>306</x>
-         <y>18</y>
+         <y>14</y>
          <width>57</width>
          <height>22</height>
         </rect>
@@ -354,7 +341,7 @@
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>20</y>
+         <y>16</y>
          <width>53</width>
          <height>22</height>
         </rect>
@@ -370,7 +357,7 @@
        <property name="geometry">
         <rect>
          <x>188</x>
-         <y>22</y>
+         <y>18</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -417,9 +404,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>326</y>
+        <y>230</y>
         <width>703</width>
-        <height>225</height>
+        <height>321</height>
        </rect>
       </property>
       <property name="verticalScrollBarPolicy">
@@ -437,7 +424,7 @@
        <rect>
         <x>4</x>
         <y>102</y>
-        <width>695</width>
+        <width>291</width>
         <height>43</height>
        </rect>
       </property>
@@ -496,9 +483,9 @@
      <widget class="QGroupBox" name="groupBox_10">
       <property name="geometry">
        <rect>
-        <x>8</x>
-        <y>254</y>
-        <width>693</width>
+        <x>450</x>
+        <y>150</y>
+        <width>221</width>
         <height>43</height>
        </rect>
       </property>
