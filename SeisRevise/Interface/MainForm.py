@@ -8,10 +8,10 @@ from PyQt5.QtWidgets import *
 
 from SeisRevise.Interface.QTForms.MainForm import Ui_MainWindow
 
-from SeisPars import rsf7
-from SeisPars import rsf8
+from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
+from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisCore import average_spectrum
+from SeisCore.MSICore.CalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 from SeisCore.GeneralCalcFunctions.CheckingName import checking_name
 

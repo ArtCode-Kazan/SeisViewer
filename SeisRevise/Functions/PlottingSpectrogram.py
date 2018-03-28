@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from SeisCore import specgram
+from SeisCore.MSICore.CalcFunctions.Spectrogam import specgram
 from SeisCore.MSICore.PlottingFunctions.Spectrogram import scale
 
 

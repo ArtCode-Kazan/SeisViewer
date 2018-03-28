@@ -29,8 +29,8 @@
 # Необходимые модули
     - PyQT5         version 5.10
     - Matplotlib    version 2.1.2
-    - SeisPars      version 0.0.16
-    - SeisCore      version 0.0.22
+    - SeisPars      version 0.1.0
+    - SeisCore      version 0.0.23
 
 
 # version 0.0.0
@@ -78,3 +78,7 @@
 # version 0.0.12
 Оптимизирован алгоритм, переработан GUI дизайн приложения, справлены ошибки.
 Зависимости: SeisPars 0.0.16, SeisCore 0.0.22
+
+# version 0.1.0
+Исправлены мелкие ошибки
+Зависимости: SeisPars 0.1.0, SeisCore 0.0.23
