@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
+    <width>746</width>
     <height>594</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>717</width>
+      <width>739</width>
       <height>581</height>
      </rect>
     </property>
@@ -155,7 +155,7 @@
        <rect>
         <x>4</x>
         <y>30</y>
-        <width>699</width>
+        <width>703</width>
         <height>41</height>
        </rect>
       </property>
@@ -198,7 +198,7 @@
        <property name="geometry">
         <rect>
          <x>328</x>
-         <y>12</y>
+         <y>14</y>
          <width>136</width>
          <height>16</height>
         </rect>
@@ -211,7 +211,7 @@
        <property name="geometry">
         <rect>
          <x>464</x>
-         <y>10</y>
+         <y>12</y>
          <width>71</width>
          <height>22</height>
         </rect>
@@ -227,7 +227,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>10</y>
+         <y>12</y>
          <width>61</width>
          <height>20</height>
         </rect>
@@ -240,7 +240,7 @@
        <property name="geometry">
         <rect>
          <x>540</x>
-         <y>12</y>
+         <y>14</y>
          <width>161</width>
          <height>17</height>
         </rect>
@@ -253,7 +253,7 @@
        <property name="geometry">
         <rect>
          <x>274</x>
-         <y>10</y>
+         <y>12</y>
          <width>49</width>
          <height>22</height>
         </rect>
@@ -301,7 +301,7 @@
        <rect>
         <x>304</x>
         <y>102</y>
-        <width>369</width>
+        <width>405</width>
         <height>43</height>
        </rect>
       </property>
@@ -322,6 +322,9 @@
        </property>
       </widget>
       <widget class="QSpinBox" name="sbNoverlapSize">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>306</x>
@@ -338,6 +341,9 @@
        </property>
       </widget>
       <widget class="QSpinBox" name="sbWindowSize">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>130</x>
@@ -404,9 +410,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>230</y>
+        <y>226</y>
         <width>703</width>
-        <height>321</height>
+        <height>325</height>
        </rect>
       </property>
       <property name="verticalScrollBarPolicy">
@@ -485,24 +491,24 @@
        <rect>
         <x>450</x>
         <y>150</y>
-        <width>221</width>
+        <width>261</width>
         <height>43</height>
        </rect>
       </property>
       <property name="title">
-       <string>Структура экспорта</string>
+       <string>Структура папок экспорта</string>
       </property>
       <widget class="QRadioButton" name="rbHourStructure">
        <property name="geometry">
         <rect>
          <x>14</x>
          <y>20</y>
-         <width>82</width>
+         <width>135</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string>по часам</string>
+        <string>по часам (для сверки)</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -514,7 +520,7 @@
       <widget class="QRadioButton" name="rbDeviceStructure">
        <property name="geometry">
         <rect>
-         <x>106</x>
+         <x>158</x>
          <y>20</y>
          <width>82</width>
          <height>17</height>
@@ -533,10 +539,10 @@
      <widget class="QGroupBox" name="gbVisualizeParams">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>316</y>
-        <width>451</width>
-        <height>53</height>
+        <x>350</x>
+        <y>186</y>
+        <width>363</width>
+        <height>69</height>
        </rect>
       </property>
       <property name="title">
@@ -558,8 +564,8 @@
       <widget class="QLabel" name="label_13">
        <property name="geometry">
         <rect>
-         <x>226</x>
-         <y>22</y>
+         <x>10</x>
+         <y>44</y>
          <width>141</width>
          <height>16</height>
         </rect>
@@ -584,8 +590,8 @@
       <widget class="QDoubleSpinBox" name="dsbMaxFrequencyVisualize">
        <property name="geometry">
         <rect>
-         <x>376</x>
-         <y>22</y>
+         <x>160</x>
+         <y>44</y>
          <width>62</width>
          <height>22</height>
         </rect>
@@ -624,8 +630,8 @@
      <widget class="QPushButton" name="pbCalculation">
       <property name="geometry">
        <rect>
-        <x>312</x>
-        <y>460</y>
+        <x>316</x>
+        <y>340</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -637,10 +643,10 @@
      <widget class="QGroupBox" name="groupBox_4">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>120</y>
-        <width>699</width>
-        <height>51</height>
+        <x>312</x>
+        <y>76</y>
+        <width>401</width>
+        <height>43</height>
        </rect>
       </property>
       <property name="title">
@@ -662,8 +668,8 @@
       <widget class="QLabel" name="label_15">
        <property name="geometry">
         <rect>
-         <x>222</x>
-         <y>18</y>
+         <x>202</x>
+         <y>20</y>
          <width>141</width>
          <height>16</height>
         </rect>
@@ -677,7 +683,7 @@
         <rect>
          <x>152</x>
          <y>18</y>
-         <width>61</width>
+         <width>47</width>
          <height>22</height>
         </rect>
        </property>
@@ -691,9 +697,9 @@
       <widget class="QSpinBox" name="sbTimeEnd">
        <property name="geometry">
         <rect>
-         <x>362</x>
-         <y>18</y>
-         <width>61</width>
+         <x>340</x>
+         <y>16</y>
+         <width>51</width>
          <height>22</height>
         </rect>
        </property>
@@ -708,10 +714,10 @@
      <widget class="QGroupBox" name="gbCorrelationParams">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>262</y>
-        <width>449</width>
-        <height>49</height>
+        <x>4</x>
+        <y>184</y>
+        <width>341</width>
+        <height>71</height>
        </rect>
       </property>
       <property name="title">
@@ -733,8 +739,8 @@
       <widget class="QLabel" name="label_18">
        <property name="geometry">
         <rect>
-         <x>226</x>
-         <y>22</y>
+         <x>10</x>
+         <y>46</y>
          <width>141</width>
          <height>16</height>
         </rect>
@@ -759,8 +765,8 @@
       <widget class="QDoubleSpinBox" name="dsbMaxFrequencyCorrelation">
        <property name="geometry">
         <rect>
-         <x>376</x>
-         <y>22</y>
+         <x>160</x>
+         <y>46</y>
          <width>62</width>
          <height>22</height>
         </rect>
@@ -787,9 +793,9 @@
       <property name="geometry">
        <rect>
         <x>4</x>
-        <y>176</y>
-        <width>699</width>
-        <height>79</height>
+        <y>120</y>
+        <width>707</width>
+        <height>65</height>
        </rect>
       </property>
       <property name="title">
@@ -798,8 +804,8 @@
       <widget class="QLabel" name="label_20">
        <property name="geometry">
         <rect>
-         <x>8</x>
-         <y>22</y>
+         <x>10</x>
+         <y>16</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -811,8 +817,8 @@
       <widget class="QLabel" name="label_21">
        <property name="geometry">
         <rect>
-         <x>198</x>
-         <y>24</y>
+         <x>12</x>
+         <y>40</y>
          <width>115</width>
          <height>16</height>
         </rect>
@@ -824,8 +830,8 @@
       <widget class="QLabel" name="label_22">
        <property name="geometry">
         <rect>
-         <x>16</x>
-         <y>52</y>
+         <x>312</x>
+         <y>10</y>
          <width>171</width>
          <height>16</height>
         </rect>
@@ -837,8 +843,8 @@
       <widget class="QLabel" name="label_23">
        <property name="geometry">
         <rect>
-         <x>338</x>
-         <y>50</y>
+         <x>330</x>
+         <y>34</y>
          <width>151</width>
          <height>16</height>
         </rect>
@@ -850,8 +856,8 @@
       <widget class="QSpinBox" name="sbWindowSize_2">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>20</y>
+         <x>132</x>
+         <y>14</y>
          <width>61</width>
          <height>22</height>
         </rect>
@@ -866,8 +872,8 @@
       <widget class="QSpinBox" name="sbNoverlapSize_2">
        <property name="geometry">
         <rect>
-         <x>316</x>
-         <y>20</y>
+         <x>130</x>
+         <y>40</y>
          <width>71</width>
          <height>22</height>
         </rect>
@@ -882,8 +888,8 @@
       <widget class="QSpinBox" name="sbMedianFilterValue">
        <property name="geometry">
         <rect>
-         <x>180</x>
-         <y>50</y>
+         <x>476</x>
+         <y>8</y>
          <width>51</width>
          <height>22</height>
         </rect>
@@ -901,8 +907,8 @@
       <widget class="QSpinBox" name="sbMarmettFilterValue">
        <property name="geometry">
         <rect>
-         <x>498</x>
-         <y>50</y>
+         <x>476</x>
+         <y>32</y>
          <width>51</width>
          <height>22</height>
         </rect>
@@ -914,8 +920,8 @@
       <widget class="QCheckBox" name="cbIsUsingMedianFilter">
        <property name="geometry">
         <rect>
-         <x>240</x>
-         <y>50</y>
+         <x>530</x>
+         <y>10</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -930,8 +936,8 @@
       <widget class="QCheckBox" name="cbIUsingMarmettFilter">
        <property name="geometry">
         <rect>
-         <x>558</x>
-         <y>50</y>
+         <x>530</x>
+         <y>34</y>
          <width>91</width>
          <height>17</height>
         </rect>
@@ -1004,7 +1010,7 @@
       </widget>
       <widget class="QSpinBox" name="sbSignalFrequency_3">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1105,7 +1111,7 @@
        <rect>
         <x>6</x>
         <y>76</y>
-        <width>701</width>
+        <width>301</width>
         <height>43</height>
        </rect>
       </property>
@@ -1164,10 +1170,10 @@
      <widget class="QTextEdit" name="teLog_2">
       <property name="geometry">
        <rect>
-        <x>4</x>
-        <y>486</y>
-        <width>697</width>
-        <height>61</height>
+        <x>6</x>
+        <y>366</y>
+        <width>711</width>
+        <height>179</height>
        </rect>
       </property>
       <property name="verticalScrollBarPolicy">
@@ -1183,9 +1189,9 @@
      <widget class="QGroupBox" name="groupBox_9">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>376</y>
-        <width>697</width>
+        <x>4</x>
+        <y>256</y>
+        <width>711</width>
         <height>83</height>
        </rect>
       </property>
@@ -1195,8 +1201,8 @@
       <widget class="QCheckBox" name="cbGraphCorrelate">
        <property name="geometry">
         <rect>
-         <x>14</x>
-         <y>60</y>
+         <x>350</x>
+         <y>54</y>
          <width>221</width>
          <height>17</height>
         </rect>
@@ -1208,8 +1214,8 @@
       <widget class="QCheckBox" name="cbOneSpectrums">
        <property name="geometry">
         <rect>
-         <x>410</x>
-         <y>22</y>
+         <x>8</x>
+         <y>58</y>
          <width>277</width>
          <height>17</height>
         </rect>
@@ -1221,21 +1227,21 @@
       <widget class="QCheckBox" name="cb_generalSpectrums">
        <property name="geometry">
         <rect>
-         <x>14</x>
-         <y>40</y>
-         <width>225</width>
+         <x>350</x>
+         <y>14</y>
+         <width>345</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string>Создать обобщенный график спектров</string>
+        <string>Создать обобщенный график сглаженных спектров</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="cbWriteSignalToFile">
        <property name="geometry">
         <rect>
-         <x>14</x>
-         <y>20</y>
+         <x>8</x>
+         <y>18</y>
          <width>181</width>
          <height>17</height>
         </rect>
@@ -1247,8 +1253,8 @@
       <widget class="QCheckBox" name="cbSignalGraph">
        <property name="geometry">
         <rect>
-         <x>206</x>
-         <y>22</y>
+         <x>8</x>
+         <y>38</y>
          <width>201</width>
          <height>17</height>
         </rect>
@@ -1260,8 +1266,8 @@
       <widget class="QCheckBox" name="cbCorrelateToFile">
        <property name="geometry">
         <rect>
-         <x>238</x>
-         <y>40</y>
+         <x>350</x>
+         <y>34</y>
          <width>265</width>
          <height>17</height>
         </rect>
