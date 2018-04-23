@@ -13,7 +13,7 @@ from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
 from SeisCore.MSICore.CalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
-from SeisCore.GeneralCalcFunctions.CheckingName import checking_name
+from SeisCore.GeneralFunction.CheckingName import checking_name
 
 from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
 from SeisRevise.Functions.CrossCorrelate import cross_correlation
@@ -267,7 +267,6 @@ class SpectrogramForm(QMainWindow, Ui_MainWindow):
             # картинки спектрограммы)
             start_second = int(time_interval*3600)*interval_number
             end_second = start_second + int(time_interval*3600)
-
 
             # второй цикл - по bin-файлам
 
