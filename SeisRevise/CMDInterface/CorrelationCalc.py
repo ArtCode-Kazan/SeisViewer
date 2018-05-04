@@ -1,16 +1,19 @@
 import sys
 import os
+import json
 import numpy as np
 from numpy.fft import rfftfreq
 
 from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
+from SeisCore.GeneralFunction.cmdLogging import error_format
 from SeisCore.MSICore.CalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
+from SeisRevise.CMDInterface.JsonData import checking_json
 from SeisRevise.Functions.CrossCorrelate import cross_correlation
 from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
 from SeisRevise.Functions.PlottingSignal import drawing_signal
@@ -23,213 +26,99 @@ from SeisRevise.Functions.PlottingCorrelation import drawing_correlation
 
 def correlation_calc():
     """
-    фунуция для расчета корреляций приборов и кумулятивных спектров
+    функция для расчета корреляций приборов и кумулятивных спектров
     :return: void
     """
     parameters = sys.argv
     # проверка числа параметров
-    if len(parameters) != 23:
-        print('Неверное число параметров')
-        exit()
-
-    # проверка самих параметров
-    errors = list()  # список ошибок
-
-    # проверка пути к рабочей папки
-    directory_path = parameters[1]
-    if not os.path.isdir(directory_path):
-        errors.append('Неверно указан путь к папкам сверки')
-
-    # проверка типа файла
-    file_type = parameters[2]
-    if file_type not in ['Baikal7', 'Baikal8']:
-        errors.append('Неверно указан тип файла')
-
-    # проверка типа записи
-    record_type = parameters[3]
-    if record_type not in ['ZXY', 'XYZ']:
-        errors.append('Неверно указан тип записи')
-
-    # проверка частоты записи сигнала
-    signal_frequency = parameters[4]
-    try:
-        signal_frequency = int(signal_frequency)
-    except ValueError:
-        errors.append('Неверно указана частота записи сигнала')
-
-    # проверка частоты ресемплирования
-    resample_frequency = parameters[5]
-    try:
-        resample_frequency = int(resample_frequency)
-    except ValueError:
-        errors.append('Неверно указана частота ресемплирования')
-
-    # проверка компонент для анализа
-    components = parameters[7]
-    components = list(components)
-    if len(components) == 0 or len(components) > 3:
-        errors.append('Не указаны компоненты для анализа')
-
-    # проверка минимальной секунды чистого сигнала
-    left_time_edge = parameters[8]
-    try:
-        left_time_edge = int(left_time_edge)
-    except ValueError:
-        errors.append('Неверно указана левая граница чистого участка')
-
-    # проверка максимальной секунды чистого сигнала
-    right_time_edge = parameters[9]
-    try:
-        right_time_edge = int(right_time_edge)
-    except ValueError:
-        errors.append('Неверно указана правая граница чистого участка')
-
-    # проверка размера окна расчета
-    window_size = parameters[10]
-    try:
-        window_size = int(window_size)
-    except ValueError:
-        errors.append('Неверно указан размер окна')
-
-    # проверка размера сдвига окна расчета
-    noverlap_size = parameters[11]
-    try:
-        noverlap_size = int(noverlap_size)
-    except ValueError:
-        errors.append('Неверно указан сдвиг окна')
-
-    # параметр медианного фильтра
-    median_filter_parameter = parameters[12]
-    if median_filter_parameter == 'None':
-        median_filter_parameter = None
-    else:
-        try:
-            median_filter_parameter = int(median_filter_parameter)
-        except ValueError:
-            errors.append('Неверно указан параметр медианного фильтра')
-
-    # параметр marmett фильтра
-    marmett_filter_parameter = parameters[13]
-    if marmett_filter_parameter == 'None':
-        marmett_filter_parameter = None
-    else:
-        try:
-            marmett_filter_parameter = int(marmett_filter_parameter)
-        except ValueError:
-            errors.append('Неверно указан параметр marmett-фильтра')
-
-    # минимальная частота для расчета корреляции
-    min_frequency_correlation = parameters[14]
-    try:
-        min_frequency_correlation = float(min_frequency_correlation)
-    except ValueError:
-        errors.append(
-            'Неверно указана минимальная частота для расчета корреляции')
-
-    # максимальная частота для расчета корреляции
-    max_frequency_correlation = parameters[15]
-    try:
-        max_frequency_correlation = float(max_frequency_correlation)
-    except ValueError:
-        errors.append(
-            'Неверно указана максимальная частота для расчета корреляции')
-
-    # минимальная частота визуализации
-    min_frequency_visuality = parameters[16]
-    try:
-        min_frequency_visuality = float(min_frequency_visuality)
-    except ValueError:
-        errors.append('Неверно указана минимальная частота для визуализации')
-
-    # максимальная частота визуализации
-    max_frequency_visuality = parameters[17]
-    try:
-        max_frequency_visuality = float(max_frequency_visuality)
-    except ValueError:
-        errors.append('Неверно указана максимальная частота для визуализации')
-
-    # вывод выборки сигнала в файл
-    is_export = parameters[18]
-    if is_export == 'True':
-        is_selection_signal_to_file = True
-    else:
-        is_selection_signal_to_file = False
-
-    # вывод выборки сигнала в виде графика
-    is_export = parameters[19]
-    if is_export == 'True':
-        is_selection_signal_to_graph = True
-    else:
-        is_selection_signal_to_graph = False
-
-    # вывод спектров для каждого прибора
-    is_export = parameters[20]
-    if is_export == 'True':
-        is_spector_device_to_graph = True
-    else:
-        is_spector_device_to_graph = False
-
-    # вывод всех спектров на один график
-    is_export = parameters[21]
-    if is_export == 'True':
-        is_all_spectors_to_graph = True
-    else:
-        is_all_spectors_to_graph = False
-
-    # вывод коэф-тов корреляции в файл
-    is_export = parameters[22]
-    if is_export == 'True':
-        is_correlation_matrix_to_file = True
-    else:
-        is_correlation_matrix_to_file = False
-
-    # вывод коэф-тов корреляции в виде графика
-    is_export = parameters[23]
-    if is_export == 'True':
-        is_correlation_matrix_to_graph = True
-    else:
-        is_correlation_matrix_to_graph = False
-
-    # проверка введенных параметров
-    errors = list()
-    if not os.path.isdir(directory_path):
-        errors.append('Неверно указан путь к папкам сверки')
-
-    if record_type not in ['XYZ', 'ZXY']:
-        errors.append('Неверно указан тип записи')
-
-    if signal_frequency % resample_frequency != 0:
-        errors.append('Неверно указана частота ресемплирования')
-
-    if len(components) == 0:
-        errors.append('Не выбрано ни одной компоненты для построения '
-                      'спектрограмм')
-
-    if left_time_edge >= right_time_edge:
-        errors.append('Неверно указаны границы чистого участка')
-
-    if window_size % noverlap_size != 0:
-        errors.append('Неверно заданы параметры окна и сдвига окон')
-
-    if median_filter_parameter is None and marmett_filter_parameter is \
-            None:
-        errors.append('Не указан ни один из способов фильтрации')
-
-    if min_frequency_correlation >= max_frequency_correlation:
-        errors.append('Неверно указаны пределы частот для расчета '
-                      'корреляции')
-
-    if min_frequency_visuality >= max_frequency_visuality:
-        errors.append('Неверно указаны пределы частот для визуализации '
-                      'спектров')
-
-    # Вывод ошибок, если они есть
-    if len(errors) != 0:
-        for line in errors:
-            print(line)
+    if len(parameters) != 2:
+        error_text = error_format(number=1,
+                                  text='Неверное число параметров')
+        print(error_text)
         return None
 
-    # если ошибок нет, то продолжается дальнейшая работа
+    # путь к файлу json
+    input_json = parameters[1]
+
+    # проверка файла json
+    if not checking_json(file_path=input_json,
+                         checking_node='general_data'):
+        return None
+    if not checking_json(file_path=input_json,
+                         checking_node='spectrograms'):
+        return None
+
+    # парсинг файла
+    json_data = json.load(open(input_json, 'r'))
+
+    # получение узлов первого порядка
+    general_data = json_data['general_data']
+    correlation_parameters = json_data['correlation']
+
+    # путь к рабочей папке
+    directory_path = general_data['directory_path']
+    # тип файла
+    file_type = general_data['file_type']
+    # тип записи
+    record_type = general_data['record_type']
+    # частота записи сигнала
+    signal_frequency = general_data['signal_frequency']
+    # частота ресемплирования
+    resample_frequency = general_data['resample_frequency']
+    # компоненты для анализа
+    components = list()
+    if general_data['x_component']:
+        components.append('X')
+    if general_data['y_component']:
+        components.append('Y')
+    if general_data['z_component']:
+        components.append('Z')
+
+    # минимальная сеекнда чистого сигнала
+    left_time_edge = correlation_parameters['left_edge']
+    # максимальная секунда чистого сигнала
+    right_time_edge = correlation_parameters['right_edge']
+    # размер окна расчета
+    window_size = correlation_parameters['window_size']
+    # размер сдвига окна расчета
+    noverlap_size = correlation_parameters['noverlap_size']
+    # параметр медианного фильтра
+    if not correlation_parameters['median_using']:
+        median_filter_parameter = None
+    else:
+        median_filter_parameter = correlation_parameters['median_filter']
+    # параметр marmett фильтра
+    if not correlation_parameters['marmett_using']:
+        marmett_filter_parameter = None
+    else:
+        marmett_filter_parameter = correlation_parameters['marmett_filter']
+    # минимальная частота для расчета корреляции
+    min_frequency_correlation = correlation_parameters['f_min_calc']
+    # максимальная частота для расчета корреляции
+    max_frequency_correlation = correlation_parameters['f_max_calc']
+    # минимальная частота визуализации
+    min_frequency_visuality = correlation_parameters['f_min_vizual']
+    # максимальная частота визуализации
+    max_frequency_visuality = correlation_parameters['f_max_vizual']
+
+    # вывод выборки сигнала в файл
+    is_selection_signal_to_file = correlation_parameters[
+        'selection_signal_to_file']
+    # вывод выборки сигнала в виде графика
+    is_selection_signal_to_graph = correlation_parameters[
+        'selection_signal_to_graph']
+    # вывод спектров для каждого прибора
+    is_spector_device_to_graph = correlation_parameters[
+        'spectors_for_each_device']
+    # вывод всех спектров на один график
+    is_all_spectors_to_graph = correlation_parameters['general_spector']
+    # вывод коэф-тов корреляции в файл
+    is_correlation_matrix_to_file = correlation_parameters[
+        'correlation_matrix_to_file']
+    # вывод коэф-тов корреляции в виде графика
+    is_correlation_matrix_to_graph = correlation_parameters[
+        'correlation_matrix_to_graph']
+
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
@@ -243,7 +132,8 @@ def correlation_calc():
         if not checking_name(root_folder_name):
             # прерывание расчета в случае неверного имени папки
             print_message('Неверное имя папки {} - содержит недопустимые '
-                          'символы. Обработка прервана', 1)
+                          'символы. Обработка '
+                          'прервана'.format(root_folder_name), 1)
             return None
 
         # Обход файлов в папке

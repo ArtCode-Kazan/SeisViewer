@@ -1,12 +1,15 @@
 import sys
 import os
+import json
 
 from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
+from SeisCore.GeneralFunction.cmdLogging import error_format
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
+from SeisRevise.CMDInterface.JsonData import checking_json
 from SeisRevise.Functions.ExportFolder import export_folder_generate
 from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
 
@@ -18,100 +21,60 @@ def spectrogram_calc():
     """
     parameters = sys.argv
     # проверка числа параметров
-    if len(parameters) != 13:
-        print('Неверное число параметров')
+    if len(parameters) != 2:
+        error_text = error_format(number=1,
+                                  text='Неверное число параметров')
+        print(error_text)
         return None
 
-    # проверка самих параметров
-    errors = list()  # список ошибок
+    # путь к файлу json
+    input_json = parameters[1]
 
-    # проверка пути к рабочей папки
-    directory_path = parameters[1]
-    if not os.path.isdir(directory_path):
-        errors.append('Неверно указан путь к папкам сверки')
-
-    # проверка типа файла
-    file_type = parameters[2]
-    if file_type not in ['Baikal7', 'Baikal8']:
-        errors.append('Неверно указан тип файла')
-
-    # проверка типа записи
-    record_type = parameters[3]
-    if record_type not in ['ZXY', 'XYZ']:
-        errors.append('Неверно указан тип записи')
-
-    # проверка частоты записи сигнала
-    signal_frequency = parameters[4]
-    try:
-        signal_frequency = int(signal_frequency)
-    except ValueError:
-        errors.append('Неверно указана частота записи сигнала')
-
-    # проверка частоты ресемплирования
-    resample_frequency = parameters[5]
-    try:
-        resample_frequency = int(resample_frequency)
-    except ValueError:
-        errors.append('Неверно указана частота ресемплирования')
-
-    # проверка временного интервлаа построения спектрограмм
-    time_interval = parameters[6]
-    try:
-        time_interval = float(time_interval)
-    except ValueError:
-        errors.append('Неверно указана частота ресемплирования')
-
-    # проверка компонент для анализа
-    components = parameters[7]
-    components = list(components)
-    if len(components) == 0 or len(components) > 3:
-        errors.append('Не указаны компоненты для анализа')
-
-    # проверка размера окна построения спектрограмм
-    window_size = parameters[8]
-    try:
-        window_size = int(window_size)
-    except ValueError:
-        errors.append('Неверно указан размер окна')
-
-    # проверка размера сдвига окна для
-    noverlap_size = parameters[9]
-    try:
-        noverlap_size = int(noverlap_size)
-    except ValueError:
-        errors.append('Неверно указан сдвиг окна')
-
-    # проверка частот визуализации
-    min_frequency = parameters[10]
-    try:
-        min_frequency = float(min_frequency)
-    except ValueError:
-        errors.append('Неверно указана минимальная частота визуализации')
-
-    max_frequency = parameters[11]
-    try:
-        max_frequency = float(max_frequency)
-    except ValueError:
-        errors.append('Неверно указана максимальная частота визуализации')
-
-    try:
-        if min_frequency >= max_frequency:
-            errors.append('Некорректно указан интервал частот визаулизации')
-    except ValueError:
+    # проверка файла json
+    if not checking_json(file_path=input_json,
+                         checking_node='general_data'):
+        return None
+    if not checking_json(file_path=input_json,
+                         checking_node='spectrograms'):
         return None
 
+    # парсинг файла
+    json_data = json.load(open(input_json, 'r'))
+
+    # получение узлов первого порядка
+    general_data = json_data['general_data']
+    spectrograms_parameters = json_data['spectrograms']
+
+    # путь к рабочей папке
+    directory_path = general_data['directory_path']
+    # тип файла
+    file_type = general_data['file_type']
+    # тип записи
+    record_type = general_data['record_type']
+    # частота записи сигнала
+    signal_frequency = general_data['signal_frequency']
+    # частота ресемплирования
+    resample_frequency = general_data['resample_frequency']
+    # компоненты для анализа
+    components = list()
+    if general_data['x_component']:
+        components.append('X')
+    if general_data['y_component']:
+        components.append('Y')
+    if general_data['z_component']:
+        components.append('Z')
+    # временной интервал построения спектрограмм
+    time_interval = spectrograms_parameters['time_interval']
+    # размер окна построения спектрограмм
+    window_size = spectrograms_parameters['window_size']
+    # размер сдвига окна для
+    noverlap_size = spectrograms_parameters['noverlap_size']
+    # частоты визуализации
+    min_frequency = spectrograms_parameters['min_frequency']
+    max_frequency = spectrograms_parameters['max_frequency']
     # проверка структуры папок экспорта
-    export_structure = parameters[12]
-    if export_structure not in ['HourStructure', 'DeviceStructure']:
-        errors.append('Неверно указан тип структуры папок экспорта')
+    export_structure = spectrograms_parameters['export_folder_structure']
 
-    # вывод ошибок, если они есть
-    if len(errors) != 0:
-        for line in errors:
-            print(line)
-        return None
-
-    # если ошибок нет, работа продолжается
     print_message('Начат процесс построения спектрограмм...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
