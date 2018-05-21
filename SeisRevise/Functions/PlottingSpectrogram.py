@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from SeisCore.MSICore.CalcFunctions.Spectrogam import specgram
-from SeisCore.MSICore.PlottingFunctions.Spectrogram import scale
+from SeisCore.GeneralCalcFunctions.Spectrogram import specgram
+from SeisCore.GeneralPlottingFunctions.Spectrogram import scale
 
 
 def plot_spectrogram(signal, frequency, window_size,
@@ -24,8 +24,7 @@ def plot_spectrogram(signal, frequency, window_size,
     :return: True, если функция успешно завершена, False, если произошли
     ошибки
     """
-   # расчет спектрограммы
-    # проба расчета, в случае ошибки функция вернет False
+    # расчет спектрограммы проба расчета, в случае ошибки функция вернет False
     try:
         times, frequencies, amplitudes = specgram(
             time_start=time_start_sec,
@@ -35,7 +34,7 @@ def plot_spectrogram(signal, frequency, window_size,
             noverlap_size=noverlap_size,
             min_frequency=min_frequency_visulize,
             max_frequency=max_frequency_visualize)
-    except:
+    except ValueError:
         return False
 
     # расчет параметров шкалы
@@ -54,7 +53,7 @@ def plot_spectrogram(signal, frequency, window_size,
     fig = plt.figure()
 
     # размер плота в дюймах
-    fig.set_size_inches(12,9)
+    fig.set_size_inches(12, 9)
     # разрешение отображения графика
     fig.dpi = 96
     # подготовка осей
@@ -62,7 +61,7 @@ def plot_spectrogram(signal, frequency, window_size,
 
     # отображение спектрограммы в виде децибелов=20*lg(|amp|)
     axes.pcolormesh(times, frequencies, 20 * np.log10(abs(amplitudes)),
-                   cmap=cmap, norm=cnorm)
+                    cmap=cmap, norm=cnorm)
     # заголовки осей
     x_label = u'Время, с'
     y_label = u'Частота, Гц'

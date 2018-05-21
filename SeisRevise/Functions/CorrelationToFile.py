@@ -1,7 +1,7 @@
 import os
 
 
-def correlation_to_file(devices, correlation_matrix,output_folder,
+def correlation_to_file(devices, correlation_matrix, output_folder,
                         output_name):
     """
     Функция для записи корреляционной матрицы в файл
@@ -24,7 +24,7 @@ def correlation_to_file(devices, correlation_matrix,output_folder,
         s = '\t'.join(t) + '\n'
         write_lines.append(s)
 
-    filepath = os.path.join(output_folder,output_name+'.dat')
+    filepath = os.path.join(output_folder, output_name+'.dat')
     f = open(filepath, 'w')
     for line in write_lines:
         f.write(line)

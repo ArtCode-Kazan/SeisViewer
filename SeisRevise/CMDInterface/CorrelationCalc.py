@@ -1,23 +1,25 @@
 import sys
 import os
-import json
+from peewee import *
+
 import numpy as np
 from numpy.fft import rfftfreq
 
 from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
 from SeisCore.GeneralFunction.cmdLogging import error_format
-from SeisCore.MSICore.CalcFunctions.AverSpectrum import average_spectrum
+from SeisCore.GeneralCalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisRevise.CMDInterface.JsonData import checking_json
+from SeisRevise.DBase.Operations import check_dbase
+from SeisRevise.DBase.ORM import get_orm_model
 from SeisRevise.Functions.CrossCorrelate import cross_correlation
 from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
 from SeisRevise.Functions.PlottingSignal import drawing_signal
-from SeisRevise.Functions.PlottingSpectrum import drawing_spectrum
+from SeisRevise.Functions.PlottingAverageSpectrum import drawing_spectrum
 from SeisRevise.Functions.PlottingAllSpectrums import \
     drawing_all_smooth_cumulative_spectrums
 from SeisRevise.Functions.CorrelationToFile import correlation_to_file
@@ -31,93 +33,95 @@ def correlation_calc():
     """
     parameters = sys.argv
     # проверка числа параметров
-    if len(parameters) != 2:
+    if len(parameters) != 3:
         error_text = error_format(number=1,
                                   text='Неверное число параметров')
         print(error_text)
         return None
 
-    # путь к файлу json
-    input_json = parameters[1]
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_folder_path=r'D:\temp'
+    # dbase_name
+    dbase_name = parameters[2]
+    # dbase_name =  'qweerrty'
 
-    # проверка файла json
-    if not checking_json(file_path=input_json,
-                         checking_node='general_data'):
+    # check dbase
+    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
+                       table_name='GeneralData'):
         return None
-    if not checking_json(file_path=input_json,
-                         checking_node='spectrograms'):
+
+    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
+                       table_name='CorrelationData'):
         return None
 
-    # парсинг файла
-    json_data = json.load(open(input_json, 'r'))
+    # get data from dbase
+    dbase_full_path = os.path.join(dbase_folder_path, dbase_name + '.db')
+    sqlite_db = SqliteDatabase(dbase_full_path)
+    general_data, spectrogram_data, correlation_data, pre_analysis_data = \
+        get_orm_model(dbase_connection=sqlite_db)
 
-    # получение узлов первого порядка
-    general_data = json_data['general_data']
-    correlation_parameters = json_data['correlation']
+    db_gen_data = general_data.get()
+    db_corr_data = correlation_data.get()
 
     # путь к рабочей папке
-    directory_path = general_data['directory_path']
+    directory_path = db_gen_data.work_dir
     # тип файла
-    file_type = general_data['file_type']
+    file_type = db_gen_data.file_type
     # тип записи
-    record_type = general_data['record_type']
+    record_type = db_gen_data.record_type
     # частота записи сигнала
-    signal_frequency = general_data['signal_frequency']
+    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
-    resample_frequency = general_data['resample_frequency']
+    resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
     components = list()
-    if general_data['x_component']:
+    if db_gen_data.x_component_flag:
         components.append('X')
-    if general_data['y_component']:
+    if db_gen_data.y_component_flag:
         components.append('Y')
-    if general_data['z_component']:
+    if db_gen_data.z_component_flag:
         components.append('Z')
 
-    # минимальная сеекнда чистого сигнала
-    left_time_edge = correlation_parameters['left_edge']
+    # минимальная секунда чистого сигнала
+    left_time_edge = db_corr_data.left_edge
     # максимальная секунда чистого сигнала
-    right_time_edge = correlation_parameters['right_edge']
+    right_time_edge = db_corr_data.right_edge
     # размер окна расчета
-    window_size = correlation_parameters['window_size']
+    window_size = db_corr_data.window_size
     # размер сдвига окна расчета
-    noverlap_size = correlation_parameters['noverlap_size']
+    noverlap_size = db_corr_data.noverlap_size
     # параметр медианного фильтра
-    if not correlation_parameters['median_using']:
+    if not db_corr_data.median_filter_flag:
         median_filter_parameter = None
     else:
-        median_filter_parameter = correlation_parameters['median_filter']
+        median_filter_parameter = db_corr_data.median_filter_parameter
     # параметр marmett фильтра
-    if not correlation_parameters['marmett_using']:
+    if not db_corr_data.marmett_filter_flag:
         marmett_filter_parameter = None
     else:
-        marmett_filter_parameter = correlation_parameters['marmett_filter']
+        marmett_filter_parameter = db_corr_data.marmett_filter_parameter
     # минимальная частота для расчета корреляции
-    min_frequency_correlation = correlation_parameters['f_min_calc']
+    min_frequency_correlation = db_corr_data.f_min_calc
     # максимальная частота для расчета корреляции
-    max_frequency_correlation = correlation_parameters['f_max_calc']
+    max_frequency_correlation = db_corr_data.f_max_calc
     # минимальная частота визуализации
-    min_frequency_visuality = correlation_parameters['f_min_vizual']
+    min_frequency_visuality = db_corr_data.f_min_visual
     # максимальная частота визуализации
-    max_frequency_visuality = correlation_parameters['f_max_vizual']
+    max_frequency_visuality = db_corr_data.f_max_visual
 
     # вывод выборки сигнала в файл
-    is_selection_signal_to_file = correlation_parameters[
-        'selection_signal_to_file']
+    is_selection_signal_to_file = db_corr_data.select_signal_to_file_flag
     # вывод выборки сигнала в виде графика
-    is_selection_signal_to_graph = correlation_parameters[
-        'selection_signal_to_graph']
+    is_selection_signal_to_graph = db_corr_data.select_signal_to_graph_flag
     # вывод спектров для каждого прибора
-    is_spector_device_to_graph = correlation_parameters[
-        'spectors_for_each_device']
+    is_spector_device_to_graph = db_corr_data.separated_spectrums_flag
     # вывод всех спектров на один график
-    is_all_spectors_to_graph = correlation_parameters['general_spector']
+    is_all_spectors_to_graph = db_corr_data.general_spectrums_flag
     # вывод коэф-тов корреляции в файл
-    is_correlation_matrix_to_file = correlation_parameters[
-        'correlation_matrix_to_file']
+    is_correlation_matrix_to_file = db_corr_data.correlation_matrix_flag
     # вывод коэф-тов корреляции в виде графика
-    is_correlation_matrix_to_graph = correlation_parameters[
-        'correlation_matrix_to_graph']
+    is_correlation_matrix_to_graph = db_corr_data.correlation_graph_flag
 
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
@@ -293,8 +297,8 @@ def correlation_calc():
                 frequency=resample_frequency,
                 window=window_size,
                 overlap=noverlap_size,
-                med_filtr=None,
-                marmett_filtr=None)
+                med_filter=None,
+                marmett_filter=None)
 
             # расчет осредненного спектра с параметрами сглаживания
             av_spec_smooth_component = average_spectrum(
@@ -302,8 +306,8 @@ def correlation_calc():
                 frequency=resample_frequency,
                 window=window_size,
                 overlap=noverlap_size,
-                med_filtr=median_filter_parameter,
-                marmett_filtr=marmett_filter_parameter)
+                med_filter=median_filter_parameter,
+                marmett_filter=marmett_filter_parameter)
 
             # запись несглаженного осредненного спектра (только амплитуды)
             averspectrum_data[component, 0, :, file_number] = \

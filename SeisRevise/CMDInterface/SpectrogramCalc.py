@@ -1,15 +1,15 @@
 import sys
 import os
-import json
+from peewee import *
 
 from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
-from SeisCore.GeneralFunction.cmdLogging import error_format
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisRevise.CMDInterface.JsonData import checking_json
+from SeisRevise.DBase.Operations import check_dbase
+from SeisRevise.DBase.ORM import get_orm_model
 from SeisRevise.Functions.ExportFolder import export_folder_generate
 from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
 
@@ -21,59 +21,64 @@ def spectrogram_calc():
     """
     parameters = sys.argv
     # проверка числа параметров
-    if len(parameters) != 2:
-        error_text = error_format(number=1,
-                                  text='Неверное число параметров')
-        print(error_text)
+    if len(parameters) != 3:
+        print('Неверное число параметров')
         return None
 
-    # путь к файлу json
-    input_json = parameters[1]
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_folder_path=r'D:\temp'
+    # dbase_name
+    dbase_name = parameters[2]
+    # dbase_name =  'qweerrty'
 
-    # проверка файла json
-    if not checking_json(file_path=input_json,
-                         checking_node='general_data'):
+    # check dbase
+    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
+                       table_name='GeneralData'):
         return None
-    if not checking_json(file_path=input_json,
-                         checking_node='spectrograms'):
+
+    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
+                       table_name='SpectrogramData'):
         return None
 
-    # парсинг файла
-    json_data = json.load(open(input_json, 'r'))
+    # get data from dbase
+    dbase_full_path = os.path.join(dbase_folder_path, dbase_name + '.db')
+    sqlite_db = SqliteDatabase(dbase_full_path)
+    general_data, spectrogram_data, correlation_data, pre_analysis_data = \
+        get_orm_model(dbase_connection=sqlite_db)
 
-    # получение узлов первого порядка
-    general_data = json_data['general_data']
-    spectrograms_parameters = json_data['spectrograms']
+    db_gen_data = general_data.get()
+    db_spec_data = spectrogram_data.get()
 
     # путь к рабочей папке
-    directory_path = general_data['directory_path']
+    directory_path = db_gen_data.work_dir
     # тип файла
-    file_type = general_data['file_type']
+    file_type = db_gen_data.file_type
     # тип записи
-    record_type = general_data['record_type']
+    record_type = db_gen_data.record_type
     # частота записи сигнала
-    signal_frequency = general_data['signal_frequency']
+    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
-    resample_frequency = general_data['resample_frequency']
+    resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
     components = list()
-    if general_data['x_component']:
+    if db_gen_data.x_component_flag:
         components.append('X')
-    if general_data['y_component']:
+    if db_gen_data.y_component_flag:
         components.append('Y')
-    if general_data['z_component']:
+    if db_gen_data.z_component_flag:
         components.append('Z')
     # временной интервал построения спектрограмм
-    time_interval = spectrograms_parameters['time_interval']
+    time_interval = db_spec_data.time_interval
     # размер окна построения спектрограмм
-    window_size = spectrograms_parameters['window_size']
+    window_size = db_spec_data.window_size
     # размер сдвига окна для
-    noverlap_size = spectrograms_parameters['noverlap_size']
+    noverlap_size = db_spec_data.noverlap_size
     # частоты визуализации
-    min_frequency = spectrograms_parameters['min_frequency']
-    max_frequency = spectrograms_parameters['max_frequency']
+    min_frequency = db_spec_data.f_min_visual
+    max_frequency = db_spec_data.f_max_visual
     # проверка структуры папок экспорта
-    export_structure = spectrograms_parameters['export_folder_structure']
+    export_structure = db_spec_data.folder_structure
 
     print_message('Начат процесс построения спектрограмм...', 0)
 

@@ -54,27 +54,27 @@ def drawing_spectrum(frequency, spectrum_begin_amplitudes,
     axes.set_xlim(f_min, f_max)
 
     # получение среза частот в заданном частотном диапазоне визуализации
-    selection_frequency=frequency[(frequency>= f_min)*(frequency <= f_max)]
+    selection_frequency = frequency[
+        (frequency >= f_min) * (frequency <= f_max)]
 
     # получение срезов массивов амплитуд в заданном частотном диаппазоне
     selection_spectrum_begin_amplitudes = \
-        spectrum_begin_amplitudes[(frequency>= f_min)*(frequency <= f_max)]
+        spectrum_begin_amplitudes[(frequency >= f_min) * (frequency <= f_max)]
 
     selection_spectrum_smooth_amplitudes = \
-        spectrum_smooth_amplitudes[(frequency>= f_min)*(frequency <= f_max)]
-
+        spectrum_smooth_amplitudes[(frequency >= f_min) * (frequency <= f_max)]
 
     # поиск максимальной и минимальной амплитуды в выборках
-    amp_min=np.min([np.min(selection_spectrum_begin_amplitudes),
-                    np.min(selection_spectrum_smooth_amplitudes)])
-    amp_max=np.max([np.max(selection_spectrum_begin_amplitudes),
-                    np.max(selection_spectrum_smooth_amplitudes)])
+    amp_min = np.min([np.min(selection_spectrum_begin_amplitudes),
+                      np.min(selection_spectrum_smooth_amplitudes)])
+    amp_max = np.max([np.max(selection_spectrum_begin_amplitudes),
+                      np.max(selection_spectrum_smooth_amplitudes)])
     axes.set_ylim(amp_min, amp_max)
 
     # построение графика исходного, несглаженного спектра (толщина линии 1)
-    axes.plot(selection_frequency,selection_spectrum_begin_amplitudes,
+    axes.plot(selection_frequency, selection_spectrum_begin_amplitudes,
               lw=1, color='#000000',
-              label = u'Кумулятивный спектр\n(без сглаживания))')
+              label=u'Кумулятивный спектр\n(без сглаживания))')
 
     axes.plot(selection_frequency, selection_spectrum_smooth_amplitudes,
               lw=2, color='#FF0000',

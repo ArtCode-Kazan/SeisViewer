@@ -45,7 +45,6 @@ def export_folder_generate(root_folder, structure_type, component,
             '{}_component'.format(component))
     else:
         return None
-    print(export_folder_path)
     # создание папки для сохранения результатов
     if not os.path.exists(export_folder_path):
         os.makedirs(export_folder_path)
