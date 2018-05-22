@@ -260,7 +260,7 @@ def pre_analysis_calc():
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                drawing_signal(left_edge=left_time_edge,
+                drawing_signal(left_edge=start_moment_position_resample,
                                frequency=resample_frequency,
                                signal=signal[:, channel_number],
                                label=png_file_name,
