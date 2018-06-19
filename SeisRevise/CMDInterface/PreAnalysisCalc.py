@@ -314,3 +314,4 @@ def pre_analysis_calc():
                     output_name=output_file_name)
                 print_message('Спектрограмма (файл {}, компонента {}) '
                               'построена'.format(bin_file_name, component), 3)
+    print_message('Обработка завершена', 0)

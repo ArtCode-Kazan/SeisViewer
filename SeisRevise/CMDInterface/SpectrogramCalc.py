@@ -98,7 +98,11 @@ def spectrogram_calc():
             return None
 
         for file in files:
-            name, extension = file.split('.')
+            try:
+                name, extension = file.split('.')
+            except Exception:
+                print_message(
+                    '{} - ошибка неверное расширение файла'.format(file), 1)
             # поиск bin-файла
             if extension in ['00', 'xx']:
                 # проверка, что имя файла и папки совпадают
