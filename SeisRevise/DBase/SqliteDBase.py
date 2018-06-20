@@ -3,7 +3,7 @@ from peewee import *
 import sqlite3
 
 
-class SqliteORM:
+class SqliteDB:
     def __init__(self):
         self.__folder_path = None
         self.__dbase_name = None
@@ -40,31 +40,32 @@ class SqliteORM:
         if len(errors) == 0:
             return True, None
         else:
-            return False, errors
+            error = '\n'.join(errors)
+            return False, error
 
     @property
     def _get_full_path(self):
-        is_correct, errors = self._is_correct_fields
+        is_correct, error = self._is_correct_fields
         if not is_correct:
-            return None, errors
+            return None, error
         else:
             full_path = os.path.join(self.folder_path, self.dbase_name)
             return full_path, None
 
     @property
     def _get_connection(self):
-        full_path, errors = self._get_full_path
+        full_path, error = self._get_full_path
         if full_path is None:
-            return None, errors
+            return None, error
         else:
             sqlite_db = SqliteDatabase(full_path)
             return sqlite_db, None
 
     @property
     def get_orm_model(self):
-        connection, errors = self._get_connection
+        connection, error = self._get_connection
         if connection is None:
-            return None, errors
+            return None, error
 
         class BaseModel(Model):
             class Meta:
@@ -196,9 +197,9 @@ class SqliteORM:
 
     @property
     def create_dbase(self):
-        full_path, errors = self._get_full_path
+        full_path, error = self._get_full_path
         if full_path is None:
-            return False, errors
+            return False, error
 
         if os.path.exists(full_path):
             return False, 'БД сессии уже существует'
@@ -213,21 +214,26 @@ class SqliteORM:
         # create tables
         try:
             sqlite_db, errors = self._get_connection
+            if sqlite_db is None:
+                return False, errors
             tables, errors = self.get_orm_model
+            if tables is None:
+                return False, errors
             tabs_list = (tables.gen_data, tables.spectrograms,
                          tables.correlations, tables.pre_analysis)
             sqlite_db.connect()
             sqlite_db.create_tables(tabs_list, safe=True)
+            return True, None
         except DatabaseError:
             return False, 'Ошибка создания таблиц БД'
-
-        return True, None
 
     @property
     def check_gen_data_table(self):
         tables, errors = self.get_orm_model
-        general_data = tables.gen_data
+        if tables is None:
+            return False, errors
 
+        general_data = tables.gen_data
         if general_data.select().count() != 1:
             error = 'Таблица GeneralData пуста или имеет неверное ' \
                     'количество записей'
@@ -285,6 +291,8 @@ class SqliteORM:
     @property
     def check_spectrogram_table(self):
         tables, errors = self.get_orm_model
+        if tables is None:
+            return False, errors
         spectrogram_data = tables.spectrograms
 
         # check record count
@@ -341,6 +349,9 @@ class SqliteORM:
     @property
     def check_correlation_table(self):
         tables, errors = self.get_orm_model
+        if tables is None:
+            return False, errors
+
         correlation_data = tables.correlations
         # check record count
         if correlation_data.select().count() != 1:
@@ -432,11 +443,11 @@ class SqliteORM:
 
         # проверка, что хотя бы один из файлов экспорта выбран
         checking = db_corr_data.select_signal_to_file_flag or \
-                   db_corr_data.select_signal_to_graph_flag or \
-                   db_corr_data.separated_spectrums_flag or \
-                   db_corr_data.general_spectrums_flag or \
-                   db_corr_data.correlation_matrix_flag or \
-                   db_corr_data.correlation_graph_flag
+            db_corr_data.select_signal_to_graph_flag or \
+            db_corr_data.separated_spectrums_flag or \
+            db_corr_data.general_spectrums_flag or \
+            db_corr_data.correlation_matrix_flag or \
+            db_corr_data.correlation_graph_flag
         if not checking:
             error = 'Не выбран ни один из способов экспорта результатов ' \
                     'данных по расчетам корреляций'
@@ -446,6 +457,9 @@ class SqliteORM:
     @property
     def check_pre_analysis_table(self):
         tables, errors = self.get_orm_model
+        if tables is None:
+            return False, errors
+
         pre_analysis_data = tables.pre_analysis
         # check record count
         if pre_analysis_data.select().count() != 1:

@@ -1,17 +1,15 @@
 import sys
 import os
-from peewee import *
 
-from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisRevise.DBase.Operations import check_dbase
-from SeisRevise.DBase.ORM import get_orm_model
-from SeisRevise.Functions.ExportFolder import export_folder_generate
-from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
+from SeisRevise.DBase.SqliteDBase import SqliteDB
+from SeisRevise.Functions.Processing import export_folder_generate
+from SeisRevise.Functions.Processing import get_bin_files
+from SeisRevise.Functions.Plotting import plot_spectrogram
 
 
 def spectrogram_calc():
@@ -19,34 +17,57 @@ def spectrogram_calc():
     Функция для потокового построения спектрограмм
     :return: void
     """
+    # -----------------------------------------------------------------------
+    # блок отладки
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_name = 'session.db'
+    # конец блока отладки
+    # -----------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------
+    # блок релиза
     parameters = sys.argv
     # проверка числа параметров
     if len(parameters) != 3:
         print('Неверное число параметров')
         return None
-
     # dbase directory path
     dbase_folder_path = parameters[1]
-    # dbase_folder_path=r'D:\temp'
     # dbase_name
     dbase_name = parameters[2]
-    # dbase_name =  'qweerrty'
+    # конец блока релиза
+    # -----------------------------------------------------------------------
+    print_message(text="Подключение к БД сессии...", level=0)
+    dbase = SqliteDB()
+    dbase.folder_path = dbase_folder_path
+    dbase.dbase_name = dbase_name
+    print_message(text="Строка подключения к БД сформирована", level=0)
 
     # check dbase
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='GeneralData'):
+    print_message(text="Проверка данных сессии...", level=0)
+    is_correct, error = dbase.check_gen_data_table
+    if not is_correct:
+        print(error)
         return None
+    print_message(text="Общие данные успешно проверены", level=0)
 
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='SpectrogramData'):
+    is_correct, error = dbase.check_spectrogram_table
+    if not is_correct:
+        print(error)
         return None
+    print_message(text="Данные для построения спектрограмм успешно проверены",
+                  level=0)
 
     # get data from dbase
-    dbase_full_path = os.path.join(dbase_folder_path, dbase_name + '.db')
-    sqlite_db = SqliteDatabase(dbase_full_path)
-    general_data, spectrogram_data, correlation_data, pre_analysis_data = \
-        get_orm_model(dbase_connection=sqlite_db)
-
+    print_message(text="Получение ORM-модели...", level=0)
+    tables, error = dbase.get_orm_model
+    if tables is None:
+        print(error)
+        return None
+    print_message(text='ORM-модель успешно получена', level=0)
+    print_message(text='Чтение исходных параметров сессии...', level=0)
+    general_data = tables.gen_data
+    spectrogram_data = tables.spectrograms
     db_gen_data = general_data.get()
     db_spec_data = spectrogram_data.get()
 
@@ -77,53 +98,27 @@ def spectrogram_calc():
     # частоты визуализации
     min_frequency = db_spec_data.f_min_visual
     max_frequency = db_spec_data.f_max_visual
-    # проверка структуры папок экспорта
+    # получение структуры папок экспорта
     export_structure = db_spec_data.folder_structure
+    print_message(text='Чтение исходных параметров сессии завершено', level=0)
 
-    print_message('Начат процесс построения спектрограмм...', 0)
-
+    print_message(text='Начат процесс построения спектрограмм...', level=0)
     # анализ папки с данными сверки - получение полных путей к bin-файлам
-    print_message('Анализ выбранной папки...', 0)
-    bin_files_list = list()
-    folder_struct = os.walk(directory_path)
-    for root_folder, folders, files in folder_struct:
-        # имя папки
-        root_folder_name = os.path.basename(root_folder)
-        # проверка имени папки на допустимые символы
-        if not checking_name(root_folder_name):
-            # прерывание расчета в случае неверного имени папки
-            print_message(
-                'Неверное имя папки {} - содержит недопустимые символы. '
-                'Обработка прервана'.format(root_folder_name), 1)
-            return None
+    print_message(text='Анализ выбранной папки...', level=0)
+    bin_files_list, error = get_bin_files(directory_path=directory_path)
 
-        for file in files:
-            try:
-                name, extension = file.split('.')
-            except Exception:
-                print_message(
-                    '{} - ошибка неверное расширение файла'.format(file), 1)
-            # поиск bin-файла
-            if extension in ['00', 'xx']:
-                # проверка, что имя файла и папки совпадают
-                if name == root_folder_name:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
-                else:
-                    # прерывание расчета в случае неверной структуры папок
-                    print_message('Неверная структура папок. Не совпадают '
-                                  'имена папки и файла - папка:{} файл: {}'.
-                                  format(root_folder_name, name), 1)
-                    return None
+    # вывод ошибок построения списка путей к bin-файлам
+    if bin_files_list is None:
+        print_message(text=error, level=0)
+        return None
 
     if len(bin_files_list) == 0:
-        print_message('Анализ папки завершен. Bin-файлов не найдено. '
-                      'Обработка прервана', 0)
+        print_message(text='Анализ папки завершен. Bin-файлов не найдено. '
+                      'Обработка прервана', level=0)
         return None
-    else:
-        print_message('Анализ папки завершен. Всего найдено {} '
-                      'файлов'.format(len(bin_files_list)), 0)
+    print_message(text='Анализ папки завершен. '
+                       'Всего найдено {} файлов'.format(len(bin_files_list)),
+                  level=0)
 
     # парсинг типа записи
     x_channel_number = record_type.index('X')
@@ -141,8 +136,9 @@ def spectrogram_calc():
     # нескольким часам
     interval_number = 0
     while True:
-        print_message('Начата обработка временного интервала #{}...'.format(
-            interval_number + 1), 1)
+        print_message(text='Начата обработка временного '
+                           'интервала #{}...'.format(interval_number + 1),
+                      level=1)
         # размер извлекаемого куска сигнала БЕЗ РЕСЕМПЛИРОВАНИЯ!!!
         signal_part_size = int(time_interval * 3600 * signal_frequency)
 
@@ -166,7 +162,8 @@ def spectrogram_calc():
         for file_path in bin_files_list:
             # получение имени файла
             bin_file_name = os.path.split(file_path)[-1].split('.')[0]
-            print_message('Обработка файла {}...'.format(bin_file_name), 2)
+            print_message(text='Обработка файла {}...'.format(bin_file_name),
+                          level=2)
 
             # проба считать данные в указанном интервале
             if file_type == 'Baikal7':
@@ -188,9 +185,10 @@ def spectrogram_calc():
             # если сигнал не пустой, добавляем (логическое OR) True
             if signal is not None:
                 is_check_marker += True
-                print_message('Выборка успешно считана', 2)
+                print_message(text='Выборка успешно считана', level=2)
             else:
-                print_message('Выборка файла пуста. Обработка пропущена', 2)
+                print_message(text='Выборка файла пуста. Обработка пропущена',
+                              level=2)
                 continue
 
             # если сигнал не пуст, второй цикл продолжает работу
@@ -215,8 +213,8 @@ def spectrogram_calc():
 
                 # проверка создания каталога экспорта
                 if export_folder is None:
-                    print_message('Ошибка создания каталога экспорта. '
-                                  'Обработка прервана', 3)
+                    print_message(text='Ошибка создания каталога экспорта. '
+                                  'Обработка прервана', level=3)
                     return None
 
                 # определение индекса канала компоненты исходя из текущей
@@ -228,8 +226,8 @@ def spectrogram_calc():
                 elif component == 'Z':
                     channel_number = z_channel_number
                 else:
-                    print_message('Ошибка чтения номера компоненты. '
-                                  'Обработка прервана', 3)
+                    print_message(text='Ошибка чтения номера компоненты. '
+                                  'Обработка прервана', level=3)
                     return None
 
                 # построение спектрограммы
@@ -247,21 +245,25 @@ def spectrogram_calc():
 
                 # проверка создания спектрограммы
                 if not is_create_spectrogram:
-                    print_message('Ошибка построения спектрограммы: файл {}, '
-                                  'компонента {}, временной интервал {}-{}. '
-                                  'Возможно, неверные параметры построения. '
-                                  'Обработка прервана'.
-                                  format(bin_file_name, component,
-                                         start_second, end_second), 3)
+                    print_message(
+                        text='Ошибка построения спектрограммы: файл {}, '
+                             'компонента {}, временной интервал {}-{}. '
+                             'Возможно, неверные параметры построения. '
+                             'Обработка прервана'.format(
+                                bin_file_name, component, start_second,
+                                end_second),
+                        level=3)
                     return None
                 else:
-                    print_message('Спектрограмма (файл {}, компонента {}) '
-                                  'построена'.format(bin_file_name,
-                                                     component, ), 3)
-            print_message('Файл {} обработан'.format(bin_file_name), 2)
+                    print_message(
+                        text='Спектрограмма (файл {}, компонента {}) '
+                             'построена'.format(bin_file_name, component),
+                        level=3)
+            print_message(text='Файл {} обработан'.format(bin_file_name),
+                          level=2)
 
         # проверка, нужно ли прервать бесконечный цикл
         if not is_check_marker:
-            print_message('Построение спектрограмм завершено', 0)
+            print_message(text='Построение спектрограмм завершено', level=0)
             break
         interval_number += 1

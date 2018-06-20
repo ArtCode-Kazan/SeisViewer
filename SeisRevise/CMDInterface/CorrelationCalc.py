@@ -1,29 +1,59 @@
 import sys
 import os
-from peewee import *
 
 import numpy as np
 from numpy.fft import rfftfreq
 
-from SeisCore.GeneralFunction.CheckingName import checking_name
 from SeisCore.GeneralFunction.cmdLogging import print_message
-from SeisCore.GeneralFunction.cmdLogging import error_format
 from SeisCore.GeneralCalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisRevise.DBase.Operations import check_dbase
-from SeisRevise.DBase.ORM import get_orm_model
-from SeisRevise.Functions.CrossCorrelate import cross_correlation
-from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
-from SeisRevise.Functions.PlottingSignal import drawing_signal
-from SeisRevise.Functions.PlottingAverageSpectrum import drawing_spectrum
-from SeisRevise.Functions.PlottingAllSpectrums import \
-    drawing_all_smooth_cumulative_spectrums
-from SeisRevise.Functions.CorrelationToFile import correlation_to_file
-from SeisRevise.Functions.PlottingCorrelation import drawing_correlation
+from SeisRevise.DBase.SqliteDBase import SqliteDB
+
+from SeisRevise.Functions.Processing import get_bin_files
+
+from SeisRevise.Functions.Exporting import part_of_signal_to_file
+from SeisRevise.Functions.Exporting import correlation_to_file
+
+from SeisRevise.Functions.Plotting import plot_signal
+from SeisRevise.Functions.Plotting import plot_average_spectrum
+from SeisRevise.Functions.Plotting import plot_all_smooth_spectrums
+from SeisRevise.Functions.Plotting import plot_correlation
+
+
+def cross_correlation(frequency, f_min_analysis, f_max_analysis, amplitudes):
+    """
+    Функция для вычисления коэффициентов корреляции между столбцами массивов
+    амплитуд спектров
+    :param frequency: одномерный массив numpy с набором частот
+    :param f_min_analysis: минимальная частота для расчета коэф-та корреляции
+    :param f_max_analysis: максимальная частота для расчета коэф-та корреляции
+    :param amplitudes: матрица только со значения амплитуд различных спектров,
+        в каждой строке данные одного спектра
+    :return: матрица с рассчитанными значениями корреляции
+    всех спектров со всеми
+    В результате получается зеркальная матрица значений с единичной диагональю
+    """
+    # выборка амплитуд в пределах указанных частот
+    selection_amplitudes = amplitudes[(f_min_analysis <= frequency) *
+                                      (frequency <= f_max_analysis)]
+
+    # создание пустой матрицы для сохранения в нее коэф-тов корреляции
+    correlation_matrix = np.empty((amplitudes.shape[1], amplitudes.shape[1]),
+                                  dtype=np.float32)
+
+    # вычисление и заполнение коэф-тов корреляции
+    for i in range(amplitudes.shape[1]):
+        for j in range(amplitudes.shape[1]):
+            correlation = np.corrcoef(selection_amplitudes[:, i],
+                                      selection_amplitudes[:, j])[0, 1]
+            correlation_matrix[i, j] = correlation
+
+    # возврат результатов
+    return correlation_matrix
 
 
 def correlation_calc():
@@ -31,36 +61,49 @@ def correlation_calc():
     функция для расчета корреляций приборов и кумулятивных спектров
     :return: void
     """
+    # -----------------------------------------------------------------------
+    # блок отладки
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_name = 'session.db'
+    # конец блока отладки
+    # -----------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------
+    # блок релиза
     parameters = sys.argv
     # проверка числа параметров
     if len(parameters) != 3:
-        error_text = error_format(number=1,
-                                  text='Неверное число параметров')
-        print(error_text)
+        print('Неверное число параметров')
         return None
-
     # dbase directory path
     dbase_folder_path = parameters[1]
-    # dbase_folder_path=r'D:\temp'
     # dbase_name
     dbase_name = parameters[2]
-    # dbase_name =  'qweerrty'
+    # конец блока релиза
+    # -----------------------------------------------------------------------
 
+    dbase = SqliteDB()
+    dbase.folder_path = dbase_folder_path
+    dbase.dbase_name = dbase_name
     # check dbase
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='GeneralData'):
+    is_correct, error = dbase.check_gen_data_table
+    if not is_correct:
+        print(error)
         return None
 
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='CorrelationData'):
+    is_correct, error = dbase.check_correlation_table
+    if not is_correct:
+        print(error)
         return None
 
     # get data from dbase
-    dbase_full_path = os.path.join(dbase_folder_path, dbase_name + '.db')
-    sqlite_db = SqliteDatabase(dbase_full_path)
-    general_data, spectrogram_data, correlation_data, pre_analysis_data = \
-        get_orm_model(dbase_connection=sqlite_db)
+    tables, error = dbase.get_orm_model
+    if tables is None:
+        print(error)
+        return None
 
+    general_data = tables.gen_data
+    correlation_data = tables.correlations
     db_gen_data = general_data.get()
     db_corr_data = correlation_data.get()
 
@@ -126,47 +169,21 @@ def correlation_calc():
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
-    bin_files_list = list()
-    folder_struct = os.walk(directory_path)
+    print_message('Анализ выбранной папки...', 0)
+    bin_files_list, error = get_bin_files(directory_path=directory_path)
 
-    for root_folder, folders, files in folder_struct:
-        # имя папки
-        root_folder_name = os.path.basename(root_folder)
-        # проверка имени папки на допустимые символы
-        if not checking_name(root_folder_name):
-            # прерывание расчета в случае неверного имени папки
-            print_message('Неверное имя папки {} - содержит недопустимые '
-                          'символы. Обработка '
-                          'прервана'.format(root_folder_name), 1)
-            return None
-
-        # Обход файлов в папке
-        for file in files:
-            name, extention = file.split('.')
-            # поиск bin-файла
-            if extention in ['00', 'xx']:
-                # проверка, что имя файла и папки совпадают
-                if name == root_folder_name:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
-                else:
-                    # прерывание расчета в случае неверной структуры папок
-                    print_message('Неверная структура папок. Не совпадает '
-                                  'имя папки и файла - '
-                                  'папка:{} файл: {}'.format(root_folder_name,
-                                                             name), 1)
-                    return None
-
-    # Проверка наличия bin-файлов
-    if len(bin_files_list) == 0:
-        print_message('Анализ папки завершен. Bin-файлов  не найдено. '
-                      'Обработка прервана', 0)
+    # вывод ошибок построения списка путей к bin-файлам
+    if bin_files_list is None:
+        print_message(text=error, level=0)
         return None
 
-    # Если bin-файлы есть, то работа продолжается
-    print_message('Анализ папки завершен. '
-                  'Всего найдено {}  файлов'.format(len(bin_files_list)), 0)
+    if len(bin_files_list) == 0:
+        print_message('Анализ папки завершен. Bin-файлов не найдено. '
+                      'Обработка прервана', 0)
+        return None
+    else:
+        print_message('Анализ папки завершен. Всего найдено {} '
+                      'файлов'.format(len(bin_files_list)), 0)
 
     # создание папки с результатами расчетов
     folder_with_result = None
@@ -361,7 +378,7 @@ def correlation_calc():
             if is_selection_signal_to_file:
                 dat_file_name = '{}_ClearSignal_{}_Component'.format(
                     bin_file_name, component_label)
-                write_part_of_signal(
+                part_of_signal_to_file(
                     signal=selection_signals[component_number, :, file_number],
                     output_folder=file_processing_result_folder,
                     output_name=dat_file_name)
@@ -371,13 +388,13 @@ def correlation_calc():
             if is_selection_signal_to_graph:
                 png_file_name = '{}_ClearSignal_{}_Component_Graph'.format(
                     bin_file_name, component_label)
-                drawing_signal(left_edge=start_moment_position_resample,
-                               frequency=resample_frequency,
-                               signal=selection_signals[
-                                      component_number, :, file_number],
-                               label=png_file_name,
-                               output_folder=file_processing_result_folder,
-                               output_name=png_file_name)
+                plot_signal(left_edge=start_moment_position_resample,
+                            frequency=resample_frequency,
+                            signal=selection_signals[
+                                   component_number, :, file_number],
+                            label=png_file_name,
+                            output_folder=file_processing_result_folder,
+                            output_name=png_file_name)
                 print_message('Экспорт графика чистого участка завершен', 2)
 
             # сохранение рисунков спектров для каждого прибора
@@ -385,19 +402,20 @@ def correlation_calc():
                 png_file_name = '{}_AverageSpectrum_{}_Component_' \
                                 'Graph'.format(bin_file_name,
                                                component_label)
-                drawing_spectrum(frequency=frequencies_list,
-                                 spectrum_begin_amplitudes=averspectrum_data[
-                                                           component_number,
-                                                           0, :,
-                                                           file_number],
-                                 spectrum_smooth_amplitudes=averspectrum_data[
-                                                            component_number,
-                                                            1, :,
-                                                            file_number],
-                                 f_min=min_frequency_visuality,
-                                 f_max=max_frequency_visuality,
-                                 output_folder=file_processing_result_folder,
-                                 output_name=png_file_name)
+                plot_average_spectrum(
+                    frequency=frequencies_list,
+                    spectrum_begin_amplitudes=averspectrum_data[
+                                              component_number,
+                                              0, :,
+                                              file_number],
+                    spectrum_smooth_amplitudes=averspectrum_data[
+                                               component_number,
+                                               1, :,
+                                               file_number],
+                    f_min=min_frequency_visuality,
+                    f_max=max_frequency_visuality,
+                    output_folder=file_processing_result_folder,
+                    output_name=png_file_name)
                 print_message('Экспорт графика спектров завершен', 2)
 
     # сохранение обобщенных данных для всех приборов
@@ -417,7 +435,7 @@ def correlation_calc():
         if is_all_spectors_to_graph:
             file_name = 'SmoothSpectrums_{}_Component'.format(
                 component_label)
-            drawing_all_smooth_cumulative_spectrums(
+            plot_all_smooth_spectrums(
                 spectrums_name_list=bin_file_name_list,
                 frequency=frequencies_list,
                 spectrum_data=averspectrum_data[component_number, 1, :, :],
@@ -444,12 +462,12 @@ def correlation_calc():
         # сохранение коэф-тов корреляции в виде графиков
         if is_correlation_matrix_to_graph:
             file_name = 'Correlations_{}_Component'.format(component_label)
-            drawing_correlation(devices=bin_file_name_list,
-                                colors=colors,
-                                correlation_matrix=result_correlate_matrix[
-                                                   component_number, :, :],
-                                output_folder=folder_with_result,
-                                output_name=file_name)
+            plot_correlation(devices=bin_file_name_list,
+                             colors=colors,
+                             correlation_matrix=result_correlate_matrix[
+                                                component_number, :, :],
+                             output_folder=folder_with_result,
+                             output_name=file_name)
             print_message('График коэф-тов корреляций для компоненты {}  '
                           'построен'.format(component_label), 1)
     print_message('Обработка завершена', 0)

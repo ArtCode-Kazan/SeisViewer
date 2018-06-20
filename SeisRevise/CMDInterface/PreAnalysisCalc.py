@@ -1,20 +1,17 @@
 import sys
 import os
-from peewee import *
 
-from SeisCore.GeneralFunction.cmdLogging import error_format
 from SeisCore.GeneralFunction.cmdLogging import print_message
-from SeisCore.GeneralFunction.CheckingName import checking_name
 
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
-from SeisRevise.DBase.Operations import check_dbase
-from SeisRevise.DBase.ORM import get_orm_model
-from SeisRevise.Functions.PlottingSpectrogram import plot_spectrogram
-from SeisRevise.Functions.PlottingSimpleSpectrum import simple_spectrum
-from SeisRevise.Functions.WriteSelectionSignal import write_part_of_signal
-from SeisRevise.Functions.PlottingSignal import drawing_signal
+from SeisRevise.DBase.SqliteDBase import SqliteDB
+from SeisRevise.Functions.Processing import get_bin_files
+from SeisRevise.Functions.Exporting import part_of_signal_to_file
+from SeisRevise.Functions.Plotting import plot_spectrogram
+from SeisRevise.Functions.Plotting import plot_simple_spectrum
+from SeisRevise.Functions.Plotting import plot_signal
 
 
 def pre_analysis_calc():
@@ -22,36 +19,48 @@ def pre_analysis_calc():
     Функция для расчета предварительного анализа сигналов
     :return: void
     """
+    # -----------------------------------------------------------------------
+    # блок отладки
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_name = 'session.db'
+    # конец блока отладки
+    # -----------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------
+    # блок релиза
     parameters = sys.argv
     # проверка числа параметров
     if len(parameters) != 3:
-        error_text = error_format(number=1,
-                                  text='Неверное число параметров')
-        print(error_text)
+        print('Неверное число параметров')
         return None
-
     # dbase directory path
     dbase_folder_path = parameters[1]
-    # dbase_folder_path=r'D:\temp'
     # dbase_name
     dbase_name = parameters[2]
-    # dbase_name =  'qweerrty'
+    # конец блока релиза
+    # -----------------------------------------------------------------------
 
+    dbase = SqliteDB()
+    dbase.folder_path = dbase_folder_path
+    dbase.dbase_name = dbase_name
     # check dbase
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='GeneralData'):
+    is_correct, error = dbase.check_gen_data_table
+    if not is_correct:
+        print(error)
         return None
 
-    if not check_dbase(folder_path=dbase_folder_path, dbase_name=dbase_name,
-                       table_name='PreAnalysisData'):
+    is_correct, error = dbase.check_pre_analysis_table
+    if not is_correct:
+        print(error)
         return None
 
     # get data from dbase
-    dbase_full_path = os.path.join(dbase_folder_path, dbase_name + '.db')
-    sqlite_db = SqliteDatabase(dbase_full_path)
-    general_data, spectrogram_data, correlation_data, pre_analysis_data = \
-        get_orm_model(dbase_connection=sqlite_db)
-
+    tables, error = dbase.get_orm_model
+    if tables is None:
+        print(error)
+        return None
+    general_data = tables.gen_data
+    pre_analysis_data = tables.pre_analysis
     db_gen_data = general_data.get()
     db_panalysis_data = pre_analysis_data.get()
 
@@ -111,47 +120,21 @@ def pre_analysis_calc():
     print_message('Начат процесс предварительного анализа...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
-    bin_files_list = list()
-    folder_struct = os.walk(directory_path)
+    print_message('Анализ выбранной папки...', 0)
+    bin_files_list, error = get_bin_files(directory_path=directory_path)
 
-    for root_folder, folders, files in folder_struct:
-        # имя папки
-        root_folder_name = os.path.basename(root_folder)
-        # проверка имени папки на допустимые символы
-        if not checking_name(root_folder_name):
-            # прерывание расчета в случае неверного имени папки
-            print_message('Неверное имя папки {} - содержит недопустимые '
-                          'символы. Обработка '
-                          'прервана'.format(root_folder_name), 1)
-            return None
-
-        # Обход файлов в папке
-        for file in files:
-            name, extention = file.split('.')
-            # поиск bin-файла
-            if extention in ['00', 'xx']:
-                # проверка, что имя файла и папки совпадают
-                if name == root_folder_name:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
-                else:
-                    # прерывание расчета в случае неверной структуры папок
-                    print_message('Неверная структура папок. Не совпадает '
-                                  'имя папки и файла - '
-                                  'папка:{} файл: {}'.format(root_folder_name,
-                                                             name), 1)
-                    return None
-
-    # Проверка наличия bin-файлов
-    if len(bin_files_list) == 0:
-        print_message('Анализ папки завершен. Bin-файлов  не найдено. '
-                      'Обработка прервана', 0)
+    # вывод ошибок построения списка путей к bin-файлам
+    if bin_files_list is None:
+        print_message(text=error, level=0)
         return None
 
-    # Если bin-файлы есть, то работа продолжается
-    print_message('Анализ папки завершен. '
-                  'Всего найдено {}  файлов'.format(len(bin_files_list)), 0)
+    if len(bin_files_list) == 0:
+        print_message('Анализ папки завершен. Bin-файлов не найдено. '
+                      'Обработка прервана', 0)
+        return None
+    else:
+        print_message('Анализ папки завершен. Всего найдено {} '
+                      'файлов'.format(len(bin_files_list)), 0)
 
     # создание папки с результатами расчетов
     folder_with_result = None
@@ -246,9 +229,9 @@ def pre_analysis_calc():
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                write_part_of_signal(signal=signal[:, channel_number],
-                                     output_folder=output_folder,
-                                     output_name=dat_file_name)
+                part_of_signal_to_file(signal=signal[:, channel_number],
+                                       output_folder=output_folder,
+                                       output_name=dat_file_name)
                 print_message('Выборка сигнала (файл {}, компонента {}) '
                               'записана'.format(bin_file_name, component), 3)
 
@@ -260,15 +243,15 @@ def pre_analysis_calc():
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                drawing_signal(left_edge=start_moment_position_resample,
-                               frequency=resample_frequency,
-                               signal=signal[:, channel_number],
-                               label=png_file_name,
-                               output_folder=output_folder,
-                               output_name=png_file_name)
+                plot_signal(left_edge=start_moment_position_resample,
+                            frequency=resample_frequency,
+                            signal=signal[:, channel_number],
+                            label=png_file_name,
+                            output_folder=output_folder,
+                            output_name=png_file_name)
                 print_message('График выборки сигнала (файл {}, '
                               'компонента {}) построен'.format(
-                               bin_file_name, component), 3)
+                                bin_file_name, component), 3)
 
             # построение спектров
             if is_spectors:
@@ -278,7 +261,7 @@ def pre_analysis_calc():
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                simple_spectrum(
+                plot_simple_spectrum(
                     signal=signal[:, channel_number],
                     frequency=resample_frequency,
                     median_filter_parameter=median_filter_parameter,
