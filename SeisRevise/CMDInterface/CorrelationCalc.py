@@ -8,8 +8,7 @@ from SeisCore.GeneralFunction.cmdLogging import print_message
 from SeisCore.GeneralCalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
+from SeisPars.Classes.BinaryFile import BinaryFile
 
 from SeisRevise.DBase.SqliteDBase import SqliteDB
 
@@ -22,6 +21,7 @@ from SeisRevise.Functions.Plotting import plot_signal
 from SeisRevise.Functions.Plotting import plot_average_spectrum
 from SeisRevise.Functions.Plotting import plot_all_smooth_spectrums
 from SeisRevise.Functions.Plotting import plot_correlation
+from SeisRevise.Functions.Plotting import plot_single_correlation
 
 
 def cross_correlation(frequency, f_min_analysis, f_max_analysis, amplitudes):
@@ -63,22 +63,22 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    parameters = sys.argv
-    # проверка числа параметров
-    if len(parameters) != 3:
-        print('Неверное число параметров')
-        return None
-    # dbase directory path
-    dbase_folder_path = parameters[1]
-    # dbase_name
-    dbase_name = parameters[2]
+    # parameters = sys.argv
+    # # проверка числа параметров
+    # if len(parameters) != 3:
+    #     print('Неверное число параметров')
+    #     return None
+    # # dbase directory path
+    # dbase_folder_path = parameters[1]
+    # # dbase_name
+    # dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 
@@ -109,14 +109,11 @@ def correlation_calc():
 
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
-    # тип файла
-    file_type = db_gen_data.file_type
-    # тип записи
-    record_type = db_gen_data.record_type
-    # частота записи сигнала
-    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
-    resample_frequency = db_gen_data.resample_frequency
+    if not db_gen_data.no_resample_flag:
+        resample_frequency = db_gen_data.resample_frequency
+    else:
+        resample_frequency = None
     # компоненты для анализа
     components = list()
     if db_gen_data.x_component_flag:
@@ -163,8 +160,10 @@ def correlation_calc():
     is_all_spectors_to_graph = db_corr_data.general_spectrums_flag
     # вывод коэф-тов корреляции в файл
     is_correlation_matrix_to_file = db_corr_data.correlation_matrix_flag
-    # вывод коэф-тов корреляции в виде графика
+    # вывод коэф-тов корреляции в виде обобщенного графика
     is_correlation_matrix_to_graph = db_corr_data.correlation_graph_flag
+    # вывод коэф-тов корреляции в виде отдельных графиков для каждого прибора
+    is_separate_correlation_to_graph = db_corr_data.separated_correlation_graph_flag
 
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
@@ -192,98 +191,64 @@ def correlation_calc():
         folder_with_result = os.path.join(directory_path, folder_name)
         if not os.path.exists(folder_with_result):
             os.mkdir(folder_with_result)
+            print_message('Папка {} для сохранения '
+                          'результатов создана'.format(folder_name), 0)
             break
 
-    # парсинг типа записи
-    x_channel_number = record_type.index('X')
-    y_channel_number = record_type.index('Y')
-    z_channel_number = record_type.index('Z')
+    # чтение выборок сигнала
+    print_message('Начат процесс выборки сигналов...')
 
-    # расчет длины выборки сигнала в отсчетах
-
-    # получение номеров отсчетов для извлечения куска сигнала из файла (
-    # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
-    start_moment_position = left_time_edge * signal_frequency
-    end_moment_position = right_time_edge * signal_frequency - 1
-
-    # получение номеров отсчетов для извлечения куска сигнала из файла (
-    # ПОСЛЕ РЕСЕМПЛИРОВАНИЯ!!!)
-    resample_parameter = signal_frequency // resample_frequency
-
-    start_moment_position_resample = \
-        start_moment_position // resample_parameter
-    end_moment_position_resample = \
-        end_moment_position // resample_parameter
-
-    selection_size \
-        = end_moment_position_resample - start_moment_position_resample + 1
-
-    print_message('Длина выборки сигналов в отсчетах: {}'.format(
-        selection_size), 0)
-
-    # создание пустого массива для хранения будущих выборок сигналов
-    # получается трехмерная матрица с размерами:
-    # 3 или 2 или 1 - количество анализируемых компонент
-    # selection_signal_length - длина сигнала (по сути строки подматрицы)
-    # bin_files_count - количество файлов (по сути столбцы подматрицы)
-    component_count = len(components)
-    bin_files_count = len(bin_files_list)
-    selection_signals = np.empty(
-        shape=(component_count, selection_size, bin_files_count),
-        dtype=np.int32)
-
-    # запуск процесса извлечения выборок сигналов
-    for file_number, file_path in enumerate(bin_files_list):
+    # создание пустого списка для хранения будущих выборок сигналов
+    selection_signals = list()
+    for bin_file in bin_files_list:
         # получение имени файла
-        bin_file_name = os.path.split(file_path)[-1].split('.')[0]
-
-        print_message('Чтение файла {}...'.format(bin_file_name), 1)
-
-        # проба считать данные в указанном интервале
-        if file_type == 'Baikal7':
-            signal = rsf7(file_path=file_path,
-                          only_signal=True,
-                          resample_frequency=resample_frequency,
-                          start_moment=start_moment_position,
-                          end_moment=end_moment_position)
-        elif file_type == 'Baikal8':
-            signal = rsf8(file_path=file_path,
-                          signal_frequency=signal_frequency,
-                          only_signal=True,
-                          resample_frequency=resample_frequency,
-                          start_moment=start_moment_position,
-                          end_moment=end_moment_position)
+        bin_file_name = os.path.split(bin_file)[-1].split('.')[0]
+        # Чтение файла
+        bin_data = BinaryFile()
+        bin_data.path = bin_file
+        signal_frequency = bin_data.signal_frequency
+        if db_gen_data.no_resample_flag:
+            resample_frequency = signal_frequency
+        components_index = bin_data.components_index
+        if signal_frequency % resample_frequency == 0:
+            bin_data.resample_frequency = resample_frequency
         else:
-            signal = None
+            print_message(text='Файл: {} - Частота дискретизации сигнала '
+                               'некратна частоте ресемплирования. '
+                               'Обработка файла пропущена'.format(bin_file),
+                          level=1)
+            continue
 
-        # проверка, что сигнал извлечен и его длина равна требуемой
-        # длине куска
-        if signal is not None and signal.shape[0] == selection_size:
-            print_message('Выборка файла успешно считана', 1)
-        else:
-            print_message('Выборка файла пуста. Обработка прервана', 1)
-            return None
+        # получение номеров отсчетов для извлечения куска сигнала из файла (
+        # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
+        start_moment_position = left_time_edge * signal_frequency
+        end_moment_position = right_time_edge * signal_frequency - 1
 
-        # заполнение общего массива выборок
-        component_number = 0  # переменная для вычисления номера столбца
-        # матрицы, так как некоторые компоненты (X,Y,Z) могут быть
-        # исключены из анализа
-        if 'X' in components:
-            component_number += 1
-            selection_signals[component_number - 1, :, file_number] = \
-                signal[:, x_channel_number]
+        # извлечение данных сигнала
+        bin_data.start_moment = start_moment_position
+        bin_data.end_moment = end_moment_position
+        signal = bin_data.signals
 
-        if 'Y' in components:
-            component_number += 1
-            selection_signals[component_number - 1, :, file_number] = \
-                signal[:, y_channel_number]
-
-        if 'Z' in components:
-            component_number += 1
-            selection_signals[component_number - 1, :, file_number] = \
-                signal[:, z_channel_number]
+        if signal is None:
+            print_message(text='Выборка файлов пуста. Обработка файла '
+                               'пропущена',
+                          level=1)
+            continue
+        selection_signals.append((bin_file_name, components_index, signal))
 
     print_message('Выборка участков сигналов завершена', 0)
+    if len(selection_signals) == 0:
+        print_message(text='Отсутствуют файлы для обработки', level=1)
+        return None
+    print_message(text='Количество файлов для расчетов '
+                       '- {}'.format(len(selection_signals)),
+                  level=1)
+
+    # получение списка с именами файлов без расширения
+    bin_file_name_list = list()
+    for el in selection_signals:
+        file_name = el[0]
+        bin_file_name_list.append(file_name)
 
     # создание массива для сохранения данных осредненных спектров с
     # размерами:
@@ -298,28 +263,36 @@ def correlation_calc():
     frequencies_list = rfftfreq(window_size, 1. / resample_frequency)
     # размер частотного ряда
     frequency_count = frequencies_list.shape[0]
-
+    component_count = len(components)
+    bin_files_count = len(selection_signals)
     averspectrum_data = np.empty(
         shape=(component_count, 2, frequency_count, bin_files_count),
         dtype=np.float32)
 
     # расчет осредненных спектров с параметрами сглаживания и без
     # по каждой компоненте
-    for component in range(component_count):
-        for file_number in range(bin_files_count):
-            signal = selection_signals[component, :, file_number]
+    for component_number, component in enumerate(components):
+        for file_number, item in enumerate(selection_signals):
+            file_name, components_index, signal = item
+            if component == 'X':
+                channel_number = components_index[0]
+            elif component == 'Y':
+                channel_number = components_index[1]
+            else:
+                channel_number = components_index[2]
+
+            channel_signal = signal[:, channel_number]
             # расчет осредненного спектра без параметров сглаживания
             av_spec_simple_component = average_spectrum(
-                signal=signal,
+                signal=channel_signal,
                 frequency=resample_frequency,
                 window=window_size,
                 overlap=noverlap_size,
                 med_filter=None,
                 marmett_filter=None)
-
             # расчет осредненного спектра с параметрами сглаживания
             av_spec_smooth_component = average_spectrum(
-                signal=signal,
+                signal=channel_signal,
                 frequency=resample_frequency,
                 window=window_size,
                 overlap=noverlap_size,
@@ -327,13 +300,12 @@ def correlation_calc():
                 marmett_filter=marmett_filter_parameter)
 
             # запись несглаженного осредненного спектра (только амплитуды)
-            averspectrum_data[component, 0, :, file_number] = \
+            averspectrum_data[component_number, 0, :, file_number] = \
                 av_spec_simple_component[:, 1]
 
             # запись сглаженного осредненного спектра (только амплитуды)
-            averspectrum_data[component, 1, :, file_number] = \
+            averspectrum_data[component_number, 1, :, file_number] = \
                 av_spec_smooth_component[:, 1]
-
     print_message('Расчет осредненных спектров завершен', 0)
 
     #  создание трехмерной итоговой корреляционной матрицы со столбцам
@@ -352,14 +324,12 @@ def correlation_calc():
             f_min_analysis=min_frequency_correlation,
             f_max_analysis=max_frequency_correlation,
             amplitudes=averspectrum_data[component, 1, :, :])
-
     print_message('Расчет корреляционной матрицы завершен', 0)
 
     # процесс экспорта результатов в виде файлов по каждому прибору
     print_message('Процесс экспорта результатов...', 0)
-
-    for file_number, file_path in enumerate(bin_files_list):
-        bin_file_name = os.path.split(file_path)[-1].split('.')[0]
+    for file_number, item in enumerate(selection_signals):
+        bin_file_name, components_index, signal = item
         # создание папки для сохранения результатов обработки файла
         file_processing_result_folder = \
             os.path.join(folder_with_result, bin_file_name)
@@ -374,28 +344,34 @@ def correlation_calc():
             print_message('Экспорт результатов по {} компоненте...'.format(
                 component_label), 2)
 
+            if component_label == 'X':
+                channel_number = components_index[0]
+            elif component_label == 'Y':
+                channel_number = components_index[1]
+            else:
+                channel_number = components_index[2]
+
             # выгрузка чистых участков сигнала в виде файла
             if is_selection_signal_to_file:
                 dat_file_name = '{}_ClearSignal_{}_Component'.format(
                     bin_file_name, component_label)
                 part_of_signal_to_file(
-                    signal=selection_signals[component_number, :, file_number],
+                    signal=signal[:, channel_number],
                     output_folder=file_processing_result_folder,
                     output_name=dat_file_name)
-                print_message('Экспорт чистого участка завершен', 2)
+                print_message('Экспорт чистого участка завершен', 3)
 
             # сохранение чистых участков сигнала в виде графиков
             if is_selection_signal_to_graph:
                 png_file_name = '{}_ClearSignal_{}_Component_Graph'.format(
                     bin_file_name, component_label)
-                plot_signal(left_edge=start_moment_position_resample,
+                plot_signal(left_edge=left_time_edge,
                             frequency=resample_frequency,
-                            signal=selection_signals[
-                                   component_number, :, file_number],
+                            signal=signal[:, channel_number],
                             label=png_file_name,
                             output_folder=file_processing_result_folder,
                             output_name=png_file_name)
-                print_message('Экспорт графика чистого участка завершен', 2)
+                print_message('Экспорт графика чистого участка завершен', 3)
 
             # сохранение рисунков спектров для каждого прибора
             if is_spector_device_to_graph:
@@ -416,18 +392,27 @@ def correlation_calc():
                     f_max=max_frequency_visuality,
                     output_folder=file_processing_result_folder,
                     output_name=png_file_name)
-                print_message('Экспорт графика спектров завершен', 2)
+                print_message('Экспорт графика спектров завершен', 3)
+
+            # сохранение отдельных графиков коэф-тов корреляции для каждого
+            # прибора в отдельности
+            if is_separate_correlation_to_graph:
+                png_file_name = '{}_Separate_Correlation_{}_Component_' \
+                                'Graph'.format(bin_file_name,
+                                               component_label)
+                plot_single_correlation(
+                    devices=bin_file_name_list,
+                    correlation_data=result_correlate_matrix[
+                                     component_number, file_number, :],
+                    output_folder=file_processing_result_folder,
+                    output_name=png_file_name)
+                print_message('Экспорт графика коэф-тов корреляции по '
+                              'прибору {} завершен'.format(bin_file_name), 3)
 
     # сохранение обобщенных данных для всех приборов
 
     # генерация набора цветов для каждого прибора
     colors = random_hex_colors_generators(bin_files_count)
-
-    # получение списка с именами файлов без расширения
-    bin_file_name_list = list()
-    for el in bin_files_list:
-        el = os.path.split(el)[-1].split('.')[0]
-        bin_file_name_list.append(el)
 
     # сохранение наборов данных идет покомпонентно
     for component_number, component_label in enumerate(components):
@@ -445,7 +430,7 @@ def correlation_calc():
                 output_folder=folder_with_result,
                 output_name=file_name)
             print_message('Экспорт графика сведенных сглаженных спектров по '
-                          'компоненте {} завершен'.format(component_label), 1)
+                          'компоненте {} завершен'.format(component_label), 2)
 
         # сохранение матрицы коэ-тов корреляции в файл формата dat
         if is_correlation_matrix_to_file:

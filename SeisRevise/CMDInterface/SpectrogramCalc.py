@@ -3,13 +3,66 @@ import os
 
 from SeisCore.GeneralFunction.cmdLogging import print_message
 
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
+from SeisPars.Classes.BinaryFile import BinaryFile
 
 from SeisRevise.DBase.SqliteDBase import SqliteDB
-from SeisRevise.Functions.Processing import export_folder_generate
 from SeisRevise.Functions.Processing import get_bin_files
 from SeisRevise.Functions.Plotting import plot_spectrogram
+
+
+def _export_folder_generate(root_folder, structure_type, component,
+                           bin_file_name=None, start_time_sec=None,
+                           end_time_sec=None):
+    """
+    Функция для генерации пути папки для экспорта результатов
+    :param root_folder: корневая папка всех сверочных данных
+    :param structure_type: тип структуры папок - HourStructure (почасовая),
+    DeviceStructure(поприборная)
+    :param component: название компоненты сигнала (X, Y, Z)
+    :param bin_file_name: имя bin-файла (без расширения)
+    :param start_time_sec: начальная секунда расчета спектрограмм
+    :param end_time_sec: конечная секунда расчета спектрограмм
+    :return: путь к папке
+    """
+    # Проверка введенных параметров
+    if structure_type == 'HourStructure' and (start_time_sec is None or
+                                              end_time_sec is None):
+        # если структура папки почасовая, то наличие начальной и конечной
+        # секунд обязательно
+        return None
+
+    if structure_type == 'DeviceStructure' and bin_file_name is None:
+        # если структура папки поприборная, то наличие имени bin-файла
+        # обязательно
+        return None
+
+    # В случае, если структура папки организована как по часам
+    # путь к папке складывается из корневой папки/2DSpectrograms/{}_component
+    if structure_type == 'HourStructure':
+        export_folder_path = os.path.join(
+            root_folder,
+            '2DSpectrograms',
+            '{}-{}_sec'.format(start_time_sec, end_time_sec),
+            '{}_component'.format(component))
+    # В случае, если структура папки организована как по датчикам
+    # путь к папке будет как:
+    # корневая папка/папка с файлом датчика/{}_component
+    elif structure_type == 'DeviceStructure':
+        export_folder_path = os.path.join(
+            root_folder,
+            bin_file_name,
+            '{}_component'.format(component))
+    else:
+        return None
+    # создание папки для сохранения результатов
+    if not os.path.exists(export_folder_path):
+        os.makedirs(export_folder_path)
+
+    # возвращение результата
+    if os.path.exists(export_folder_path):
+        return export_folder_path
+    else:
+        return None
 
 
 def spectrogram_calc():
@@ -73,14 +126,11 @@ def spectrogram_calc():
 
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
-    # тип файла
-    file_type = db_gen_data.file_type
-    # тип записи
-    record_type = db_gen_data.record_type
-    # частота записи сигнала
-    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
-    resample_frequency = db_gen_data.resample_frequency
+    if not db_gen_data.no_resample_flag:
+        resample_frequency = db_gen_data.resample_frequency
+    else:
+        resample_frequency = None
     # компоненты для анализа
     components = list()
     if db_gen_data.x_component_flag:
@@ -92,9 +142,9 @@ def spectrogram_calc():
     # временной интервал построения спектрограмм
     time_interval = db_spec_data.time_interval
     # размер окна построения спектрограмм
-    window_size = db_spec_data.window_size
+    window_size = 8192
     # размер сдвига окна для
-    noverlap_size = db_spec_data.noverlap_size
+    noverlap_size = 256
     # частоты визуализации
     min_frequency = db_spec_data.f_min_visual
     max_frequency = db_spec_data.f_max_visual
@@ -120,81 +170,76 @@ def spectrogram_calc():
                        'Всего найдено {} файлов'.format(len(bin_files_list)),
                   level=0)
 
-    # парсинг типа записи
-    x_channel_number = record_type.index('X')
-    y_channel_number = record_type.index('Y')
-    z_channel_number = record_type.index('Z')
-
     # запуск процесса построения спектрограмм
 
-    # главный цикл - по интервалам времени
-    # ВНИМАНИЕ! Цикл бесконечный, так как неивестна длина данных в файле
-    #  заранее - файл может быть очень большим настолько, что нельзя его
-    #  полностью считать в память
-
-    # номер интервала для обработки. Один интервал может быть равен
-    # нескольким часам
-    interval_number = 0
-    while True:
-        print_message(text='Начата обработка временного '
-                           'интервала #{}...'.format(interval_number + 1),
+    # главный цикл по файлам
+    for bin_file in bin_files_list:
+        # получение имени файла
+        bin_file_name = os.path.split(bin_file)[-1].split('.')[0]
+        print_message(text='Начата обработка файла {}...'.format(bin_file_name),
                       level=1)
-        # размер извлекаемого куска сигнала БЕЗ РЕСЕМПЛИРОВАНИЯ!!!
-        signal_part_size = int(time_interval * 3600 * signal_frequency)
+        # Чтение файла
+        bin_data = BinaryFile()
+        bin_data.path = bin_file
+        signal_frequency = bin_data.signal_frequency
+        if db_gen_data.no_resample_flag:
+            resample_frequency = signal_frequency
 
-        # получение номеров отсчетов для извлечения куска сигнала из
-        # файла БЕЗ РЕСЕМПЛИРОВАНИЯ!!!
-        start_moment_position = interval_number * signal_part_size
-        end_moment_position = start_moment_position + signal_part_size - 1
+        if signal_frequency % resample_frequency == 0:
+            bin_data.resample_frequency = resample_frequency
+        else:
+            print_message(text='Частота дискретизации сигнала некратна '
+                               'частоте ресемплирования. Обработка файла '
+                               'пропущена',
+                          level=1)
+            continue
 
-        # интервал секунд (нужно для названия выходного png-файла
-        # картинки спектрограммы)
-        start_second = int(time_interval * 3600) * interval_number
-        end_second = start_second + int(time_interval * 3600)
+        components_indexes = bin_data.components_index
+        seconds_delay = bin_data.seconds_delay
+        if components_indexes is None or seconds_delay is None or \
+                signal_frequency is None:
+            print_message(text='Ошибка чтения файла {}'.format(bin_file_name),
+                level=1)
+            continue
 
-        # второй цикл - по bin-файлам
+        # вычисление количества интервалов разбиения
+        intervals_amount = int(seconds_delay / (time_interval * 3600)) + 1
+        # размер извлекаемого куска сигнала в секундах
+        part_seconds_size = int(time_interval * 3600)
+        # размер извлекаемого куска сигнала в отсчетах
+        signal_part_size = int(part_seconds_size * signal_frequency)
 
-        # переменная для определения прерывания бесконечного цикла -
-        # True - если цикл нужно продолжить, False - если прерывать цикл
-        # не нужно. Все зависит от того, есть ли извлеченный кусок
-        # сигнала хотя бы в одном файле
-        is_check_marker = False
-        for file_path in bin_files_list:
-            # получение имени файла
-            bin_file_name = os.path.split(file_path)[-1].split('.')[0]
-            print_message(text='Обработка файла {}...'.format(bin_file_name),
-                          level=2)
+        for interval_number in range(intervals_amount):
+            # получение номеров отсчетов для извлечения куска сигнала из
+            start_moment_position = interval_number * signal_part_size
+            end_moment_position = start_moment_position + signal_part_size - 1
 
-            # проба считать данные в указанном интервале
-            if file_type == 'Baikal7':
-                signal = rsf7(file_path=file_path,
-                              only_signal=True,
-                              resample_frequency=resample_frequency,
-                              start_moment=start_moment_position,
-                              end_moment=end_moment_position)
-            elif file_type == 'Baikal8':
-                signal = rsf8(file_path=file_path,
-                              signal_frequency=signal_frequency,
-                              only_signal=True,
-                              resample_frequency=resample_frequency,
-                              start_moment=start_moment_position,
-                              end_moment=end_moment_position)
-            else:
-                signal = None
+            # интервал секунд (нужно для названия выходного png-файла
+            # картинки спектрограммы)
+            start_second = int(time_interval * 3600) * interval_number
+            end_second = start_second + int(time_interval * 3600)
 
-            # если сигнал не пустой, добавляем (логическое OR) True
-            if signal is not None:
-                is_check_marker += True
-                print_message(text='Выборка успешно считана', level=2)
-            else:
-                print_message(text='Выборка файла пуста. Обработка пропущена',
-                              level=2)
+            print_message(
+                text='Интервал {}-{} сек...'.format(start_second,end_second),
+                level=2)
+
+            # извлечение сигнала
+            bin_data.start_moment = start_moment_position
+            bin_data.end_moment = end_moment_position
+            signal = bin_data.signals
+
+            if signal is None:
+                print_message(
+                    text='Ошибка извлечения сигнала интервала {}-{} '
+                         'сек'.format(start_second,end_second),
+                    level=2)
                 continue
-
-            # если сигнал не пуст, второй цикл продолжает работу
 
             # Построение спектрограмм по компонентам
             for component in components:
+                print_message(
+                    text='Компонента {}...'.format(component),
+                    level=3)
                 # имя для png-файла складывается как название компоненты
                 #  имя bin-файла+начальная секудна интервала+конечная
                 # секунда интервала
@@ -203,7 +248,7 @@ def spectrogram_calc():
 
                 # генерация пути к папке, куда будет сохраняться результат
                 # в зависимости от типа структуры папок экспорта
-                export_folder = export_folder_generate(
+                export_folder = _export_folder_generate(
                     root_folder=directory_path,
                     structure_type=export_structure,
                     component=component,
@@ -214,20 +259,20 @@ def spectrogram_calc():
                 # проверка создания каталога экспорта
                 if export_folder is None:
                     print_message(text='Ошибка создания каталога экспорта. '
-                                  'Обработка прервана', level=3)
+                                       'Обработка прервана', level=3)
                     return None
 
                 # определение индекса канала компоненты исходя из текущей
                 #  компоненты
                 if component == 'X':
-                    channel_number = x_channel_number
+                    channel_number = components_indexes[0]
                 elif component == 'Y':
-                    channel_number = y_channel_number
+                    channel_number = components_indexes[1]
                 elif component == 'Z':
-                    channel_number = z_channel_number
+                    channel_number = components_indexes[2]
                 else:
                     print_message(text='Ошибка чтения номера компоненты. '
-                                  'Обработка прервана', level=3)
+                                       'Обработка прервана', level=3)
                     return None
 
                 # построение спектрограммы
@@ -247,23 +292,16 @@ def spectrogram_calc():
                 if not is_create_spectrogram:
                     print_message(
                         text='Ошибка построения спектрограммы: файл {}, '
-                             'компонента {}, временной интервал {}-{}. '
+                             'компонента {}, временной интервал {}-{} сек. '
                              'Возможно, неверные параметры построения. '
                              'Обработка прервана'.format(
-                                bin_file_name, component, start_second,
-                                end_second),
+                            bin_file_name, component, start_second,
+                            end_second),
                         level=3)
                     return None
                 else:
                     print_message(
-                        text='Спектрограмма (файл {}, компонента {}) '
-                             'построена'.format(bin_file_name, component),
-                        level=3)
-            print_message(text='Файл {} обработан'.format(bin_file_name),
+                        text='Спектрограмма построена', level=3)
+        print_message(text='Файл {} обработан'.format(bin_file_name),
                           level=2)
-
-        # проверка, нужно ли прервать бесконечный цикл
-        if not is_check_marker:
-            print_message(text='Построение спектрограмм завершено', level=0)
-            break
-        interval_number += 1
+    print_message('Обработка завершена', 0)

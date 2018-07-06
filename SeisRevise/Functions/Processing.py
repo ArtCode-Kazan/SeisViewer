@@ -1,6 +1,6 @@
 import os
 
-from SeisCore.GeneralFunction.CheckingName import checking_name
+from SeisCore.GeneralFunction.GeneralFunctions import checking_name as _checking_name
 
 
 def get_bin_files(directory_path):
@@ -15,7 +15,7 @@ def get_bin_files(directory_path):
         # имя папки
         root_folder_name = os.path.basename(root_folder)
         # проверка имени папки на допустимые символы
-        if not checking_name(root_folder_name):
+        if not _checking_name(root_folder_name):
             # прерывание расчета в случае неверного имени папки
             error = 'Неверное имя папки {} - содержит недопустимые символы. ' \
                     'Обработка прервана'.format(root_folder_name)

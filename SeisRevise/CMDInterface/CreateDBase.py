@@ -11,8 +11,8 @@ def create_dbase():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
