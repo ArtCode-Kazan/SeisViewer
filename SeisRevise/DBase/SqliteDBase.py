@@ -146,6 +146,15 @@ class SqliteDB:
             correlation_graph_flag = BooleanField(
                 verbose_name="Флаг экспорта коэф-тов корреляции в виде "
                              "графиков")
+            correlation_separate_graph_flag = BooleanField(
+                verbose_name='Флаг экспорта отдельных графиков коэф-та '
+                             'корреляции')
+            smooth_spectrum_data_flag = BooleanField(
+                verbose_name='Флаг экспорта сглаженного спектра в виде файла '
+                             '(весь набор частот)')
+            no_smooth_spectrum_data_flag = BooleanField(
+                verbose_name='Флаг экспорта НЕсглаженного спектра в виде '
+                             'файла (весь набор частот)')
 
             # мета-класс модели
             class Meta:
@@ -447,7 +456,10 @@ class SqliteDB:
             db_corr_data.separated_spectrums_flag or \
             db_corr_data.general_spectrums_flag or \
             db_corr_data.correlation_matrix_flag or \
-            db_corr_data.correlation_graph_flag
+            db_corr_data.correlation_graph_flag or \
+            db_corr_data.correlation_separate_graph_flag or \
+            db_corr_data.smooth_spectrum_data_flag or \
+            db_corr_data.no_smooth_spectrum_data_flag
         if not checking:
             error = 'Не выбран ни один из способов экспорта результатов ' \
                     'данных по расчетам корреляций'

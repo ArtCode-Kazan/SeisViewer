@@ -44,3 +44,26 @@ def correlation_to_file(devices, correlation_matrix, output_folder,
     for line in write_lines:
         f.write(line)
     f.close()
+
+
+def spectrum_to_file(frequency, amplitude, type, output_folder, output_name):
+    """
+    Функция для экспорта данных сглаженного и НЕсглаженного спектров в виде
+    файла
+    :param frequency: массив с набором частот
+    :param amplitude: массив с набором амплитуд
+    :param type: тип спектра (сглаженный или несглаженный)
+    :param output_folder: папка экспорта
+    :param output_name: имя файла (БЕЗ РАСШИЕРЕНИЯ!)
+    :return: None
+    """
+    if type=='.smooth':
+        extension = 'ssc'
+    elif type=='no_smooth':
+        extension = '.sc'
+    else:
+        extension = '.dat'
+    export_path = os.path.join(output_folder, output_name + extension)
+    np.savez(export_path, frequency, amplitude)
+
+

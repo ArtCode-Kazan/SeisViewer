@@ -17,6 +17,7 @@ from SeisRevise.Functions.Processing import get_bin_files
 
 from SeisRevise.Functions.Exporting import part_of_signal_to_file
 from SeisRevise.Functions.Exporting import correlation_to_file
+from SeisRevise.Functions.Exporting import spectrum_to_file
 
 from SeisRevise.Functions.Plotting import plot_signal
 from SeisRevise.Functions.Plotting import plot_average_spectrum
@@ -165,7 +166,12 @@ def correlation_calc():
     is_correlation_matrix_to_file = db_corr_data.correlation_matrix_flag
     # вывод коэф-тов корреляции в виде графика
     is_correlation_matrix_to_graph = db_corr_data.correlation_graph_flag
-
+    # вывод коэф-тов корреляции в виде графика отдельно для каждого файла
+    is_separate_correlation_graph = db_corr_data.correlation_separate_graph_flag
+    # вывод сглаженного спектра каждого прибора в виде файла
+    is_smooth_spectrum_data_to_file = db_corr_data.smooth_spectrum_data_flag
+    # вывод НЕсглаженного спектра каждого прибора в виде файла
+    is_no_smooth_spectrum_data_to_file = db_corr_data.no_smooth_spectrum_data_flag
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
@@ -418,6 +424,28 @@ def correlation_calc():
                     output_name=png_file_name)
                 print_message('Экспорт графика спектров завершен', 2)
 
+            # сохранение раздельных коэф-тов корреляции
+            if is_separate_correlation_graph:
+                pass
+
+            # сохранение данных сглаженного спектра в файл
+            if is_smooth_spectrum_data_to_file:
+                spectrum_to_file(
+                    type='smooth', frequency=frequencies_list,
+                    amplitude=averspectrum_data[component_number, 1, :, file_number],
+                    output_folder=file_processing_result_folder,
+                    output_name=bin_file_name)
+                print_message('Экспорт данных сглаженного спектра завершен', 2)
+
+            # сохранение данных НЕсглаженного спектра в файл
+            if is_no_smooth_spectrum_data_to_file:
+                spectrum_to_file(
+                    type='no_smooth', frequency=frequencies_list,
+                    amplitude=averspectrum_data[component_number, 0, :, file_number],
+                    output_folder=file_processing_result_folder,
+                    output_name=bin_file_name)
+                print_message('Экспорт данных несглаженного спектра завершен', 2)
+
     # сохранение обобщенных данных для всех приборов
 
     # генерация набора цветов для каждого прибора
@@ -470,4 +498,5 @@ def correlation_calc():
                              output_name=file_name)
             print_message('График коэф-тов корреляций для компоненты {}  '
                           'построен'.format(component_label), 1)
+
     print_message('Обработка завершена', 0)
