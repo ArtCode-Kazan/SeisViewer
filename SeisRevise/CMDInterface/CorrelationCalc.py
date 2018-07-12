@@ -63,22 +63,22 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    dbase_name = 'session.db'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    # parameters = sys.argv
-    # # проверка числа параметров
-    # if len(parameters) != 3:
-    #     print('Неверное число параметров')
-    #     return None
-    # # dbase directory path
-    # dbase_folder_path = parameters[1]
-    # # dbase_name
-    # dbase_name = parameters[2]
+    parameters = sys.argv
+    # проверка числа параметров
+    if len(parameters) != 3:
+        print('Неверное число параметров')
+        return None
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_name
+    dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 
@@ -207,6 +207,13 @@ def correlation_calc():
         bin_data = BinaryFile()
         bin_data.path = bin_file
         signal_frequency = bin_data.signal_frequency
+        if signal_frequency == 0:
+            print_message(text='Файл: {} - Частота дискретизации сигнала '
+                               'неверно считана из заголовка файла. '
+                               'Проверьте его расширение'
+                               'Обработка файла пропущена'.format(bin_file),
+                          level=1)
+            continue
         if db_gen_data.no_resample_flag:
             resample_frequency = signal_frequency
         components_index = bin_data.components_index
