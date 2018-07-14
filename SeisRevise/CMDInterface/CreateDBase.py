@@ -11,22 +11,22 @@ def create_dbase():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    parameters = sys.argv
-    # проверка числа параметров
-    if len(parameters) != 3:
-        print('Неверное число параметров')
-        return None
-    # dbase directory path
-    dbase_folder_path = parameters[1]
-    # dbase_name
-    dbase_name = parameters[2]
+    # parameters = sys.argv
+    # # проверка числа параметров
+    # if len(parameters) != 3:
+    #     print('Неверное число параметров')
+    #     return None
+    # # dbase directory path
+    # dbase_folder_path = parameters[1]
+    # # dbase_name
+    # dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 

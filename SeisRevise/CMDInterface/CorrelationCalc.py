@@ -22,6 +22,7 @@ from SeisRevise.Functions.Exporting import spectrum_to_file
 from SeisRevise.Functions.Plotting import plot_signal
 from SeisRevise.Functions.Plotting import plot_average_spectrum
 from SeisRevise.Functions.Plotting import plot_all_smooth_spectrums
+from SeisRevise.Functions.Plotting import plot_single_correlation
 from SeisRevise.Functions.Plotting import plot_correlation
 
 
@@ -64,22 +65,22 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    parameters = sys.argv
-    # проверка числа параметров
-    if len(parameters) != 3:
-        print('Неверное число параметров')
-        return None
-    # dbase directory path
-    dbase_folder_path = parameters[1]
-    # dbase_name
-    dbase_name = parameters[2]
+    # parameters = sys.argv
+    # # проверка числа параметров
+    # if len(parameters) != 3:
+    #     print('Неверное число параметров')
+    #     return None
+    # # dbase directory path
+    # dbase_folder_path = parameters[1]
+    # # dbase_name
+    # dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 
@@ -261,7 +262,7 @@ def correlation_calc():
                           end_moment=end_moment_position)
         else:
             signal = None
-
+        print(selection_size,signal.shape[0])
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
         if signal is not None and signal.shape[0] == selection_size:
@@ -426,7 +427,17 @@ def correlation_calc():
 
             # сохранение раздельных коэф-тов корреляции
             if is_separate_correlation_graph:
-                pass
+                png_file_name = '{}_Separate_Correlation_{}_Component_' \
+                                'Graph'.format(bin_file_name,
+                                               component_label)
+                plot_single_correlation(
+                    devices=bin_files_list,
+                    correlation_data=result_correlate_matrix[
+                                     component_number, file_number, :],
+                    output_folder=file_processing_result_folder,
+                    output_name=png_file_name)
+                print_message('Экспорт графика коэф-тов корреляции по '
+                              'прибору {} завершен'.format(bin_file_name), 3)
 
             # сохранение данных сглаженного спектра в файл
             if is_smooth_spectrum_data_to_file:
@@ -435,8 +446,8 @@ def correlation_calc():
                     amplitude=averspectrum_data[component_number, 1, :, file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
-                print_message('Экспорт данных сглаженного спектра завершен', 2)
-
+                print_message('Экспорт данных сглаженного спектра по '
+                              'прибору {} завершен'.format(bin_file_name), 3)
             # сохранение данных НЕсглаженного спектра в файл
             if is_no_smooth_spectrum_data_to_file:
                 spectrum_to_file(
@@ -444,7 +455,8 @@ def correlation_calc():
                     amplitude=averspectrum_data[component_number, 0, :, file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
-                print_message('Экспорт данных несглаженного спектра завершен', 2)
+                print_message('Экспорт данных несглаженного спектра по '
+                              'прибору {} завершен'.format(bin_file_name), 3)
 
     # сохранение обобщенных данных для всех приборов
 

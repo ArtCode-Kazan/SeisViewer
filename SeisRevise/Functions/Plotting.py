@@ -436,6 +436,67 @@ def plot_all_smooth_spectrums(spectrums_name_list, frequency, spectrum_data,
     plt.close(fig)
 
 
+def plot_single_correlation(devices, correlation_data, output_folder,
+                            output_name):
+    """
+    Функция для построения отдельных графиков корреляции для каждого
+    прибора в отдельности
+    :param devices: списко имен приборов
+    :param correlation_data: значение коэф-тов корреляции
+    :param output_folder: папка для сохранения результатов
+    :param output_name: имя графического файла
+    :return: None
+    """
+    # настройка шрифта (для отображения русских букв)
+    mpl.rc('font', family='Verdana')
+
+    # настройка отступов полей
+    mpl.rcParams['figure.subplot.left'] = 0.07
+    mpl.rcParams['figure.subplot.right'] = 0.8
+    mpl.rcParams['figure.subplot.bottom'] = 0.15
+    mpl.rcParams['figure.subplot.top'] = 0.95
+
+    # создание бланка графика
+    fig = plt.figure()
+
+    # размер плота в дюймах
+    fig.set_size_inches(13, 10)
+    # разрешение отображения графика
+    fig.dpi = 96
+    # подготовка осей
+    axes = fig.add_subplot(111)
+
+    # пределы по осям
+    axes.set_ylim(0, 1.1)
+
+    # специальная подпись по оси x
+    x_values = np.arange(1, len(devices) + 1, 1)
+    x_labels = devices
+
+    # подпись оси x - пары регистратор-сенсор
+    axes.set_xticks(x_values)
+    axes.set_xticklabels(x_labels, minor=False, rotation=90)
+
+    # построение графика
+    axes.plot(x_values, correlation_data, color='#FF0000', lw=1)
+
+    # заголовки осей
+    x_label = u'Приборы'
+    y_label = u'Коэф-т корреляции'
+    axes.set_xlabel(x_label)
+    axes.set_ylabel(y_label)
+
+    # подпись графика
+    axes.set_title(output_name, fontsize=10)
+    axes.grid()
+
+    # сохранение графика в png
+    export_path = os.path.join(output_folder, output_name + '.png')
+    plt.savefig(export_path, dpi=200)
+    # закрытие плота
+    plt.close(fig)
+
+
 def plot_correlation(devices, colors, correlation_matrix,
                      output_folder, output_name):
     """
