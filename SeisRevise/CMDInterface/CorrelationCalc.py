@@ -1,5 +1,6 @@
 import sys
 import os
+import warnings
 
 import numpy as np
 from numpy.fft import rfftfreq
@@ -12,7 +13,6 @@ from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
 from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
 from SeisRevise.DBase.SqliteDBase import SqliteDB
-
 from SeisRevise.Functions.Processing import get_bin_files
 
 from SeisRevise.Functions.Exporting import part_of_signal_to_file
@@ -65,22 +65,23 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    dbase_name = 'session.db'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    # parameters = sys.argv
-    # # проверка числа параметров
-    # if len(parameters) != 3:
-    #     print('Неверное число параметров')
-    #     return None
-    # # dbase directory path
-    # dbase_folder_path = parameters[1]
-    # # dbase_name
-    # dbase_name = parameters[2]
+    warnings.filterwarnings("ignore")
+    parameters = sys.argv
+    # проверка числа параметров
+    if len(parameters) != 3:
+        print('Неверное число параметров')
+        return None
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_name
+    dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 
@@ -168,11 +169,13 @@ def correlation_calc():
     # вывод коэф-тов корреляции в виде графика
     is_correlation_matrix_to_graph = db_corr_data.correlation_graph_flag
     # вывод коэф-тов корреляции в виде графика отдельно для каждого файла
-    is_separate_correlation_graph = db_corr_data.correlation_separate_graph_flag
+    is_separate_correlation_graph = \
+        db_corr_data.correlation_separate_graph_flag
     # вывод сглаженного спектра каждого прибора в виде файла
     is_smooth_spectrum_data_to_file = db_corr_data.smooth_spectrum_data_flag
     # вывод НЕсглаженного спектра каждого прибора в виде файла
-    is_no_smooth_spectrum_data_to_file = db_corr_data.no_smooth_spectrum_data_flag
+    is_no_smooth_spectrum_data_to_file = \
+        db_corr_data.no_smooth_spectrum_data_flag
     print_message('Начат процесс расчета спектров и корреляций...', 0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
@@ -262,13 +265,14 @@ def correlation_calc():
                           end_moment=end_moment_position)
         else:
             signal = None
-        print(selection_size,signal.shape[0])
+
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
         if signal is not None and signal.shape[0] == selection_size:
             print_message('Выборка файла успешно считана', 1)
         else:
-            print_message('Выборка файла пуста. Обработка прервана', 1)
+            print_message('Выборка файла пуста или имеет неверную длину. '
+                          'Обработка прервана', 1)
             return None
 
         # заполнение общего массива выборок
@@ -389,20 +393,20 @@ def correlation_calc():
                     signal=selection_signals[component_number, :, file_number],
                     output_folder=file_processing_result_folder,
                     output_name=dat_file_name)
-                print_message('Экспорт чистого участка завершен', 2)
+                print_message('Экспорт чистого участка завершен', 3)
 
             # сохранение чистых участков сигнала в виде графиков
             if is_selection_signal_to_graph:
                 png_file_name = '{}_ClearSignal_{}_Component_Graph'.format(
                     bin_file_name, component_label)
-                plot_signal(left_edge=start_moment_position_resample,
+                plot_signal(time_start_sec=left_time_edge,
                             frequency=resample_frequency,
                             signal=selection_signals[
                                    component_number, :, file_number],
                             label=png_file_name,
                             output_folder=file_processing_result_folder,
                             output_name=png_file_name)
-                print_message('Экспорт графика чистого участка завершен', 2)
+                print_message('Экспорт графика чистого участка завершен', 3)
 
             # сохранение рисунков спектров для каждого прибора
             if is_spector_device_to_graph:
@@ -423,7 +427,7 @@ def correlation_calc():
                     f_max=max_frequency_visuality,
                     output_folder=file_processing_result_folder,
                     output_name=png_file_name)
-                print_message('Экспорт графика спектров завершен', 2)
+                print_message('Экспорт графика спектров завершен', 3)
 
             # сохранение раздельных коэф-тов корреляции
             if is_separate_correlation_graph:

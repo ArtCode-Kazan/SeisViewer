@@ -1,4 +1,5 @@
 import sys
+import warnings
 
 from SeisCore.GeneralFunction.cmdLogging import print_message
 from SeisRevise.DBase.SqliteDBase import SqliteDB
@@ -11,22 +12,23 @@ def create_dbase():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
-    dbase_name = 'session.db'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    # parameters = sys.argv
-    # # проверка числа параметров
-    # if len(parameters) != 3:
-    #     print('Неверное число параметров')
-    #     return None
-    # # dbase directory path
-    # dbase_folder_path = parameters[1]
-    # # dbase_name
-    # dbase_name = parameters[2]
+    warnings.filterwarnings("ignore")
+    parameters = sys.argv
+    # проверка числа параметров
+    if len(parameters) != 3:
+        print('Неверное число параметров')
+        return None
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_name
+    dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 

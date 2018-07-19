@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 from scipy.signal import medfilt
 import matplotlib as mpl
@@ -88,12 +87,12 @@ def plot_spectrogram(signal, frequency, window_size,
         return False
 
 
-def plot_signal(left_edge, frequency, signal, label, output_folder,
+def plot_signal(time_start_sec, frequency, signal, label, output_folder,
                 output_name):
     """
     Функция для построения графика сигнала
-    :param left_edge: номер отсчета, с которого строится сигнал (нужен для
-    построения временного ряда)
+    :param time_start_sec: время в секундах, с которого строится сигнал (
+    нужен для построения временного ряда)
     :param frequency: частота дискретизации (нужен для построения временного ъ
     ряда)
     :param signal: одномерный массив сигнала
@@ -123,14 +122,13 @@ def plot_signal(left_edge, frequency, signal, label, output_folder,
 
     # пределы по осям
     # ось x - время в секундах
-    t_min = left_edge / frequency
-    t_max = (left_edge + signal.shape[0] - 1) / frequency
-    axes.set_xlim(t_min, t_max)
+    t_min = time_start_sec
+    t_max = time_start_sec+(signal.shape[0] - 1) / frequency
+    axes.set_xlim(t_min-5, t_max+5)
     # ось y - амплитуда сигнала
     amp_min = np.min(signal)
     amp_max = np.max(signal)
     axes.set_ylim(amp_min, amp_max)
-
     # генерация массива времен
     time_array = np.linspace(start=t_min, stop=t_max, num=signal.shape[0])
 

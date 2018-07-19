@@ -1,5 +1,6 @@
 import sys
 import os
+import warnings
 
 from SeisCore.GeneralFunction.cmdLogging import print_message
 
@@ -21,13 +22,14 @@ def pre_analysis_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
     # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
+    warnings.filterwarnings("ignore")
     parameters = sys.argv
     # проверка числа параметров
     if len(parameters) != 3:
@@ -198,11 +200,18 @@ def pre_analysis_calc():
 
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
-        if signal is not None and signal.shape[0] == selection_size:
-            print_message('Выборка файла успешно считана', 1)
-        else:
-            print_message('Выборка файла пуста. Обработка прервана', 1)
+        if signal is None:
+            print_message(text='Выборка файла пуста. Обработка '
+                               'файла пропущена', level=2)
             return None
+        elif signal is not None \
+                and signal.shape[0] != selection_size:
+            print_message(text='Выборка файла не соответствует '
+                               'требуемому размеру. Обработка '
+                               'файла пропущена', level=2)
+            return None
+        else:
+            print_message(text='Выборка успешно считана', level=2)
 
         # если сигнал не пуст, второй цикл продолжает работу
 
@@ -237,13 +246,13 @@ def pre_analysis_calc():
 
             # визуализация выборки сигнала в виде графика
             if is_selection_signal_to_graph:
-                png_file_name = '{}_ClearSignal_{}_Component_Graph'.format(
+                png_file_name = '{}_Signal_{}_Component_Graph'.format(
                     bin_file_name, component)
                 # создание папки для сохранения результатов
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                plot_signal(left_edge=start_moment_position_resample,
+                plot_signal(time_start_sec=left_time_edge,
                             frequency=resample_frequency,
                             signal=signal[:, channel_number],
                             label=png_file_name,

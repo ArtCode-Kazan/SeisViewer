@@ -81,6 +81,7 @@ class SqliteDB:
             resample_frequency = IntegerField(
                 verbose_name="Частота ресемплирования")
             no_resample_flag = BooleanField(verbose_name="Нет ресемплирования")
+            data_type = CharField(verbose_name="Тип данных (ГРП/МСИ)")
             x_component_flag = BooleanField(verbose_name="x-component")
             y_component_flag = BooleanField(verbose_name="y-component")
             z_component_flag = BooleanField(verbose_name="z-component")
@@ -98,8 +99,6 @@ class SqliteDB:
             f_min_visual = FloatField(verbose_name="Мин. частота визуализации")
             f_max_visual = FloatField(
                 verbose_name="Макс. частота визуализации")
-            folder_structure = CharField(
-                verbose_name="Структура папки экспорта")
 
             # мета-класс модели
             class Meta:
@@ -289,6 +288,11 @@ class SqliteDB:
                     'сигнала'
             return False, error
 
+        # проверка типа данных
+        if db_gen_data.data_type not in ('GRP', 'MSI'):
+            error = 'Неверно указан тип данных'
+            return False, error
+
         # список компонент для анализа
         if not (
                 db_gen_data.x_component_flag or db_gen_data.y_component_flag or
@@ -346,12 +350,6 @@ class SqliteDB:
         # проверка частот на правильность указания
         if min_frequency > max_frequency:
             error = 'Неверно указан диапазон частот визуализации спектрограмм'
-            return False, error
-
-        # тип структуры экспорта результатов
-        if db_spec_data.folder_structure not in \
-                ['HourStructure', 'DeviceStructure']:
-            error = 'Неверно указана структура экспорта результатов'
             return False, error
         return True, None
 
