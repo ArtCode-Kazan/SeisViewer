@@ -4,7 +4,7 @@ from SeisRevise.CMDInterface.CorrelationCalc import correlation_calc
 from SeisRevise.CMDInterface.PreAnalysisCalc import pre_analysis_calc
 
 
-# create_dbase()
-spectrogram_calc()
+create_dbase()
+# spectrogram_calc()
 # correlation_calc()
 # pre_analysis_calc()
