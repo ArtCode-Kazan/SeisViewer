@@ -1,13 +1,33 @@
 import os
+from datetime import datetime
 
 from SeisCore.GeneralFunction.GeneralFunctions import checking_name as _checking_name
+
+
+def get_dates(directory_path):
+    """
+    Функция получения дат из названия папок в рабочей директории
+    :param directory_path: путь к рабочей папке
+    :return: список дат, текст ошибки
+    """
+    dates_list=list()
+    root_folder, folders, files = next(os.walk(directory_path))
+    for folder_name in folders:
+        try:
+            date_value = datetime.strptime(folder_name, '%Y-%m-%d')
+            dates_list.append(date_value)
+        except ValueError:
+            error = 'Неверная структура папок. Папка: {} - имя папки ' \
+                    'не является датой'.format(folder_name)
+            return None, error
+    return dates_list, None
 
 
 def get_bin_files(directory_path):
     """
     Функция для получения списка полных путей к bin-файлам
-    :param directory_path: рабочая папка
-    :return: список полных путей к bin-файлам
+    :param directory_path: путь к рабочей папке
+    :return: список полных путей к bin-файлам, текст ошибки
     """
     bin_files_list = list()
     folder_struct = os.walk(directory_path)
@@ -46,14 +66,14 @@ def get_bin_files(directory_path):
     return bin_files_list, None
 
 
-def export_folder_generate(root_folder, structure_type, component,
+def export_folder_generate(root_folder, date_value, data_type, component,
                            bin_file_name=None, start_time_sec=None,
                            end_time_sec=None):
     """
     Функция для генерации пути папки для экспорта результатов
     :param root_folder: корневая папка всех сверочных данных
-    :param structure_type: тип структуры папок - HourStructure (почасовая),
-    DeviceStructure(поприборная)
+    :param date_value: дата дня обработки
+    :param data_type: тип данных - MSI, GRP
     :param component: название компоненты сигнала (X, Y, Z)
     :param bin_file_name: имя bin-файла (без расширения)
     :param start_time_sec: начальная секунда расчета спектрограмм
@@ -61,31 +81,30 @@ def export_folder_generate(root_folder, structure_type, component,
     :return: путь к папке
     """
     # Проверка введенных параметров
-    if structure_type == 'HourStructure' and (start_time_sec is None or
+    if data_type == 'GRP' and (start_time_sec is None or
                                               end_time_sec is None):
         # если структура папки почасовая, то наличие начальной и конечной
         # секунд обязательно
         return None
 
-    if structure_type == 'DeviceStructure' and bin_file_name is None:
+    if data_type == 'MSI' and bin_file_name is None:
         # если структура папки поприборная, то наличие имени bin-файла
         # обязательно
         return None
 
     # В случае, если структура папки организована как по часам
     # путь к папке складывается из корневой папки/2DSpectrograms/{}_component
-    if structure_type == 'HourStructure':
+    if data_type == 'GRP':
         export_folder_path = os.path.join(
-            root_folder,
-            '2DSpectrograms',
+            root_folder, date_value.strftime("%Y-%m-%d"), '2DSpectrograms',
             '{}-{}_sec'.format(start_time_sec, end_time_sec),
             '{}_component'.format(component))
     # В случае, если структура папки организована как по датчикам
     # путь к папке будет как:
     # корневая папка/папка с файлом датчика/{}_component
-    elif structure_type == 'DeviceStructure':
+    elif data_type == 'MSI':
         export_folder_path = os.path.join(
-            root_folder,
+            root_folder, date_value.strftime("%Y-%m-%d"), '2DSpectrograms',
             bin_file_name,
             '{}_component'.format(component))
     else:

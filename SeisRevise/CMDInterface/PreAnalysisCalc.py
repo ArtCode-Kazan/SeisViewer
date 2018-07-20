@@ -1,9 +1,11 @@
 import sys
 import os
+import warnings
 
 from SeisCore.GeneralFunction.cmdLogging import print_message
 
-from SeisPars.Classes.BinaryFile import BinaryFile
+from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
+from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
 
 from SeisRevise.DBase.SqliteDBase import SqliteDB
 from SeisRevise.Functions.Processing import get_bin_files
@@ -20,13 +22,14 @@ def pre_analysis_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise\tmp'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
     # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
+    warnings.filterwarnings("ignore")
     parameters = sys.argv
     # проверка числа параметров
     if len(parameters) != 3:
@@ -65,11 +68,14 @@ def pre_analysis_calc():
 
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
+    # тип файла
+    file_type = db_gen_data.file_type
+    # тип записи
+    record_type = db_gen_data.record_type
+    # частота записи сигнала
+    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
-    if not db_gen_data.no_resample_flag:
-        resample_frequency = db_gen_data.resample_frequency
-    else:
-        resample_frequency = None
+    resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
     components = list()
     if db_gen_data.x_component_flag:
@@ -84,9 +90,9 @@ def pre_analysis_calc():
     # максимальная секунда чистого сигнала
     right_time_edge = db_panalysis_data.right_edge
     # размер окна расчета
-    window_size = 8192
+    window_size = db_panalysis_data.window_size
     # размер сдвига окна расчета
-    noverlap_size = 256
+    noverlap_size = db_panalysis_data.noverlap_size
     # параметр медианного фильтра
     if not db_panalysis_data.median_filter_flag:
         median_filter_parameter = None
@@ -141,6 +147,33 @@ def pre_analysis_calc():
             os.mkdir(folder_with_result)
             break
 
+    # парсинг типа записи
+    x_channel_number = record_type.index('X')
+    y_channel_number = record_type.index('Y')
+    z_channel_number = record_type.index('Z')
+
+    # расчет длины выборки сигнала в отсчетах
+
+    # получение номеров отсчетов для извлечения куска сигнала из файла (
+    # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
+    start_moment_position = left_time_edge * signal_frequency
+    end_moment_position = right_time_edge * signal_frequency - 1
+
+    # получение номеров отсчетов для извлечения куска сигнала из файла (
+    # ПОСЛЕ РЕСЕМПЛИРОВАНИЯ!!!)
+    resample_parameter = signal_frequency // resample_frequency
+
+    start_moment_position_resample = \
+        start_moment_position // resample_parameter
+    end_moment_position_resample = \
+        end_moment_position // resample_parameter
+
+    selection_size \
+        = end_moment_position_resample - start_moment_position_resample + 1
+
+    print_message('Длина выборки сигналов в отсчетах: {}'.format(
+        selection_size), 0)
+
     # запуск процесса извлечения выборок сигналов
     for file_number, file_path in enumerate(bin_files_list):
         # получение имени файла
@@ -149,39 +182,36 @@ def pre_analysis_calc():
         print_message('Чтение файла {}...'.format(bin_file_name), 1)
 
         # проба считать данные в указанном интервале
-        bin_data = BinaryFile()
-        bin_data.path = file_path
-        signal_frequency = bin_data.signal_frequency
-        if db_gen_data.no_resample_flag:
-            resample_frequency = signal_frequency
-        components_index = bin_data.components_index
-        if signal_frequency % resample_frequency == 0:
-            bin_data.resample_frequency = resample_frequency
+        if file_type == 'Baikal7':
+            signal = rsf7(file_path=file_path,
+                          only_signal=True,
+                          resample_frequency=resample_frequency,
+                          start_moment=start_moment_position,
+                          end_moment=end_moment_position)
+        elif file_type == 'Baikal8':
+            signal = rsf8(file_path=file_path,
+                          signal_frequency=signal_frequency,
+                          only_signal=True,
+                          resample_frequency=resample_frequency,
+                          start_moment=start_moment_position,
+                          end_moment=end_moment_position)
         else:
-            print_message(text='Файл: {} - Частота дискретизации сигнала '
-                               'некратна частоте ресемплирования. Обработка '
-                               'файла пропущена'.format(bin_file_name),
-                          level=1)
-            continue
-
-        # расчет длины выборки сигнала в отсчетах
-        # получение номеров отсчетов для извлечения куска сигнала из файла (
-        # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
-        start_moment_position = left_time_edge * signal_frequency
-        end_moment_position = right_time_edge * signal_frequency - 1
-
-        bin_data.start_moment = start_moment_position
-        bin_data.end_moment = end_moment_position
-
-        signal = bin_data.signals
+            signal = None
 
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
-        if signal is not None:
-            print_message('Выборка файла успешно считана', 1)
-        else:
-            print_message('Выборка файла пуста. Обработка прервана', 1)
+        if signal is None:
+            print_message(text='Выборка файла пуста. Обработка '
+                               'файла пропущена', level=2)
             return None
+        elif signal is not None \
+                and signal.shape[0] != selection_size:
+            print_message(text='Выборка файла не соответствует '
+                               'требуемому размеру. Обработка '
+                               'файла пропущена', level=2)
+            return None
+        else:
+            print_message(text='Выборка успешно считана', level=2)
 
         # если сигнал не пуст, второй цикл продолжает работу
 
@@ -190,14 +220,14 @@ def pre_analysis_calc():
             # определение индекса канала компоненты исходя из текущей
             #  компоненты
             if component == 'X':
-                channel_number = components_index[0]
+                channel_number = x_channel_number
             elif component == 'Y':
-                channel_number = components_index[1]
+                channel_number = y_channel_number
             elif component == 'Z':
-                channel_number = components_index[2]
+                channel_number = z_channel_number
             else:
                 print_message('Ошибка чтения номера компоненты. '
-                              'Обработка прервана', 1)
+                              'Обработка прервана', 3)
                 return None
 
             # запись выборки сигнала в файл
@@ -216,13 +246,13 @@ def pre_analysis_calc():
 
             # визуализация выборки сигнала в виде графика
             if is_selection_signal_to_graph:
-                png_file_name = '{}_ClearSignal_{}_Component_Graph'.format(
+                png_file_name = '{}_Signal_{}_Component_Graph'.format(
                     bin_file_name, component)
                 # создание папки для сохранения результатов
                 output_folder = os.path.join(folder_with_result, bin_file_name)
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
-                plot_signal(left_edge=left_time_edge,
+                plot_signal(time_start_sec=left_time_edge,
                             frequency=resample_frequency,
                             signal=signal[:, channel_number],
                             label=png_file_name,
