@@ -90,6 +90,29 @@ class SqliteDB:
             class Meta:
                 db_table = "GeneralData"
 
+        # модель - метаданные bin-файлов
+        class FileStatistics(BaseModel):
+            name = CharField(verbose_name="Имя файла (без расширения)")
+            path = CharField(verbose_name="Путь к файлу")
+            file_type = CharField(verbose_name="Тип файла")
+            record_type = CharField(verbose_name="Тип записи")
+            frequency = IntegerField(verbose_name="Частота дискретизации")
+            datetime_start = DateTimeField(
+                verbose_name="Дата и время начала записи файла",
+                formats='%d.%m.%Y %H:%M:%S')
+            datetime_stop = DateTimeField(
+                verbose_name="Дата и время окончания записи файла",
+                formats='%d.%m.%Y %H:%M:%S')
+            time_duration = FloatField(
+                verbose_name="Длительность записи в часах")
+            longitude = FloatField(verbose_name="Долгота")
+            latitude = FloatField(verbose_name="Широта")
+            error_text = CharField(verbose_name="Текст ошибки")
+
+            # мета-класс модели
+            class Meta:
+                db_table = "FileStatistic"
+
         # модель - 2D-спектрограммы
         class SpectrogramData(BaseModel):
             time_interval = FloatField(verbose_name="Интервал построения "
@@ -197,6 +220,7 @@ class SqliteDB:
 
         class Tables:
             gen_data = GeneralData
+            file_stats = FileStatistics
             spectrograms = SpectrogramData
             correlations = CorrelationData
             pre_analysis = PreAnalysisData
@@ -227,7 +251,8 @@ class SqliteDB:
             tables, errors = self.get_orm_model
             if tables is None:
                 return False, errors
-            tabs_list = (tables.gen_data, tables.spectrograms,
+            tabs_list = (tables.gen_data, tables.file_stats,
+                         tables.spectrograms,
                          tables.correlations, tables.pre_analysis)
             sqlite_db.connect()
             sqlite_db.create_tables(tabs_list, safe=True)
