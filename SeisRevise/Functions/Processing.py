@@ -3,6 +3,8 @@ from datetime import datetime
 
 from SeisCore.GeneralFunction.GeneralFunctions import checking_name as _checking_name
 
+from SeisPars.Refactoring.BinaryFile import BinaryFile
+
 
 def get_dates(directory_path):
     """
@@ -10,7 +12,7 @@ def get_dates(directory_path):
     :param directory_path: путь к рабочей папке
     :return: список дат, текст ошибки
     """
-    dates_list=list()
+    dates_list = list()
     root_folder, folders, files = next(os.walk(directory_path))
     for folder_name in folders:
         try:
@@ -23,47 +25,64 @@ def get_dates(directory_path):
     return dates_list, None
 
 
-def get_bin_files(directory_path):
-    """
-    Функция для получения списка полных путей к bin-файлам
-    :param directory_path: путь к рабочей папке
-    :return: список полных путей к bin-файлам, текст ошибки
-    """
-    bin_files_list = list()
+def files_info(directory_path):
     folder_struct = os.walk(directory_path)
+    files_data = list()
     for root_folder, folders, files in folder_struct:
-        # имя папки
+        # имя корневой папки
         root_folder_name = os.path.basename(root_folder)
-        # проверка имени папки на допустимые символы
-        if not _checking_name(root_folder_name):
-            # прерывание расчета в случае неверного имени папки
-            error = 'Неверное имя папки {} - содержит недопустимые символы. ' \
-                    'Обработка прервана'.format(root_folder_name)
-            return None, error
-
-        # проверка файлов в папке
+        # обход всех файлов
         for file in files:
             try:
                 name, extension = file.split('.')
             except ValueError:
-                error = 'Папка {}, файл {} - ошибка неверное расширение ' \
-                        'файла'.format(root_folder_name, file)
-                return None, error
-
-            # поиск bin-файла
+                continue
             if extension in ['00', 'xx']:
-                # проверка, что имя файла и папки совпадают
-                if name == root_folder_name:
-                    # получение полного пути к bin-файлу
-                    bin_file_path = os.path.join(root_folder, file)
-                    bin_files_list.append(bin_file_path)
+                file_info = dict()
+                file_info['name'] = name
+                file_info['path'] = os.path.join(root_folder, file)
+                file_info['file_type'] = 'NULL'
+                file_info['record_type'] = 'NULL'
+                file_info['frequency'] = -9999
+                file_info['longitude'] = -9999
+                file_info['latitude'] = -9999
+                file_info['datetime_start'] = datetime.now()
+                file_info['datetime_stop'] = datetime.now()
+                file_info['time_duration'] = -9999
+                file_info['error_text'] = ''
+
+                # проверка на совпадение имени файла и папки
+                if name != root_folder_name:
+                    file_info['error_text'] += \
+                        'Неверная структура папок. Не совпадают имена папки ' \
+                        'и файла - папка:{} файл: {}\n'.format(
+                            root_folder_name, name)
                 else:
-                    # прерывание расчета в случае неверной структуры папок
-                    error = 'Неверная структура папок. Не совпадают ' \
-                            'имена папки и файла - ' \
-                            'папка:{} файл: {}'.format(root_folder_name, name)
-                    return None, error
-    return bin_files_list, None
+                    if not _checking_name(name):
+                        file_info['error_text'] += \
+                            'Путь к файлу содержит недопустимые символы. ' \
+                            'Файл: {}\n'.format(name)
+
+                # получение атрибутов из bin-файла
+                bin_data = BinaryFile()
+                bin_data.path = file_info['path']
+                is_correct, error = bin_data.check_correct
+                if not is_correct:
+                    file_info['error_text'] += error
+                else:
+                    file_info['file_type'] = bin_data.type
+                    file_info['record_type'] = bin_data.record_type
+                    file_info['frequency'] = bin_data.signal_frequency
+                    file_info['longitude'] = bin_data.longitude
+                    file_info['latitude'] = bin_data.latitude
+                    file_info['datetime_start'] = bin_data.datetime_start
+                    file_info['datetime_stop'] = bin_data.datetime_stop
+                    file_info['time_duration'] = bin_data.seconds_delay / 3600
+
+                if file_info['error_text'] == '':
+                    file_info['error_text'] = 'ok'
+                files_data.append(file_info)
+    return files_data
 
 
 def export_folder_generate(root_folder, date_value, data_type, component,
@@ -81,8 +100,7 @@ def export_folder_generate(root_folder, date_value, data_type, component,
     :return: путь к папке
     """
     # Проверка введенных параметров
-    if data_type == 'GRP' and (start_time_sec is None or
-                                              end_time_sec is None):
+    if data_type == 'GRP' and (start_time_sec is None or end_time_sec is None):
         # если структура папки почасовая, то наличие начальной и конечной
         # секунд обязательно
         return None
@@ -118,4 +136,5 @@ def export_folder_generate(root_folder, date_value, data_type, component,
         return export_folder_path
     else:
         return None
+
 

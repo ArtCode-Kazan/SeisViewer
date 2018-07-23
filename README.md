@@ -118,3 +118,8 @@ GUI интерфейсом на Lazarus
 # version 0.2.3
 Добавлена опция - получение статистики по bin-файлам
 Зависимости: SeisPars 0.1.2ref, SeisCore 0.0.34sm2ref
+
+# version 0.2.4ref
+Все функции изменены с учетом пакета SeisPars vers 0.1.3ref (считывание файлов
+на основе класса BinaryFile)
+Зависимости: SeisPars 0.1.3, SeisCore 0.0.35sm2ref

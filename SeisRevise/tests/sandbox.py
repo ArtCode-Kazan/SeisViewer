@@ -1,3 +1,5 @@
-a='False'
-b=bool(a)
-print(a,b)
+import os
+
+a='cmd.exe /c python -c "{}"'.format('print(\'Hello!\')')
+print(a)
+os.popen(a)

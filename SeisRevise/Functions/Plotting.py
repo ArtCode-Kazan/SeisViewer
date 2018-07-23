@@ -10,16 +10,13 @@ from SeisCore.GeneralCalcFunctions.Spectrum import spectrum
 from SeisCore.GeneralCalcFunctions.MarmettFilter import marmett
 
 
-def plot_spectrogram(signal, frequency, window_size,
-                     noverlap_size, min_frequency_visulize,
+def plot_spectrogram(signal, frequency, min_frequency_visulize,
                      max_frequency_visualize, output_folder,
                      output_name, time_start_sec=0):
     """
     Функция для построения 2D спектрограммы в виде картинки
     :param signal: входной сигнал numpy (1D массив)
     :param frequency: частота сигнала, Гц
-    :param window_size: размер окна расчета, отсчеты
-    :param noverlap_size: размер сдвига окна, отсчеты
     :param min_frequency_visulize: минимальная частота для визуализации
     :param max_frequency_visualize: максимальная частота для визуализации
     :param output_folder: папка для экспорта рисунка
@@ -34,8 +31,6 @@ def plot_spectrogram(signal, frequency, window_size,
             time_start=time_start_sec,
             signal_data=signal,
             frequency_of_signal=frequency,
-            nfft_window_size=window_size,
-            noverlap_size=noverlap_size,
             min_frequency=min_frequency_visulize,
             max_frequency=max_frequency_visualize)
     except ValueError:

@@ -74,10 +74,6 @@ class SqliteDB:
         # модель - общие данные для обработки
         class GeneralData(BaseModel):
             work_dir = CharField(verbose_name="Рабочая директория")
-            file_type = CharField(verbose_name="Тип файлов")
-            record_type = CharField(verbose_name="Тип записи")
-            signal_frequency = IntegerField(
-                verbose_name="Частота записи сигнала")
             resample_frequency = IntegerField(
                 verbose_name="Частота ресемплирования")
             no_resample_flag = BooleanField(verbose_name="Нет ресемплирования")
@@ -117,8 +113,6 @@ class SqliteDB:
         class SpectrogramData(BaseModel):
             time_interval = FloatField(verbose_name="Интервал построения "
                                                     "спектрограмм, часы")
-            window_size = IntegerField(verbose_name="Размер окна расчета")
-            noverlap_size = IntegerField(verbose_name="Размер сдвига окна")
             f_min_visual = FloatField(verbose_name="Мин. частота визуализации")
             f_max_visual = FloatField(
                 verbose_name="Макс. частота визуализации")
@@ -188,10 +182,6 @@ class SqliteDB:
                 verbose_name="Левая граница выборки куска сигнала, с")
             right_edge = IntegerField(
                 verbose_name="Правая граница выборки куска сигнала, с")
-            window_size = IntegerField(
-                verbose_name="Размер окна расчета спектрограммы")
-            noverlap_size = IntegerField(
-                verbose_name="Сдвиг окна расчета спектрограммы")
             median_filter_parameter = IntegerField(
                 verbose_name="Параметр медианного фильтра")
             median_filter_flag = BooleanField(
@@ -286,31 +276,9 @@ class SqliteDB:
             error = 'Путь к рабочей папке не существует'
             return False, error
 
-        # проверка типа файла
-        if db_gen_data.file_type not in ['Baikal7', 'Baikal8']:
-            error = 'Неверно указан тип файла'
-            return None, error
-
-        # тип записи
-        if db_gen_data.record_type not in ['ZXY', 'XYZ']:
-            error = 'Неверно указан тип записи'
-            return False, error
-
-        # частота записи сигнала
-        signal_frequency = db_gen_data.signal_frequency
-        if signal_frequency <= 0:
-            error = 'Не задана частота записи сигнала'
-            return False, error
-
         resample_frequency = db_gen_data.resample_frequency
         if resample_frequency <= 0:
             error = 'Не задана частота ресемплирования'
-            return False, error
-
-        # проверка кратности частот ресемплирования и исходной частоты
-        if signal_frequency % resample_frequency != 0:
-            error = 'Частота ресемплирования должна быть кратной частоте ' \
-                    'сигнала'
             return False, error
 
         # проверка типа данных
@@ -348,16 +316,6 @@ class SqliteDB:
         # размер временного интервала (часы)
         if db_spec_data.time_interval <= 0:
             error = 'Не задан интервал построения спектрограмм'
-            return False, error
-
-        # размер окна расчета (отсчeты)
-        if db_spec_data.window_size <= 0:
-            error = 'Не задан размер окна построения спектрограмм'
-            return False, error
-
-        # размер сдвига окна (отсчеты)
-        if db_spec_data.noverlap_size <= 0:
-            error = 'Не задан размер сдвига окна построения спектрограмм'
             return False, error
 
         # минимальная частота для визуализации (Гц)
@@ -521,16 +479,6 @@ class SqliteDB:
         # проверка на правильность указания границ чистого участка
         if db_analysis_data.left_edge >= db_analysis_data.right_edge:
             error = 'Неверно указан диапазон выборки сигнала'
-            return False, error
-
-        # размер окна расчета спектрограммы (отсчеты)
-        if db_analysis_data.window_size <= 0:
-            error = 'Неверно указан размер окна расчета спектрограмм'
-            return False, error
-
-        # размер сдвига окна расчета спектрограммы(отсчеты)
-        if db_analysis_data.noverlap_size <= 0:
-            error = 'Неверно указан размер сдвига окна расчета спектрограмм'
             return False, error
 
         # параметр медианного фильтра

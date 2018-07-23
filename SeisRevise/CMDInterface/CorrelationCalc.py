@@ -9,11 +9,10 @@ from SeisCore.GeneralFunction.cmdLogging import print_message
 from SeisCore.GeneralCalcFunctions.AverSpectrum import average_spectrum
 from SeisCore.VisualFunctions.Colors import random_hex_colors_generators
 
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal7 as rsf7
-from SeisPars.Parsers.BinarySeisReader import read_seismic_file_baikal8 as rsf8
+from SeisPars.Refactoring.BinaryFile import BinaryFile
 
 from SeisRevise.DBase.SqliteDBase import SqliteDB
-from SeisRevise.Functions.Processing import get_bin_files
+from SeisRevise.Functions.Processing import files_info
 
 from SeisRevise.Functions.Exporting import part_of_signal_to_file
 from SeisRevise.Functions.Exporting import correlation_to_file
@@ -65,23 +64,23 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    warnings.filterwarnings("ignore")
-    parameters = sys.argv
-    # проверка числа параметров
-    if len(parameters) != 3:
-        print('Неверное число параметров')
-        return None
-    # dbase directory path
-    dbase_folder_path = parameters[1]
-    # dbase_name
-    dbase_name = parameters[2]
+    # warnings.filterwarnings("ignore")
+    # parameters = sys.argv
+    # # проверка числа параметров
+    # if len(parameters) != 3:
+    #     print('Неверное число параметров')
+    #     return None
+    # # dbase directory path
+    # dbase_folder_path = parameters[1]
+    # # dbase_name
+    # dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
 
@@ -112,12 +111,6 @@ def correlation_calc():
 
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
-    # тип файла
-    file_type = db_gen_data.file_type
-    # тип записи
-    record_type = db_gen_data.record_type
-    # частота записи сигнала
-    signal_frequency = db_gen_data.signal_frequency
     # частота ресемплирования
     resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
@@ -180,20 +173,26 @@ def correlation_calc():
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
     print_message('Анализ выбранной папки...', 0)
-    bin_files_list, error = get_bin_files(directory_path=directory_path)
+    bin_files_data = files_info(directory_path=directory_path)
 
-    # вывод ошибок построения списка путей к bin-файлам
-    if bin_files_list is None:
-        print_message(text=error, level=0)
-        return None
-
-    if len(bin_files_list) == 0:
+    if len(bin_files_data) == 0:
         print_message('Анализ папки завершен. Bin-файлов не найдено. '
                       'Обработка прервана', 0)
         return None
     else:
         print_message('Анализ папки завершен. Всего найдено {} '
-                      'файлов'.format(len(bin_files_list)), 0)
+                      'файлов'.format(len(bin_files_data)), 0)
+
+    # проверка, что у всех файлов одинаковая частота
+    signal_frequency = None
+    for file_data in bin_files_data:
+        if signal_frequency is None:
+            signal_frequency = file_data['frequency']
+        else:
+            if signal_frequency != file_data['frequency']:
+                print_message('Файлы имеют разную частоту записи. '
+                              'Обработка невозможна', 0)
+                return None
 
     # создание папки с результатами расчетов
     folder_with_result = None
@@ -204,26 +203,15 @@ def correlation_calc():
             os.mkdir(folder_with_result)
             break
 
-    # парсинг типа записи
-    x_channel_number = record_type.index('X')
-    y_channel_number = record_type.index('Y')
-    z_channel_number = record_type.index('Z')
-
     # расчет длины выборки сигнала в отсчетах
-
-    # получение номеров отсчетов для извлечения куска сигнала из файла (
-    # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
     start_moment_position = left_time_edge * signal_frequency
     end_moment_position = right_time_edge * signal_frequency - 1
-
-    # получение номеров отсчетов для извлечения куска сигнала из файла (
-    # ПОСЛЕ РЕСЕМПЛИРОВАНИЯ!!!)
-    resample_parameter = signal_frequency // resample_frequency
+    resample_parameter = resample_frequency / signal_frequency
 
     start_moment_position_resample = \
-        start_moment_position // resample_parameter
+        int(start_moment_position * resample_parameter)
     end_moment_position_resample = \
-        end_moment_position // resample_parameter
+        int(end_moment_position * resample_parameter)
 
     selection_size \
         = end_moment_position_resample - start_moment_position_resample + 1
@@ -237,38 +225,31 @@ def correlation_calc():
     # selection_signal_length - длина сигнала (по сути строки подматрицы)
     # bin_files_count - количество файлов (по сути столбцы подматрицы)
     component_count = len(components)
-    bin_files_count = len(bin_files_list)
+    bin_files_count = len(bin_files_data)
     selection_signals = np.empty(
         shape=(component_count, selection_size, bin_files_count),
         dtype=np.int32)
 
     # запуск процесса извлечения выборок сигналов
-    for file_number, file_path in enumerate(bin_files_list):
+    for file_number, file_data in enumerate(bin_files_data):
         # получение имени файла
-        bin_file_name = os.path.split(file_path)[-1].split('.')[0]
+        bin_file_name = file_data['name']
 
         print_message('Чтение файла {}...'.format(bin_file_name), 1)
 
-        # проба считать данные в указанном интервале
-        if file_type == 'Baikal7':
-            signal = rsf7(file_path=file_path,
-                          only_signal=True,
-                          resample_frequency=resample_frequency,
-                          start_moment=start_moment_position,
-                          end_moment=end_moment_position)
-        elif file_type == 'Baikal8':
-            signal = rsf8(file_path=file_path,
-                          signal_frequency=signal_frequency,
-                          only_signal=True,
-                          resample_frequency=resample_frequency,
-                          start_moment=start_moment_position,
-                          end_moment=end_moment_position)
-        else:
-            signal = None
+        # Создание объекта для чтения файла
+        bin_data = BinaryFile()
+        bin_data.path = file_data['path']
+        bin_data.resample_frequency = resample_frequency
+        bin_data.start_moment = start_moment_position
+        bin_data.end_moment = end_moment_position
+        signal = bin_data.signals
+
+        x_channel_number, y_channel_number, z_channel_number = bin_data.components_index
 
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
-        if signal is not None and signal.shape[0] == selection_size:
+        if signal.shape[0] == selection_size:
             print_message('Выборка файла успешно считана', 1)
         else:
             print_message('Выборка файла пуста или имеет неверную длину. '
@@ -369,8 +350,8 @@ def correlation_calc():
     # процесс экспорта результатов в виде файлов по каждому прибору
     print_message('Процесс экспорта результатов...', 0)
 
-    for file_number, file_path in enumerate(bin_files_list):
-        bin_file_name = os.path.split(file_path)[-1].split('.')[0]
+    for file_number, file_data in enumerate(bin_files_data):
+        bin_file_name = file_data['name']
         # создание папки для сохранения результатов обработки файла
         file_processing_result_folder = \
             os.path.join(folder_with_result, bin_file_name)
@@ -434,6 +415,10 @@ def correlation_calc():
                 png_file_name = '{}_Separate_Correlation_{}_Component_' \
                                 'Graph'.format(bin_file_name,
                                                component_label)
+                bin_files_list = list()
+                for el in bin_files_data:
+                    bin_files_list.append(el['name'])
+
                 plot_single_correlation(
                     devices=bin_files_list,
                     correlation_data=result_correlate_matrix[
@@ -447,7 +432,8 @@ def correlation_calc():
             if is_smooth_spectrum_data_to_file:
                 spectrum_to_file(
                     type='smooth', frequency=frequencies_list,
-                    amplitude=averspectrum_data[component_number, 1, :, file_number],
+                    amplitude=averspectrum_data[component_number, 1, :,
+                              file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
                 print_message('Экспорт данных сглаженного спектра по '
@@ -456,7 +442,8 @@ def correlation_calc():
             if is_no_smooth_spectrum_data_to_file:
                 spectrum_to_file(
                     type='no_smooth', frequency=frequencies_list,
-                    amplitude=averspectrum_data[component_number, 0, :, file_number],
+                    amplitude=averspectrum_data[component_number, 0, :,
+                              file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
                 print_message('Экспорт данных несглаженного спектра по '
@@ -469,9 +456,8 @@ def correlation_calc():
 
     # получение списка с именами файлов без расширения
     bin_file_name_list = list()
-    for el in bin_files_list:
-        el = os.path.split(el)[-1].split('.')[0]
-        bin_file_name_list.append(el)
+    for el in bin_files_data:
+        bin_file_name_list.append(el['name'])
 
     # сохранение наборов данных идет покомпонентно
     for component_number, component_label in enumerate(components):
