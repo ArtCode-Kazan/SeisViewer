@@ -6,7 +6,7 @@ from SeisRevise.CMDInterface.PreAnalysisCalc import pre_analysis_calc
 
 
 # create_dbase()
-file_stats()
-# spectrogram_calc()
+#file_stats()
+spectrogram_calc()
 # correlation_calc()
 # pre_analysis_calc()

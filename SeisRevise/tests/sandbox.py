@@ -1,5 +1,7 @@
-import os
+s=[1,2,3,4,4,5,6,1,3]
 
-a='cmd.exe /c python -c "{}"'.format('print(\'Hello!\')')
-print(a)
-os.popen(a)
+for el in s:
+    if el == 3:
+        del el
+
+print(s)

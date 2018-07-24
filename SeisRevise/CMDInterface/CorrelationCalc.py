@@ -64,46 +64,54 @@ def correlation_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
-    dbase_name = 'session.db'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    # warnings.filterwarnings("ignore")
-    # parameters = sys.argv
-    # # проверка числа параметров
-    # if len(parameters) != 3:
-    #     print('Неверное число параметров')
-    #     return None
-    # # dbase directory path
-    # dbase_folder_path = parameters[1]
-    # # dbase_name
-    # dbase_name = parameters[2]
+    warnings.filterwarnings("ignore")
+    parameters = sys.argv
+    # проверка числа параметров
+    if len(parameters) != 3:
+        print('Неверное число параметров')
+        return None
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_name
+    dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
-
+    print_message(text="Подключение к БД сессии...", level=0)
     dbase = SqliteDB()
     dbase.folder_path = dbase_folder_path
     dbase.dbase_name = dbase_name
+    print_message(text="Строка подключения к БД сформирована", level=0)
+
     # check dbase
+    print_message(text="Проверка данных сессии...", level=0)
     is_correct, error = dbase.check_gen_data_table
     if not is_correct:
         print(error)
         return None
+    print_message(text="Общие данные успешно проверены", level=0)
 
     is_correct, error = dbase.check_correlation_table
     if not is_correct:
         print(error)
         return None
+    print_message(text="Данные для расчета корреляций успешно проверены",
+                  level=0)
 
     # get data from dbase
+    print_message(text="Получение ORM-модели...", level=0)
     tables, error = dbase.get_orm_model
     if tables is None:
         print(error)
         return None
-
+    print_message(text='ORM-модель успешно получена', level=0)
+    print_message(text='Чтение исходных параметров сессии...', level=0)
     general_data = tables.gen_data
     correlation_data = tables.correlations
     db_gen_data = general_data.get()
@@ -169,7 +177,7 @@ def correlation_calc():
     # вывод НЕсглаженного спектра каждого прибора в виде файла
     is_no_smooth_spectrum_data_to_file = \
         db_corr_data.no_smooth_spectrum_data_flag
-    print_message('Начат процесс расчета спектров и корреляций...', 0)
+    print_message(text='Чтение исходных параметров сессии завершено', level=0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
     print_message('Анализ выбранной папки...', 0)
@@ -183,16 +191,25 @@ def correlation_calc():
         print_message('Анализ папки завершен. Всего найдено {} '
                       'файлов'.format(len(bin_files_data)), 0)
 
-    # проверка, что у всех файлов одинаковая частота
+    # проверка, что у всех файлов одинаковая частота и файлы корректны
     signal_frequency = None
     for file_data in bin_files_data:
+        if file_data['error_text'] != 'ok':
+            print_message(text='Ошибка обработки файла {}'.format(
+                            file_data['name']), level=1)
+            print_message(text=file_data['error_text'], level=1)
+            return None
+
         if signal_frequency is None:
             signal_frequency = file_data['frequency']
         else:
             if signal_frequency != file_data['frequency']:
                 print_message('Файлы имеют разную частоту записи. '
-                              'Обработка невозможна', 0)
+                              'Обработка невозможна. Проверьте статистику '
+                              'по файлам', 0)
                 return None
+
+
 
     # создание папки с результатами расчетов
     folder_with_result = None
@@ -202,6 +219,8 @@ def correlation_calc():
         if not os.path.exists(folder_with_result):
             os.mkdir(folder_with_result)
             break
+
+    print_message('Начат процесс расчета спектров и корреляций...', 0)
 
     # расчет длины выборки сигнала в отсчетах
     start_moment_position = left_time_edge * signal_frequency
@@ -216,9 +235,6 @@ def correlation_calc():
     selection_size \
         = end_moment_position_resample - start_moment_position_resample + 1
 
-    print_message('Длина выборки сигналов в отсчетах: {}'.format(
-        selection_size), 0)
-
     # создание пустого массива для хранения будущих выборок сигналов
     # получается трехмерная матрица с размерами:
     # 3 или 2 или 1 - количество анализируемых компонент
@@ -226,9 +242,14 @@ def correlation_calc():
     # bin_files_count - количество файлов (по сути столбцы подматрицы)
     component_count = len(components)
     bin_files_count = len(bin_files_data)
-    selection_signals = np.empty(
-        shape=(component_count, selection_size, bin_files_count),
-        dtype=np.int32)
+    try:
+        selection_signals = np.empty(
+            shape=(component_count, selection_size, bin_files_count),
+            dtype=np.int32)
+    except MemoryError:
+        print_message('Недостаточно памяти для извлечения выборок сигнала. '
+                      'Решение: уменьшить количество файлов для обработки', 0)
+        return None
 
     # запуск процесса извлечения выборок сигналов
     for file_number, file_data in enumerate(bin_files_data):
@@ -244,14 +265,13 @@ def correlation_calc():
         bin_data.start_moment = start_moment_position
         bin_data.end_moment = end_moment_position
         signal = bin_data.signals
-
-        x_channel_number, y_channel_number, z_channel_number = bin_data.components_index
+        # получение индексов каналов
+        x_channel_number, y_channel_number, z_channel_number = \
+            bin_data.components_index
 
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
-        if signal.shape[0] == selection_size:
-            print_message('Выборка файла успешно считана', 1)
-        else:
+        if signal is None:
             print_message('Выборка файла пуста или имеет неверную длину. '
                           'Обработка прервана', 1)
             return None
@@ -290,10 +310,14 @@ def correlation_calc():
     frequencies_list = rfftfreq(window_size, 1. / resample_frequency)
     # размер частотного ряда
     frequency_count = frequencies_list.shape[0]
-
-    averspectrum_data = np.empty(
-        shape=(component_count, 2, frequency_count, bin_files_count),
-        dtype=np.float32)
+    try:
+        averspectrum_data = np.empty(
+            shape=(component_count, 2, frequency_count, bin_files_count),
+            dtype=np.float32)
+    except MemoryError:
+        print_message('Недостаточно памяти для сохранения '
+                      'данных осредненных спектров', 0)
+        return None
 
     # расчет осредненных спектров с параметрами сглаживания и без
     # по каждой компоненте
@@ -433,7 +457,7 @@ def correlation_calc():
                 spectrum_to_file(
                     type='smooth', frequency=frequencies_list,
                     amplitude=averspectrum_data[component_number, 1, :,
-                              file_number],
+                                                file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
                 print_message('Экспорт данных сглаженного спектра по '
@@ -443,7 +467,7 @@ def correlation_calc():
                 spectrum_to_file(
                     type='no_smooth', frequency=frequencies_list,
                     amplitude=averspectrum_data[component_number, 0, :,
-                              file_number],
+                                                file_number],
                     output_folder=file_processing_result_folder,
                     output_name=bin_file_name)
                 print_message('Экспорт данных несглаженного спектра по '

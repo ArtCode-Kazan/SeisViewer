@@ -40,26 +40,33 @@ def pre_analysis_calc():
     dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
-
+    print_message(text="Подключение к БД сессии...", level=0)
     dbase = SqliteDB()
     dbase.folder_path = dbase_folder_path
     dbase.dbase_name = dbase_name
+    print_message(text="Строка подключения к БД сформирована", level=0)
+
     # check dbase
     is_correct, error = dbase.check_gen_data_table
     if not is_correct:
         print(error)
         return None
+    print_message(text="Общие данные успешно проверены", level=0)
 
     is_correct, error = dbase.check_pre_analysis_table
     if not is_correct:
         print(error)
         return None
+    print_message(text="Данные для проведения преданализа успешно проверены",
+                  level=0)
 
     # get data from dbase
     tables, error = dbase.get_orm_model
     if tables is None:
         print(error)
         return None
+    print_message(text='ORM-модель успешно получена', level=0)
+    print_message(text='Чтение исходных параметров сессии...', level=0)
     general_data = tables.gen_data
     pre_analysis_data = tables.pre_analysis
     db_gen_data = general_data.get()
@@ -107,8 +114,7 @@ def pre_analysis_calc():
     is_spectors = db_panalysis_data.separated_spectrums_flag
     # вывод 2D спектрограммы
     is_spectrogram = db_panalysis_data.spectrogram_flag
-
-    print_message('Начат процесс предварительного анализа...', 0)
+    print_message(text='Чтение исходных параметров сессии завершено', level=0)
 
     # анализ папки с данными сверки - получение полных путей к bin-файлам
     print_message('Анализ выбранной папки...', 0)
@@ -123,15 +129,22 @@ def pre_analysis_calc():
         print_message('Анализ папки завершен. Всего найдено {} '
                       'файлов'.format(len(bin_files_data)), 0)
 
-    # проверка, что у всех файлов одинаковая частота
+    # проверка, что у всех файлов одинаковая частота и файлы корректны
     signal_frequency = None
     for file_data in bin_files_data:
+        if file_data['error_text'] != 'ok':
+            print_message(text='Ошибка обработки файла {}'.format(
+                file_data['name']), level=1)
+            print_message(text=file_data['error_text'], level=1)
+            return None
+
         if signal_frequency is None:
             signal_frequency = file_data['frequency']
         else:
             if signal_frequency != file_data['frequency']:
                 print_message('Файлы имеют разную частоту записи. '
-                              'Обработка невозможна', 0)
+                              'Обработка невозможна. Проверьте статистику '
+                              'по файлам', 0)
                 return None
 
     # создание папки с результатами расчетов
@@ -142,9 +155,8 @@ def pre_analysis_calc():
         if not os.path.exists(folder_with_result):
             os.mkdir(folder_with_result)
             break
-
+    print_message('Начат процесс предварительного анализа...', 0)
     # расчет длины выборки сигнала в отсчетах
-
     # получение номеров отсчетов для извлечения куска сигнала из файла (
     # БЕЗ РЕСЕМПЛИРОВАНИЯ!!!)
     start_moment_position = left_time_edge * signal_frequency
@@ -161,9 +173,6 @@ def pre_analysis_calc():
 
     selection_size \
         = end_moment_position_resample - start_moment_position_resample + 1
-
-    print_message('Длина выборки сигналов в отсчетах: {}'.format(
-        selection_size), 0)
 
     # запуск процесса извлечения выборок сигналов
     for file_number, file_data in enumerate(bin_files_data):
@@ -184,13 +193,12 @@ def pre_analysis_calc():
         signal = bin_data.signals
         # проверка, что сигнал извлечен и его длина равна требуемой
         # длине куска
-        if signal.shape[0] != selection_size:
-            print_message(text='Выборка файла не соответствует '
-                               'требуемому размеру. Обработка '
-                               'файла пропущена', level=2)
+        # проверка, что сигнал извлечен и его длина равна требуемой
+        # длине куска
+        if signal is None:
+            print_message('Выборка файла пуста или имеет неверную длину. '
+                          'Обработка прервана', 1)
             return None
-        else:
-            print_message(text='Выборка успешно считана', level=2)
 
         # если сигнал не пуст, второй цикл продолжает работу
 

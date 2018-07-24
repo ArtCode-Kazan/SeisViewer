@@ -136,18 +136,19 @@ def spectrogram_calc():
                 print_message(text=file_info['error_text'], level=1)
                 print_message(text='Обработка файла пропущена', level=1)
                 continue
-            # получение имени файла
+            # получение имени файла и пути
+            bin_file_name = file_info['name']
             file_path = file_info['path']
-            bin_file_name = os.path.split(file_path)[-1].split('.')[0]
+
             print_message(text='Обработка файла {}...'.format(bin_file_name),
                           level=1)
-            # создание объекта Bin-файла
+            # создание объекта Bin-файла для чтения
             bin_data = BinaryFile()
             bin_data.path = file_path
             bin_data.resample_frequency = resample_frequency
-
+            # получение частоты записи сигнала
             signal_frequency = bin_data.signal_frequency
-            resample_parameter = bin_data.resample_parameter
+            # получение индексов каналов записи
             x_channel_number, y_channel_number, z_channel_number = \
                 bin_data.components_index
             # получение количества целых интервалов для построения спектрограмм
@@ -158,9 +159,6 @@ def spectrogram_calc():
                           level=1)
             # размер извлекаемого куска сигнала БЕЗ РЕСЕМПЛИРОВАНИЯ!!!
             signal_part_size = int(time_interval * 3600 * signal_frequency)
-            # размер извлекаемого куска сигнала ПОСЛЕ РЕСЕМПЛИРОВАНИЯ!!!
-            resample_signal_part_size = \
-                int(signal_part_size*resample_parameter)
             # третий цикл - по интервалам времени
             for interval_number in range(interval_amount):
                 print_message(
@@ -184,16 +182,12 @@ def spectrogram_calc():
                 signal_data = bin_data.signals
                 # проверка размера извлеченного куска сигнала
                 if signal_data is None:
-                    print_message(text='Выборка файла пуста. Обработка '
-                                       'файла пропущена', level=2)
-                    continue
-                elif signal_data.shape[0] != resample_signal_part_size:
-                    print_message(text='Выборка файла не соответствует '
-                                       'требуемому размеру. Обработка '
-                                       'файла пропущена', level=2)
+                    print_message(text='Выборка файла пуста или не '
+                                       'соотвествует требуемому размеру. '
+                                       'Обработка файла пропущена', level=3)
                     continue
                 else:
-                    print_message(text='Выборка успешно считана', level=2)
+                    print_message(text='Выборка успешно считана', level=3)
 
                 # четвертый цикл - по компонентам
                 for component in components:
@@ -221,7 +215,7 @@ def spectrogram_calc():
                     if export_folder is None:
                         print_message(
                             text='Ошибка создания каталога экспорта. '
-                                 'Обработка прервана', level=3)
+                                 'Обработка прервана', level=4)
                         return None
 
                     # определение индекса канала компоненты исходя из текущей
@@ -234,7 +228,7 @@ def spectrogram_calc():
                         channel_number = z_channel_number
                     else:
                         print_message(text='Ошибка чтения номера компоненты. '
-                                           'Обработка прервана', level=3)
+                                           'Обработка прервана', level=4)
                         return None
 
                     # построение спектрограммы
@@ -257,13 +251,10 @@ def spectrogram_calc():
                                  'Обработка прервана'.format(
                                     bin_file_name, component, start_second,
                                     end_second),
-                            level=3)
+                            level=4)
                         return None
                     else:
-                        print_message(
-                            text='Спектрограмма (файл {}, компонента {}) '
-                                 'построена'.format(bin_file_name, component),
-                            level=3)
+                        print_message(text='Спектрограмма построена', level=4)
                     # сохранение графика участка анализируемого сигнала в
                     # случае, если это данные МСИ
                     if data_type == 'MSI':
@@ -278,10 +269,7 @@ def spectrogram_calc():
                                     output_folder=export_folder,
                                     output_name=output_file_name)
                         print_message(
-                            text='График участка сигнала (файл {}, '
-                                 'компонента {}) '
-                                 'построен'.format(bin_file_name, component),
-                            level=3)
+                            text='График участка сигнала построен', level=4)
 
             print_message(text='Файл {} обработан'.format(bin_file_name),
                           level=1)
