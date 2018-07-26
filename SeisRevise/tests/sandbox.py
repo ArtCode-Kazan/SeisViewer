@@ -1,7 +1,10 @@
-s=[1,2,3,4,4,5,6,1,3]
+from SeisRevise.Functions.Exporting import energy_to_file
 
-for el in s:
-    if el == 3:
-        del el
 
-print(s)
+
+energy_to_file(components=('X','Z'),
+               points=(('1',3,4), ('2',5,6), ('5',8,9)),
+               intervals=('t1','t2'),
+               data_matrix='fah',
+               output_folder=r'D:\temp',
+               output_name='qwerty')

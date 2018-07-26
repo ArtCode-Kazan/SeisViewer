@@ -21,23 +21,23 @@ def spectrogram_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
-    # dbase_name = 'session.db'
+    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    warnings.filterwarnings("ignore")
-    parameters = sys.argv
-    # проверка числа параметров
-    if len(parameters) != 3:
-        print('Неверное число параметров')
-        return None
-    # dbase directory path
-    dbase_folder_path = parameters[1]
-    # dbase_name
-    dbase_name = parameters[2]
+    # warnings.filterwarnings("ignore")
+    # parameters = sys.argv
+    # # проверка числа параметров
+    # if len(parameters) != 3:
+    #     print('Неверное число параметров')
+    #     return None
+    # # dbase directory path
+    # dbase_folder_path = parameters[1]
+    # # dbase_name
+    # dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
     print_message(text="Подключение к БД сессии...", level=0)
@@ -77,7 +77,10 @@ def spectrogram_calc():
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
     # частота ресемплирования
-    resample_frequency = db_gen_data.resample_frequency
+    if not db_gen_data.no_resample_flag:
+        resample_frequency = None
+    else:
+        resample_frequency = db_gen_data.resample_frequency
     # получение типа данных
     data_type = db_gen_data.data_type
     # компоненты для анализа
@@ -145,15 +148,19 @@ def spectrogram_calc():
             # создание объекта Bin-файла для чтения
             bin_data = BinaryFile()
             bin_data.path = file_path
-            bin_data.resample_frequency = resample_frequency
             # получение частоты записи сигнала
             signal_frequency = bin_data.signal_frequency
+            # присваивание частоты ресемплирования
+            if resample_frequency is None:
+                resample_frequency = signal_frequency
+            bin_data.resample_frequency = resample_frequency
+
             # получение индексов каналов записи
             x_channel_number, y_channel_number, z_channel_number = \
                 bin_data.components_index
             # получение количества целых интервалов для построения спектрограмм
             time_duration_sec = bin_data.seconds_delay
-            interval_amount = int(time_duration_sec/(3600*time_interval))
+            interval_amount = int(time_duration_sec/(3600*time_interval))+1
             print_message(text='Количество интервалов '
                                'для обработки: {}'.format(interval_amount),
                           level=1)

@@ -1,21 +1,23 @@
 import warnings
 import sys
+import os
 
 from SeisCore.GeneralFunction.cmdLogging import print_message
 
-from SeisRevise.Functions.Processing import files_info
 from SeisRevise.DBase.SqliteDBase import SqliteDB
+from SeisRevise.Functions.Processing import read_coords_file
 
 
-def file_stats():
+def join_coords():
     """
-    Функция для получения информации о bin-файлах в папке
-    :return: None
+    Функция для присоединения координат точек из внешнего файла
+    :return:
     """
     # -----------------------------------------------------------------------
     # блок отладки
     # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
     # dbase_name = 'session.db'
+    # coords_file_path = r'D:\AppsBuilding\TestingData\BinData\coords.dat'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
@@ -24,13 +26,15 @@ def file_stats():
     warnings.filterwarnings("ignore")
     parameters = sys.argv
     # проверка числа параметров
-    if len(parameters) != 3:
+    if len(parameters) != 4:
         print('Неверное число параметров')
         return None
     # dbase directory path
     dbase_folder_path = parameters[1]
     # dbase_name
     dbase_name = parameters[2]
+    # file with coordinates
+    coords_file_path = parameters[3]
     # конец блока релиза
     # -----------------------------------------------------------------------
     print_message(text="Подключение к БД сессии...", level=0)
@@ -55,20 +59,34 @@ def file_stats():
         return None
     print_message(text='ORM-модель успешно получена', level=0)
 
-    # получение информации по файлам в рабочей папке
-    general_data = tables.gen_data
+    # получение информации по файлам
     statistic_data = tables.file_stats
-    db_gen_data = general_data.get()
 
-    # удаление предыдущих данных
-    statistic_data.delete().execute()
+    # проверка количества записей в БД
+    record_amount = statistic_data.select().count()
+    if record_amount == 0:
+        print_message(text='Отсутсвуют данные ORM для присвоения координат',
+                      level=0)
+        return None
 
-    # путь к рабочей папке
-    directory_path = db_gen_data.work_dir
-    print_message(text='Получение информации о файлах...', level=0)
-    files_data = files_info(directory_path=directory_path)
-    # запись данных в таблицу БД сессии
-    for data_dict in files_data:
-        statistic_data.create(**data_dict)
-    print_message(text='Информация о файлах получена. Всего найдено {} '
-                       'файлов'.format(len(files_data)), level=0)
+    # чтение внешнего файла с координатами
+    print_message(text='Начат процесс присоединения файла координат...',
+                  level=0)
+    if not os.path.exists(coords_file_path):
+        print_message(text='Внешний файл координат не найден', level=0)
+        return None
+    outfile_data = read_coords_file(file_path=coords_file_path)
+    if outfile_data is None:
+        print_message(text='Ошибка чтения внешнего файла', level=0)
+        return None
+
+    # Присвоение координат для точек из БД сессии
+    for file_data in statistic_data.select():
+        point_name = file_data.point
+        for point, x, y in outfile_data:
+            if point == point_name:
+                file_data.x_coord = x
+                file_data.y_coord = y
+                file_data.save()
+                break
+    print_message(text='Присоединение координат успешно завершено', level=0)

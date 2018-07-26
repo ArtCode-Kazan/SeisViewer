@@ -88,6 +88,9 @@ class SqliteDB:
 
         # модель - метаданные bin-файлов
         class FileStatistics(BaseModel):
+            point = CharField(verbose_name="Номер точки")
+            x_coord = FloatField(verbose_name="x-координата")
+            y_coord = FloatField(verbose_name="y-координата")
             name = CharField(verbose_name="Имя файла (без расширения)")
             path = CharField(verbose_name="Путь к файлу")
             file_type = CharField(verbose_name="Тип файла")
@@ -208,12 +211,29 @@ class SqliteDB:
             class Meta:
                 db_table = "PreAnalysisData"
 
+        class EnergyCalcData(BaseModel):
+            left_edge = FloatField(verbose_name="Левая граница времени (час)")
+            right_edge = FloatField(
+                verbose_name="Правая граница времени (час)")
+            interval = FloatField(
+                verbose_name="Размер интервала расчета (час)")
+            null_value = IntegerField(
+                verbose_name="Нулевое значение")
+            f_min_calc = FloatField(
+                verbose_name="Минимальная частота расчета")
+            f_max_calc = FloatField(
+                verbose_name="Максимальная частота расчета")
+            # мета-класс модели
+            class Meta:
+                db_table = "EnergyCalcData"
+
         class Tables:
             gen_data = GeneralData
             file_stats = FileStatistics
             spectrograms = SpectrogramData
             correlations = CorrelationData
             pre_analysis = PreAnalysisData
+            energy_calc = EnergyCalcData
 
         return Tables(), None
 
@@ -243,7 +263,8 @@ class SqliteDB:
                 return False, errors
             tabs_list = (tables.gen_data, tables.file_stats,
                          tables.spectrograms,
-                         tables.correlations, tables.pre_analysis)
+                         tables.correlations, tables.pre_analysis,
+                         tables.energy_calc)
             sqlite_db.connect()
             sqlite_db.create_tables(tabs_list, safe=True)
             return True, None
@@ -292,6 +313,35 @@ class SqliteDB:
                 db_gen_data.z_component_flag):
             error = 'Не выбрано ни одной компоненты для анализа'
             return False, error
+        return True, None
+
+    @property
+    def check_file_statistic_table(self):
+        tables, errors = self.get_orm_model
+        if tables is None:
+            return False, errors
+
+        file_stats_data = tables.file_stats
+        if file_stats_data.select().count() == 0:
+            error = 'Таблица FileStatistics пуста'
+            return False, error
+
+        try:
+            db_file_stats_data = file_stats_data.get()
+        except ValueError:
+            error = 'Ошибка чтения таблицы FileStatistics'
+            return False, error
+
+        for file_data in file_stats_data.select():
+            point_name = file_data.point
+            x_coord = file_data.x_coord
+            y_coord = file_data.y_coord
+            error_text = file_data.error_text
+            if point_name == 'NULL' or x_coord == -9999 or y_coord == -9999 \
+                    or error_text != 'ok':
+                error = 'Плохая статистика по файлам. Проверье ' \
+                            'статистику еще раз'
+                return False, error
         return True, None
 
     @property
@@ -522,9 +572,68 @@ class SqliteDB:
         checking = db_analysis_data.select_signal_to_file_flag or \
             db_analysis_data.select_signal_to_graph_flag or \
             db_analysis_data.separated_spectrums_flag or \
-            db_analysis_data.spectrogram_flag
+            db_analysis_data.spectrogram_flag or \
+            db_analysis_data.energy_calc_flag
         if not checking:
             error = 'Не выбран ни один из способов экспорта результатов ' \
                     'данных по расчетам предварительного анализа'
+            return False, error
+        return True, None
+
+    @property
+    def check_energy_calc_table(self):
+        tables, errors = self.get_orm_model
+        if tables is None:
+            return False, errors
+        energy_calc_data = tables.energy_calc
+        # check record count
+        if energy_calc_data.select().count() != 1:
+            error = 'Таблица EnergyCalcData пуста или имеет неверное ' \
+                    'количество записей'
+            return False, error
+        try:
+            db_energy_calc_data = energy_calc_data.get()
+        except ValueError:
+            error = 'Ошибка чтения таблицы EnergyCalcData'
+            return False, error
+
+        # минимальный час расчета энергий
+        if db_energy_calc_data.left_edge < 0:
+            error = 'Неверно указана левая граница для расчета энергий'
+            return False, error
+
+        # максимальный час расчета энергий
+        if db_energy_calc_data.right_edge <= 0:
+            error = 'Неверно указана правая граница для расчета энергий'
+            return False, error
+
+        # проверка пределов для расчета энергии
+        if db_energy_calc_data.left_edge >= db_energy_calc_data.right_edge:
+            error = 'Неверно указан пределы для расчета энергии'
+            return False, error
+
+        # проверка интервала расчета энергии
+        if db_energy_calc_data.interval <= 0:
+            error = 'Неверно указан пределы для расчета энергии'
+            return False, error
+
+        # проверка нулевого значения по умолчанию
+        if db_energy_calc_data.null_value is None:
+            error = 'Неверно указан нулевое значение по умолчанию'
+            return False, error
+
+        # минимальная частота для расчетов (Гц)
+        if db_energy_calc_data.f_min_calc < 0:
+            error = 'Не указана минимальная частота для расчета энергий'
+            return False, error
+
+        # максимальная частота для расчетов (Гц)
+        if db_energy_calc_data.f_max_calc <= 0:
+            error = 'Не указана максимальная частота для расчета энергий'
+            return False, error
+
+        # проверка пределов частот для расчета
+        if db_energy_calc_data.f_max_calc <= db_energy_calc_data.f_min_calc:
+            error = 'Неверно указаны пределы частот для расчета энергий'
             return False, error
         return True, None

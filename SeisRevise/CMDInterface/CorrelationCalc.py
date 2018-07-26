@@ -120,7 +120,10 @@ def correlation_calc():
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
     # частота ресемплирования
-    resample_frequency = db_gen_data.resample_frequency
+    if not db_gen_data.no_resample_flag:
+        resample_frequency = None
+    else:
+        resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
     components = list()
     if db_gen_data.x_component_flag:
@@ -209,7 +212,9 @@ def correlation_calc():
                               'по файлам', 0)
                 return None
 
-
+    # переопределение resample_frequency
+    if resample_frequency is None:
+        resample_frequency = signal_frequency
 
     # создание папки с результатами расчетов
     folder_with_result = None

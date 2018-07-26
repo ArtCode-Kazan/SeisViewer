@@ -75,7 +75,10 @@ def pre_analysis_calc():
     # путь к рабочей папке
     directory_path = db_gen_data.work_dir
     # частота ресемплирования
-    resample_frequency = db_gen_data.resample_frequency
+    if not db_gen_data.no_resample_flag:
+        resample_frequency = None
+    else:
+        resample_frequency = db_gen_data.resample_frequency
     # компоненты для анализа
     components = list()
     if db_gen_data.x_component_flag:
@@ -147,6 +150,10 @@ def pre_analysis_calc():
                               'по файлам', 0)
                 return None
 
+    # переопределение resample_frequency
+    if resample_frequency is None:
+        resample_frequency = signal_frequency
+
     # создание папки с результатами расчетов
     folder_with_result = None
     for i in range(99):
@@ -162,18 +169,6 @@ def pre_analysis_calc():
     start_moment_position = left_time_edge * signal_frequency
     end_moment_position = right_time_edge * signal_frequency - 1
 
-    # получение номеров отсчетов для извлечения куска сигнала из файла (
-    # ПОСЛЕ РЕСЕМПЛИРОВАНИЯ!!!)
-    resample_parameter = resample_frequency / signal_frequency
-
-    start_moment_position_resample = \
-        int(start_moment_position * resample_parameter)
-    end_moment_position_resample = \
-        int(end_moment_position * resample_parameter)
-
-    selection_size \
-        = end_moment_position_resample - start_moment_position_resample + 1
-
     # запуск процесса извлечения выборок сигналов
     for file_number, file_data in enumerate(bin_files_data):
         # получение имени файла
@@ -188,7 +183,8 @@ def pre_analysis_calc():
         bin_data.start_moment = start_moment_position
         bin_data.end_moment = end_moment_position
 
-        x_channel_number, y_channel_number, z_channel_number = bin_data.components_index
+        x_channel_number, y_channel_number, z_channel_number = \
+            bin_data.components_index
 
         signal = bin_data.signals
         # проверка, что сигнал извлечен и его длина равна требуемой

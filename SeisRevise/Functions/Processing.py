@@ -1,7 +1,10 @@
 import os
 from datetime import datetime
+import re
+import numpy as np
 
-from SeisCore.GeneralFunction.GeneralFunctions import checking_name as _checking_name
+from SeisCore.GeneralFunction.GeneralFunctions import \
+    checking_name as _checking_name
 
 from SeisPars.Refactoring.BinaryFile import BinaryFile
 
@@ -26,6 +29,11 @@ def get_dates(directory_path):
 
 
 def files_info(directory_path):
+    """
+    Функция для получения информации о файлах, находящихся в указанной папке
+    :param directory_path: папка для анализа
+    :return:
+    """
     folder_struct = os.walk(directory_path)
     files_data = list()
     for root_folder, folders, files in folder_struct:
@@ -39,6 +47,9 @@ def files_info(directory_path):
                 continue
             if extension in ['00', 'xx']:
                 file_info = dict()
+                file_info['point'] = 'NULL'
+                file_info['x_coord'] = -9999
+                file_info['y_coord'] = -9999
                 file_info['name'] = name
                 file_info['path'] = os.path.join(root_folder, file)
                 file_info['file_type'] = 'NULL'
@@ -62,6 +73,9 @@ def files_info(directory_path):
                         file_info['error_text'] += \
                             'Путь к файлу содержит недопустимые символы. ' \
                             'Файл: {}\n'.format(name)
+
+                # получение имени точки из имени файла
+                file_info['point'] = re.findall('[0-9]+[A-Z]*', name)[0]
 
                 # получение атрибутов из bin-файла
                 bin_data = BinaryFile()
@@ -138,3 +152,30 @@ def export_folder_generate(root_folder, date_value, data_type, component,
         return None
 
 
+def read_coords_file(file_path):
+    """
+    Функция для чтения внешнего файла координат
+    :param file_path: путь к dat-файлу
+    :return: None
+    """
+    f = open(file_path, 'r')
+    result = list()
+    i = 0
+    for line in f:
+        i += 1
+        if i > 1:
+            line = line.strip()
+            t = line.split('\t')
+            if len(t) != 3:
+                f.close()
+                return None
+            point_name = t[0]
+            try:
+                x_coord = float(t[1])
+                y_coord = float(t[2])
+            except ValueError:
+                f.close()
+                return None
+            result.append((point_name, x_coord, y_coord))
+    f.close()
+    return result
