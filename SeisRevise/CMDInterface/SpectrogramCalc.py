@@ -21,23 +21,23 @@ def spectrogram_calc():
     """
     # -----------------------------------------------------------------------
     # блок отладки
-    dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
-    dbase_name = 'session.db'
+    # dbase_folder_path = r'D:\AppsBuilding\Packages\GUISeisRevise'
+    # dbase_name = 'session.db'
     # конец блока отладки
     # -----------------------------------------------------------------------
 
     # -----------------------------------------------------------------------
     # блок релиза
-    # warnings.filterwarnings("ignore")
-    # parameters = sys.argv
-    # # проверка числа параметров
-    # if len(parameters) != 3:
-    #     print('Неверное число параметров')
-    #     return None
-    # # dbase directory path
-    # dbase_folder_path = parameters[1]
-    # # dbase_name
-    # dbase_name = parameters[2]
+    warnings.filterwarnings("ignore")
+    parameters = sys.argv
+    # проверка числа параметров
+    if len(parameters) != 3:
+        print('Неверное число параметров')
+        return None
+    # dbase directory path
+    dbase_folder_path = parameters[1]
+    # dbase_name
+    dbase_name = parameters[2]
     # конец блока релиза
     # -----------------------------------------------------------------------
     print_message(text="Подключение к БД сессии...", level=0)
@@ -159,7 +159,7 @@ def spectrogram_calc():
             x_channel_number, y_channel_number, z_channel_number = \
                 bin_data.components_index
             # получение количества целых интервалов для построения спектрограмм
-            time_duration_sec = bin_data.seconds_delay
+            time_duration_sec = bin_data.seconds_duration
             interval_amount = int(time_duration_sec/(3600*time_interval))+1
             print_message(text='Количество интервалов '
                                'для обработки: {}'.format(interval_amount),

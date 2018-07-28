@@ -47,13 +47,15 @@ def correlation_to_file(devices, correlation_matrix, output_folder,
     f.close()
 
 
-def spectrum_to_file(frequency, amplitude, type, output_folder, output_name):
+def spectrum_to_file(frequency, amplitude, type, component, output_folder,
+                     output_name):
     """
     Функция для экспорта данных сглаженного и НЕсглаженного спектров в виде
     файла
     :param frequency: массив с набором частот
     :param amplitude: массив с набором амплитуд
     :param type: тип спектра (сглаженный или несглаженный)
+    :param component: название компоненты
     :param output_folder: папка экспорта
     :param output_name: имя файла (БЕЗ РАСШИЕРЕНИЯ!)
     :return: None
@@ -64,7 +66,8 @@ def spectrum_to_file(frequency, amplitude, type, output_folder, output_name):
         extension = '.sc'
     else:
         extension = '.dat'
-    export_path = os.path.join(output_folder, output_name + extension)
+    file_name='{}_{}_Component'.format(output_name, component)
+    export_path = os.path.join(output_folder, file_name + extension)
 
     temp_array = np.empty(shape=(frequency.shape[0], 2), dtype=float)
     temp_array[:, 0] = frequency
@@ -86,7 +89,7 @@ def energy_to_file(components, points, intervals, data_matrix, output_folder,
     """
     export_path = os.path.join(output_folder, output_name + '.ods')
 
-    doc = newdoc(doctype='ods',filename=export_path)
+    doc = newdoc(doctype='ods', filename=export_path)
 
     for component_index, component_name in enumerate(components):
         # Создание нового листа

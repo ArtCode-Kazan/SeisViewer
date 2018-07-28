@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 import re
-import numpy as np
 
 from SeisCore.GeneralFunction.GeneralFunctions import \
     checking_name as _checking_name
@@ -91,7 +90,8 @@ def files_info(directory_path):
                     file_info['latitude'] = bin_data.latitude
                     file_info['datetime_start'] = bin_data.datetime_start
                     file_info['datetime_stop'] = bin_data.datetime_stop
-                    file_info['time_duration'] = bin_data.seconds_delay / 3600
+                    file_info['time_duration'] = bin_data.seconds_duration / \
+                                                 3600
 
                 if file_info['error_text'] == '':
                     file_info['error_text'] = 'ok'

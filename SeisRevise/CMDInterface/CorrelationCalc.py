@@ -460,7 +460,9 @@ def correlation_calc():
             # сохранение данных сглаженного спектра в файл
             if is_smooth_spectrum_data_to_file:
                 spectrum_to_file(
-                    type='smooth', frequency=frequencies_list,
+                    type='smooth',
+                    component=component_label,
+                    frequency=frequencies_list,
                     amplitude=averspectrum_data[component_number, 1, :,
                                                 file_number],
                     output_folder=file_processing_result_folder,
@@ -470,7 +472,9 @@ def correlation_calc():
             # сохранение данных НЕсглаженного спектра в файл
             if is_no_smooth_spectrum_data_to_file:
                 spectrum_to_file(
-                    type='no_smooth', frequency=frequencies_list,
+                    type='no_smooth',
+                    component=component_label,
+                    frequency=frequencies_list,
                     amplitude=averspectrum_data[component_number, 0, :,
                                                 file_number],
                     output_folder=file_processing_result_folder,
