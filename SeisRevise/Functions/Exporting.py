@@ -1,6 +1,30 @@
 import numpy as np
 import os
 from ezodf import newdoc, Sheet
+import struct
+
+
+def _binary_write(bin_data, x_type, values):
+    """
+    Функция для чтения бинарной строки (любого типа)
+    :param bin_data: открытый BIN-файл filedata = open(file_00, 'rb')
+    :param x_type: тип данных
+    :param values: значение для записи
+    """
+    if x_type not in ['s', 'H', 'I', 'd', 'Q']:
+        return None
+
+    count = len(values)
+    if x_type == 's':
+        fmt = str(count) + x_type
+        values = values.encode('utf-8')
+        record = struct.pack(fmt, values)
+        bin_data.write(record)
+    else:
+        fmt = '1' + x_type
+        for index in range(count):
+            record = struct.pack(fmt, values[index])
+            bin_data.write(record)
 
 
 def part_of_signal_to_file(signal, output_folder,
@@ -66,7 +90,7 @@ def spectrum_to_file(frequency, amplitude, type, component, output_folder,
         extension = '.sc'
     else:
         extension = '.dat'
-    file_name='{}_{}_Component'.format(output_name, component)
+    file_name = '{}_{}_Component'.format(output_name, component)
     export_path = os.path.join(output_folder, file_name + extension)
 
     temp_array = np.empty(shape=(frequency.shape[0], 2), dtype=float)
@@ -95,18 +119,18 @@ def energy_to_file(components, points, intervals, data_matrix, output_folder,
         # Создание нового листа
         current_sheet = Sheet(name='Component_{}'.format(component_name))
         # установка количества строк и столбцов
-        current_sheet.append_rows(len(points)+1)
-        current_sheet.append_columns(len(intervals)+3)
+        current_sheet.append_rows(len(points) + 1)
+        current_sheet.append_columns(len(intervals) + 3)
         # заполнение заголовков столбцов
         current_sheet[0, 0].set_value('Point_name')
         current_sheet[0, 1].set_value('x')
         current_sheet[0, 2].set_value('y')
         for interval_index, interval_name in enumerate(intervals):
-            current_sheet[0,3+interval_index].set_value(interval_name)
+            current_sheet[0, 3 + interval_index].set_value(interval_name)
 
         # заполнение номеров точек и координат
         for data_index, data_value in enumerate(points):
-            point_name,x,y = data_value
+            point_name, x, y = data_value
             current_sheet[1 + data_index, 0].set_value(point_name)
             current_sheet[1 + data_index, 1].set_value(x)
             current_sheet[1 + data_index, 2].set_value(y)
@@ -114,7 +138,8 @@ def energy_to_file(components, points, intervals, data_matrix, output_folder,
         # заполнение значений энергии
         for row_i in range(len(points)):
             for col_j in range(len(intervals)):
-                current_sheet[1 + row_i, 3 + col_j].set_value(data_matrix[component_index,row_i,col_j])
+                current_sheet[1 + row_i, 3 + col_j].set_value(
+                    data_matrix[component_index, row_i, col_j])
 
         # добавление листа в книгу
         doc.sheets.append(current_sheet)
