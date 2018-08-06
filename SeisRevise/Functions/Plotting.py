@@ -66,7 +66,6 @@ def plot_spectrogram(signal, frequency, min_frequency_visulize,
     y_label = u'Частота, Гц'
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
-
     # подпись графика
     axes.set_title(output_name, fontsize=10)
     # сохранение графика в png
@@ -115,11 +114,18 @@ def plot_signal(time_start_sec, frequency, signal, label, output_folder,
     # подготовка осей
     axes = fig.add_subplot(111)
 
+    # Нормировка амплитуды сигнала на 1000 для удобства отображения
+    norm_coeff = 1000
+    signal = signal/1000
+
     # пределы по осям
     # ось x - время в секундах
     t_min = time_start_sec
     t_max = time_start_sec+(signal.shape[0] - 1) / frequency
-    axes.set_xlim(t_min-5, t_max+5)
+    axes.set_xlim(t_min, t_max)
+    # специальная подпись оси с интервалом 300 секунд
+    axes.set_xticks(np.arange(t_min, t_max + 1, 300))
+
     # ось y - амплитуда сигнала
     amp_min = np.min(signal)
     amp_max = np.max(signal)
@@ -132,7 +138,7 @@ def plot_signal(time_start_sec, frequency, signal, label, output_folder,
 
     # заголовки осей
     x_label = u'Время, с'
-    y_label = u'Амплитуда, усл. ед'
+    y_label = u'Амплитуда, усл. ед, x{}'.format(norm_coeff)
     axes.set_ylabel(y_label)
     axes.set_xlabel(x_label)
     # подпись графика

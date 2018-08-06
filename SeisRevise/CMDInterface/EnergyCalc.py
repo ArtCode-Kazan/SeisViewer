@@ -182,8 +182,7 @@ def energy_calc():
 
                 # расчет энергии сигнала
                 energy_value = calc_energy_by_spectrum(
-                    frequencies=spectrum_data[:, 0],
-                    amplitudes=spectrum_data[:, 1],
+                    spectrum_data=spectrum_data,
                     f_min=f_min_calc, f_max=f_max_calc)
 
                 # запись энергии в массив

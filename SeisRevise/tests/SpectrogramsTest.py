@@ -9,9 +9,9 @@ from SeisRevise.CMDInterface.JoinBinFiles import join_bin_files
 
 # create_dbase()
 # file_stats()
-# spectrogram_calc()
+spectrogram_calc()
 # correlation_calc()
 # pre_analysis_calc()
 # join_coords()
 # energy_calc()
-join_bin_files()
+# join_bin_files()

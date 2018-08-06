@@ -1,4 +1,6 @@
-import datetime
+import numpy as np
 
-dt = datetime.timedelta(seconds=0.001)
-print(dt)
+a = np.array([1,2,3,4,5,6])
+
+a=a/1000
+print(a)
