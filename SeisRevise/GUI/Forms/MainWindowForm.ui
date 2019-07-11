@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>827</width>
+    <height>564</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTableWidget" name="gFileInfo">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>789</width>
+      <height>515</height>
+     </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>130</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>File name</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>File type</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Record type</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Frequency</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Time start</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Time stop</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="bDelRow">
+    <property name="geometry">
+     <rect>
+      <x>792</x>
+      <y>242</y>
+      <width>31</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>❌</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>827</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuProcessing">
+    <property name="title">
+     <string>Processing</string>
+    </property>
+    <addaction name="aSpectrograms"/>
+    <addaction name="aCorrelations"/>
+   </widget>
+   <widget class="QMenu" name="menulOADING">
+    <property name="title">
+     <string>Loading</string>
+    </property>
+    <addaction name="aLoadFiles"/>
+   </widget>
+   <addaction name="menulOADING"/>
+   <addaction name="menuProcessing"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="aSpectrograms">
+   <property name="text">
+    <string>Spectrograms</string>
+   </property>
+  </action>
+  <action name="aCorrelations">
+   <property name="text">
+    <string>Correlations</string>
+   </property>
+  </action>
+  <action name="aLoadFiles">
+   <property name="text">
+    <string>LoadFiles</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

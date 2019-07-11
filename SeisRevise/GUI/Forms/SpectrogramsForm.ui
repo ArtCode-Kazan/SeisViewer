@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>821</width>
+    <height>362</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>4</y>
+      <width>807</width>
+      <height>157</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Processing parameters</string>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>2</x>
+       <y>30</y>
+       <width>141</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Resample frequency</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="sbResampleFrequency">
+     <property name="geometry">
+      <rect>
+       <x>146</x>
+       <y>26</y>
+       <width>77</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>10000</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>226</x>
+       <y>32</y>
+       <width>129</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start time analysis</string>
+     </property>
+    </widget>
+    <widget class="QDateTimeEdit" name="dtStartTime">
+     <property name="geometry">
+      <rect>
+       <x>356</x>
+       <y>26</y>
+       <width>161</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="displayFormat">
+      <string>dd.MM.yyyy HH:mm:ss</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>518</x>
+       <y>30</y>
+       <width>129</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop time analysis</string>
+     </property>
+    </widget>
+    <widget class="QDateTimeEdit" name="dtStopTime">
+     <property name="geometry">
+      <rect>
+       <x>642</x>
+       <y>26</y>
+       <width>159</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="displayFormat">
+      <string>dd.MM.yyyy HH:mm:ss</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>2</x>
+       <y>60</y>
+       <width>153</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Interval size (minutes)</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="geometry">
+      <rect>
+       <x>2</x>
+       <y>90</y>
+       <width>795</width>
+       <height>59</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Components</string>
+     </property>
+     <widget class="QCheckBox" name="cbXComponent">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>26</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>x-component</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbYComponent">
+      <property name="geometry">
+       <rect>
+        <x>126</x>
+        <y>26</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>y-component</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbZComponent">
+      <property name="geometry">
+       <rect>
+        <x>244</x>
+        <y>26</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>z-component</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QSpinBox" name="sbIntervalSize">
+     <property name="geometry">
+      <rect>
+       <x>154</x>
+       <y>56</y>
+       <width>77</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>3600</number>
+     </property>
+     <property name="value">
+      <number>60</number>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>4</x>
+      <y>166</y>
+      <width>805</width>
+      <height>65</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Visualization parameters</string>
+    </property>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>8</x>
+       <y>32</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Minimal frequency</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>298</x>
+       <y>32</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Maximal frequency</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="dsMinFrequency">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>28</y>
+       <width>91</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <double>10000.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="dsMaxFrequency">
+     <property name="geometry">
+      <rect>
+       <x>434</x>
+       <y>28</y>
+       <width>91</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <double>10000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>20.000000000000000</double>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>318</y>
+      <width>817</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbStartProcess">
+    <property name="geometry">
+     <rect>
+      <x>362</x>
+      <y>288</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>232</y>
+      <width>799</width>
+      <height>55</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Export parameters</string>
+    </property>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>16</x>
+       <y>28</y>
+       <width>97</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Export folder</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="leFolderPath">
+     <property name="geometry">
+      <rect>
+       <x>126</x>
+       <y>24</y>
+       <width>609</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbOpenFolder">
+     <property name="geometry">
+      <rect>
+       <x>748</x>
+       <y>24</y>
+       <width>39</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>📂</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>821</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
