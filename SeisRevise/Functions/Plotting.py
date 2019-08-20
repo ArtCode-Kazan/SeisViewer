@@ -20,8 +20,6 @@ def plot_single_correlation(devices, correlation_data, output_folder,
     :param output_name: export name
     :return: None
     """
-    mpl.rc('font', family='Verdana')
-
     mpl.rcParams['figure.subplot.left'] = 0.07
     mpl.rcParams['figure.subplot.right'] = 0.95
     mpl.rcParams['figure.subplot.bottom'] = 0.2
@@ -73,8 +71,6 @@ def plot_all_smooth_spectrums(spectrums_name_list, frequency, spectrum_data,
     :param output_name: export name
     :return: None
     """
-    mpl.rc('font', family='Verdana')
-
     mpl.rcParams['figure.subplot.left'] = 0.07
     mpl.rcParams['figure.subplot.right'] = 0.8
     mpl.rcParams['figure.subplot.bottom'] = 0.05
@@ -139,8 +135,6 @@ def plot_correlation(devices, colors, correlation_matrix,
     :param output_name: export name
     :return: None
     """
-    mpl.rc('font', family='Verdana')
-
     mpl.rcParams['figure.subplot.left'] = 0.07
     mpl.rcParams['figure.subplot.right'] = 0.8
     mpl.rcParams['figure.subplot.bottom'] = 0.2

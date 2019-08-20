@@ -149,3 +149,7 @@ SeisPars 0.2.5, SeisCore 0.1.4ref
 # version 1.0.0
 Create GUI application with using PyQt
 Requires:  SeisCore 0.2.8
+
+# version 1.0.1
+Fix bug: setting time interval in GUI (Revise part)
+Requires:  SeisCore 0.3.0

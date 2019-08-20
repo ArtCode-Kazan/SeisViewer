@@ -234,7 +234,7 @@ class MainWindow:
         revise_ui.dtStopTime.setMinimumDateTime(
             cross_start_time_analysis)
         revise_ui.dtStopTime.setMaximumDateTime(cross_stop_time_analysis)
-        revise_ui.dtStopTime.setDateTime(cross_stop_time_analysis)
+        revise_ui.dtStopTime.setDateTime(cross_start_time_analysis)
         revise_ui.sbResampleFrequency.setValue(resample_frequency)
 
         self.__revise_form.window.show()
