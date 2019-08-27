@@ -18,9 +18,9 @@
 
 
 # Необходимые модули
+    - NumPy         version 1.16.3
     - Matplotlib    version 2.1.2
-    - SeisPars      version 0.1.1
-    - SeisCore      version 0.0.32sm2
+    - SeisCore      version 0.3.1
 
 
 # version 0.0.0
@@ -153,3 +153,7 @@ Requires:  SeisCore 0.2.8
 # version 1.0.1
 Fix bug: setting time interval in GUI (Revise part)
 Requires:  SeisCore 0.3.0
+
+# version 1.0.2
+Change algorithm: deprecated time limits for creating spectrograms and
+revise processing

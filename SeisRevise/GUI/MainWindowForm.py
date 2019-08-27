@@ -113,7 +113,7 @@ class MainWindow:
             except ValueError:
                 continue
 
-            if extension in ('00', 'xx'):
+            if extension in ('00', 'xx', 'bin'):
                 bin_data = BinaryFile()
                 bin_data.path = path
                 bin_data.record_type = 'XYZ'
@@ -186,13 +186,14 @@ class MainWindow:
 
         spectrograms_form_ui = self.__spectrograms_form.ui
 
-        spectrograms_form_ui.dtStartTime.setMinimumDateTime(
-            start_time_analysis)
-        spectrograms_form_ui.dtStartTime.setMaximumDateTime(
-            stop_time_analysis)
-        spectrograms_form_ui.dtStopTime.setMinimumDateTime(
-            start_time_analysis)
-        spectrograms_form_ui.dtStopTime.setMaximumDateTime(stop_time_analysis)
+        # spectrograms_form_ui.dtStartTime.setMinimumDateTime(
+        #     start_time_analysis)
+        # spectrograms_form_ui.dtStartTime.setMaximumDateTime(
+        #     stop_time_analysis)
+        # spectrograms_form_ui.dtStopTime.setMinimumDateTime(
+        #     start_time_analysis)
+        # spectrograms_form_ui.dtStopTime.setMaximumDateTime(stop_time_analysis)
+        spectrograms_form_ui.dtStartTime.setDateTime(start_time_analysis)
         spectrograms_form_ui.dtStopTime.setDateTime(stop_time_analysis)
         spectrograms_form_ui.sbResampleFrequency.setValue(resample_frequency)
         self.__spectrograms_form.window.show()
@@ -227,14 +228,15 @@ class MainWindow:
             return
 
         revise_ui = self.__revise_form.ui
-        revise_ui.dtStartTime.setMinimumDateTime(
-            cross_start_time_analysis)
-        revise_ui.dtStartTime.setMaximumDateTime(
-            cross_stop_time_analysis)
-        revise_ui.dtStopTime.setMinimumDateTime(
-            cross_start_time_analysis)
-        revise_ui.dtStopTime.setMaximumDateTime(cross_stop_time_analysis)
-        revise_ui.dtStopTime.setDateTime(cross_start_time_analysis)
+        # revise_ui.dtStartTime.setMinimumDateTime(
+        #     cross_start_time_analysis)
+        # revise_ui.dtStartTime.setMaximumDateTime(
+        #     cross_stop_time_analysis)
+        # revise_ui.dtStopTime.setMinimumDateTime(
+        #     cross_start_time_analysis)
+        # revise_ui.dtStopTime.setMaximumDateTime(cross_stop_time_analysis)
+        revise_ui.dtStartTime.setDateTime(cross_start_time_analysis)
+        revise_ui.dtStopTime.setDateTime(cross_stop_time_analysis)
         revise_ui.sbResampleFrequency.setValue(resample_frequency)
 
         self.__revise_form.window.show()

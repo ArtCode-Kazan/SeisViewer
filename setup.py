@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='SeisRevise',
-      version='1.0.1',
+      version='1.0.2',
       packages=find_packages(),
       description='Package for processing of microseismic data',
       author='Michael Chernov',
@@ -10,4 +10,4 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      install_requires=['numpy', 'matplotlib', 'scipy'])
+      install_requires=['numpy', 'matplotlib'])
