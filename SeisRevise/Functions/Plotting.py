@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import random
 
 
+plt.switch_backend('SVG')
+
+
 def generate_random_color():
     r = lambda: random.randint(0, 255)
     return '#%02X%02X%02X' % (r(), r(), r())

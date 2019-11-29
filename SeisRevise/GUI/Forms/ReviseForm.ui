@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>878</width>
-    <height>467</height>
+    <width>943</width>
+    <height>487</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,97 +22,19 @@
      <rect>
       <x>10</x>
       <y>8</y>
-      <width>865</width>
-      <height>249</height>
+      <width>925</width>
+      <height>265</height>
      </rect>
     </property>
     <property name="title">
      <string>Processing parameters</string>
     </property>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>2</x>
-       <y>30</y>
-       <width>141</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Resample frequency</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="sbResampleFrequency">
-     <property name="geometry">
-      <rect>
-       <x>146</x>
-       <y>26</y>
-       <width>77</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>10000</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>256</x>
-       <y>32</y>
-       <width>129</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Start time analysis</string>
-     </property>
-    </widget>
-    <widget class="QDateTimeEdit" name="dtStartTime">
-     <property name="geometry">
-      <rect>
-       <x>386</x>
-       <y>26</y>
-       <width>161</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="displayFormat">
-      <string>dd.MM.yyyy HH:mm:ss</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>572</x>
-       <y>30</y>
-       <width>129</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Stop time analysis</string>
-     </property>
-    </widget>
-    <widget class="QDateTimeEdit" name="dtStopTime">
-     <property name="geometry">
-      <rect>
-       <x>696</x>
-       <y>26</y>
-       <width>159</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="displayFormat">
-      <string>dd.MM.yyyy HH:mm:ss</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
        <x>2</x>
-       <y>184</y>
-       <width>855</width>
+       <y>198</y>
+       <width>907</width>
        <height>59</height>
       </rect>
      </property>
@@ -166,8 +88,8 @@
      <property name="geometry">
       <rect>
        <x>2</x>
-       <y>56</y>
-       <width>853</width>
+       <y>78</y>
+       <width>909</width>
        <height>63</height>
       </rect>
      </property>
@@ -339,7 +261,7 @@
      <property name="geometry">
       <rect>
        <x>2</x>
-       <y>124</y>
+       <y>142</y>
        <width>425</width>
        <height>57</height>
       </rect>
@@ -407,7 +329,7 @@
      <property name="geometry">
       <rect>
        <x>432</x>
-       <y>124</y>
+       <y>142</y>
        <width>425</width>
        <height>57</height>
       </rect>
@@ -471,13 +393,127 @@
       </property>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="groupBox_7">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>911</width>
+       <height>57</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Signal Preprocessing</string>
+     </property>
+     <widget class="QDateTimeEdit" name="dtStopTime">
+      <property name="geometry">
+       <rect>
+        <x>536</x>
+        <y>26</y>
+        <width>159</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="displayFormat">
+       <string>dd.MM.yyyy HH:mm:ss</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbResampleFrequency">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>24</y>
+        <width>77</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>30</y>
+        <width>73</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start time</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>466</x>
+        <y>30</y>
+        <width>67</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Stop time</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>28</y>
+        <width>141</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Resample frequency</string>
+      </property>
+     </widget>
+     <widget class="QDateTimeEdit" name="dtStartTime">
+      <property name="geometry">
+       <rect>
+        <x>302</x>
+        <y>26</y>
+        <width>161</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="displayFormat">
+       <string>dd.MM.yyyy HH:mm:ss</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>698</x>
+        <y>30</y>
+        <width>135</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Detrend frequency</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="sbDentendEdge">
+      <property name="geometry">
+       <rect>
+        <x>832</x>
+        <y>26</y>
+        <width>71</width>
+        <height>26</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_6">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>258</y>
-      <width>865</width>
+      <x>8</x>
+      <y>282</y>
+      <width>927</width>
       <height>131</height>
      </rect>
     </property>
@@ -606,7 +642,7 @@
       <rect>
        <x>118</x>
        <y>24</y>
-       <width>609</width>
+       <width>761</width>
        <height>25</height>
       </rect>
      </property>
@@ -617,7 +653,7 @@
     <widget class="QPushButton" name="pbOpenFolder">
      <property name="geometry">
       <rect>
-       <x>734</x>
+       <x>882</x>
        <y>24</y>
        <width>39</width>
        <height>25</height>
@@ -644,8 +680,8 @@
    <widget class="QPushButton" name="bStartProcess">
     <property name="geometry">
      <rect>
-      <x>396</x>
-      <y>394</y>
+      <x>418</x>
+      <y>416</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -657,9 +693,9 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>4</x>
-      <y>424</y>
-      <width>867</width>
+      <x>0</x>
+      <y>444</y>
+      <width>937</width>
       <height>19</height>
      </rect>
     </property>
@@ -673,7 +709,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>878</width>
+     <width>943</width>
      <height>22</height>
     </rect>
    </property>

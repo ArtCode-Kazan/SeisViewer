@@ -156,4 +156,10 @@ Requires:  SeisCore 0.3.0
 
 # version 1.0.2
 Change algorithm: deprecated time limits for creating spectrograms and
-revise processing
+revise processing 
+Requires: SeisCore 0.3.1
+
+# version 1.0.3
+Add detrending of signal for revise processing 
+Requires: SeisCore 0.3.4
+

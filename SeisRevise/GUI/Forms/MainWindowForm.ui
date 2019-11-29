@@ -93,13 +93,13 @@
     <addaction name="aSpectrograms"/>
     <addaction name="aCorrelations"/>
    </widget>
-   <widget class="QMenu" name="menulOADING">
+   <widget class="QMenu" name="menuArchive">
     <property name="title">
-     <string>Loading</string>
+     <string>Files</string>
     </property>
     <addaction name="aLoadFiles"/>
    </widget>
-   <addaction name="menulOADING"/>
+   <addaction name="menuArchive"/>
    <addaction name="menuProcessing"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -115,7 +115,27 @@
   </action>
   <action name="aLoadFiles">
    <property name="text">
-    <string>LoadFiles</string>
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="aCheckArchive">
+   <property name="text">
+    <string>Check</string>
+   </property>
+  </action>
+  <action name="aUnpackArchive">
+   <property name="text">
+    <string>Unpack</string>
+   </property>
+  </action>
+  <action name="aCreateArchive">
+   <property name="text">
+    <string>Create</string>
+   </property>
+  </action>
+  <action name="aCheckingArchive">
+   <property name="text">
+    <string>Checking</string>
    </property>
   </action>
  </widget>

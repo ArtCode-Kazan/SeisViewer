@@ -11,6 +11,7 @@ from SeisCore.BinaryFile.BinaryFile import BinaryFile
 from SeisCore.Functions.Spectrum import average_spectrum
 from SeisCore.Plotting.Plotting import plot_signal
 from SeisCore.Plotting.Plotting import plot_average_spectrum
+from SeisCore.Functions.Wavelet import detrend
 
 from SeisRevise.GUI.Dialogs import show_folder_dialog
 from SeisRevise.Functions.Processing import cross_correlation
@@ -64,6 +65,11 @@ class External(QThread):
             bin_data.read_date_time_stop = params['dt_stop']
             signals = bin_data.signals
 
+            if params['detrend_frequency']!=0:
+                for i in range(signals.shape[1]):
+                    signals[:,i]=detrend(signal=signals[:,i],
+                                         frequency=bin_data.resample_frequency,
+                                         edge_frequency=params['detrend_frequency'])
             for index_b, component in enumerate(params['components']):
                 compoment_signal = signals[:, record_type.index(component)]
                 joined_signal_array[index_b, :, index_a] = compoment_signal
@@ -317,6 +323,7 @@ class ReviseForm:
         params['dt_stop'] = ui.dtStopTime.dateTime().toPyDateTime()
         params['window_size'] = ui.sbWindowSize.value()
         params['overlap_size'] = ui.sbOverlapSize.value()
+        params['detrend_frequency']=ui.sbDentendEdge.value()
 
         if ui.cbUseMarmettFilter.isChecked():
             params['marmett_filter'] = ui.sbMarmettFilter.value()
