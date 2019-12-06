@@ -10,6 +10,7 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      install_requires=[
-            'SeisCore@git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore',
-      ])
+)
+# install_requires = [
+#       'SeisCore@git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore',
+# ]
