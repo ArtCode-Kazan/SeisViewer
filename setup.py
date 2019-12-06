@@ -10,4 +10,6 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      install_requires=['numpy', 'matplotlib', 'pyqtgraph'])
+      install_requires=[
+            'pyqtgraph==0.10.0'
+      ])
