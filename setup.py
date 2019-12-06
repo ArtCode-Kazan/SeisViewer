@@ -10,5 +10,5 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      utl='git@github.com:MikkoArtik/SeisCore.git',
+      url='https://github.com/MikkoArtik/SeisCore',
       install_requires=['SeisCore@git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore'])
