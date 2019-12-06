@@ -11,5 +11,5 @@ setup(name='SeisRevise',
       include_package_data=True,
       zip=False,
       install_requires=['SeisCore'],
-      dependency_links=['git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore']
+      dependency_links=['git+https://github.com/MikkoArtik/SeisCore@dev#egg=SeisCore']
       )
