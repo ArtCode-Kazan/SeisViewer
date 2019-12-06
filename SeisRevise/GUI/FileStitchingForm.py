@@ -4,9 +4,9 @@ import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5 import QtGui
 
 from SeisCore.BinaryFile.BinaryFile import BinaryFile
-
 from SeisRevise.GUI.Dialogs import show_folder_dialog
 
 
@@ -122,7 +122,7 @@ class FileStitchingForm:
                 bin_data=BinaryFile()
                 bin_data.path=path
 
-                if index>0:
+                if freq is not None:
                     if bin_data.signal_frequency!=freq:
                         continue
                 else:
@@ -144,6 +144,13 @@ class FileStitchingForm:
                     break
             if is_right:
                 result.append((export_name, file_statistics))
+                color = QtGui.QColor(0, 207, 0)
+            else:
+                color = QtGui.QColor(248, 207, 0)
+
+            for j in range(grid_data.columnCount()):
+                grid_data.item(i, j).setBackground(color)
+
         return result
 
     def thread_function(self):

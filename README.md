@@ -167,3 +167,7 @@ Requires: SeisCore 0.3.4
 Add new option: stitching binary files (for Baikal7)
 Add link for SeisCore package
 Requires: SeisCore 0.3.7
+
+# version 1.0.5
+Fix bug in stitching file algorithm
+Requires: SeisCore 0.3.7
