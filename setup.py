@@ -10,6 +10,5 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      install_requires=[
-            'pyqtgraph==0.10.0'
-      ])
+      install_requires=[],
+      dependency_links=['http://github.com/MikkoArik/SeisCore/tarball/dev#egg=SeisCore'])
