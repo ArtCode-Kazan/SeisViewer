@@ -10,5 +10,5 @@ setup(name='SeisRevise',
       license='MIT',
       include_package_data=True,
       zip=False,
-      install_requires=[],
+      install_requires=['SeisCore'],
       dependency_links=['http://github.com/MikkoArik/SeisCore/tarball/dev#egg=SeisCore'])
