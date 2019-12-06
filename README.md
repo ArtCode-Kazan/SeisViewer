@@ -163,3 +163,6 @@ Requires: SeisCore 0.3.1
 Add detrending of signal for revise processing 
 Requires: SeisCore 0.3.4
 
+# version 1.0.4
+Add new option: stitching binary files (for Baikal7)
+Requires: SeisCore 0.3.7

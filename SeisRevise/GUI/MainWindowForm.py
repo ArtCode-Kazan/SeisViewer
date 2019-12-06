@@ -11,6 +11,7 @@ from SeisCore.BinaryFile.BinaryFile import BinaryFile
 from SeisRevise.GUI.Dialogs import show_message
 from SeisRevise.GUI.SpectrogramsForm import SpectrogramsForm
 from SeisRevise.GUI.ReviseForm import ReviseForm
+from SeisRevise.GUI.FileStitchingForm import FileStitchingForm
 
 
 class MainWindow:
@@ -27,12 +28,14 @@ class MainWindow:
 
         self.__spectrograms_form = SpectrogramsForm(self)
         self.__revise_form = ReviseForm(self)
+        self.__file_stitching_form=FileStitchingForm(self)
 
         ui_path = os.path.join(self.__forms_folder, 'MainWindowForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
         self.__ui.aLoadFiles.triggered.connect(self.open_files)
         self.__ui.aSpectrograms.triggered.connect(self.open_spectrograms_form)
         self.__ui.aCorrelations.triggered.connect(self.open_revise_form)
+        self.__ui.aFileStitching.triggered.connect(self.open_stitching_form)
         self.__ui.bDelRow.clicked.connect(self.delete_selected_rows)
 
         self.__window.show()
@@ -240,3 +243,7 @@ class MainWindow:
         revise_ui.sbResampleFrequency.setValue(resample_frequency)
 
         self.__revise_form.window.show()
+
+    def open_stitching_form(self):
+        self.__file_stitching_form.window.show()
+

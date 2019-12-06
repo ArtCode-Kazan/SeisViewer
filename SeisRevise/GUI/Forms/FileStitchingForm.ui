@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>773</width>
+    <height>396</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>10</y>
+      <width>143</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Folder with file parts</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbOpenFolder">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>8</y>
+      <width>39</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>📂</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leFolderPath">
+    <property name="geometry">
+     <rect>
+      <x>154</x>
+      <y>8</y>
+      <width>559</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tGrid">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>42</y>
+      <width>765</width>
+      <height>235</height>
+     </rect>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>250</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Export name</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Folder path</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Part count</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="bStartProcess">
+    <property name="geometry">
+     <rect>
+      <x>334</x>
+      <y>282</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stitching</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="pbPartAmount">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>310</y>
+      <width>767</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="pbStitchingAmount">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>332</y>
+      <width>767</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>773</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

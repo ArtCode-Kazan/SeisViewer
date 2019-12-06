@@ -98,6 +98,7 @@
      <string>Files</string>
     </property>
     <addaction name="aLoadFiles"/>
+    <addaction name="aFileStitching"/>
    </widget>
    <addaction name="menuArchive"/>
    <addaction name="menuProcessing"/>
@@ -136,6 +137,11 @@
   <action name="aCheckingArchive">
    <property name="text">
     <string>Checking</string>
+   </property>
+  </action>
+  <action name="aFileStitching">
+   <property name="text">
+    <string>Stitching</string>
    </property>
   </action>
  </widget>
