@@ -11,5 +11,5 @@ setup(name='SeisRevise',
       include_package_data=True,
       zip=False,
       install_requires=[
-            'pyqtgraph==0.10.0'
+            'SeisCore@git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore',
       ])
