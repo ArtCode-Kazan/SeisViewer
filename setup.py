@@ -13,4 +13,4 @@ setup(name='SeisRevise',
 )
 # install_requires = [
 #       'SeisCore@git+https://github.com/MikkoArtik/SeisCore.git@dev#egg=SeisCore',
-# ]
+# ] 
