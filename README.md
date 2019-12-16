@@ -171,3 +171,7 @@ Requires: SeisCore 0.3.7
 # version 1.0.5
 Fix bug in stitching file algorithm
 Requires: SeisCore 0.3.7
+
+# version 1.0.6
+Fix bug - migration to SeisCore 0.3.8
+Requires: SeisCore 0.3.8

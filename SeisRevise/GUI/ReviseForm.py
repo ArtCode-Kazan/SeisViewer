@@ -30,7 +30,7 @@ class External(QThread):
     def run(self):
         params = self.parameters
         dt = (params['dt_stop'] - params['dt_start']).total_seconds()
-        discrete_amount = int(round(dt * params['resample_frequency']))
+        discrete_amount = int(round(dt * params['resample_frequency']))+1
         components_amount = len(params['components'])
         files_amount = len(self.files_info.keys())
 
