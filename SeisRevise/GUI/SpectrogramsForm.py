@@ -26,7 +26,6 @@ class External(QThread):
             cur_file_data = self.files_info[key]
             dt_start = cur_file_data['datetime_start']
             dt_stop = cur_file_data['datetime_stop']
-            record_type = cur_file_data['record_type']
             file_path = cur_file_data['path']
             file_name = os.path.basename(file_path).split('.')[0]
 
@@ -35,7 +34,6 @@ class External(QThread):
 
             bin_data = BinaryFile()
             bin_data.path = file_path
-            bin_data.record_type = record_type
             bin_data.use_avg_values = True
             bin_data.resample_frequency = params['resample_frequency']
 
@@ -57,6 +55,7 @@ class External(QThread):
 
                 signals = bin_data.signals
 
+                record_type=bin_data.record_type
                 for component in params['components']:
                     component_signal=signals[:, record_type.index(component)]
                     output_folder = os.path.join(params['output_folder'],

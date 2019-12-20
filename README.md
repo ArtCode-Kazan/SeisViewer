@@ -184,3 +184,8 @@ Requires: SeisCore 0.3.8
 Add new option - spectrogram viewer for seismic signal. Add possibility for
  selection loading file  - from list or from need path 
 Requires: SeisCore 0.3.8 
+
+# version 1.1.1
+Code refactoring: column "Record type" was removed from main window (don't
+ need, 'ZXY' record type setup by default in BinaryFile class)
+ Requires: SeisCore 0.3.8 

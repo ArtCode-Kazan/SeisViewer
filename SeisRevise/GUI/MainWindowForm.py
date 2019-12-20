@@ -64,43 +64,6 @@ class MainWindow:
     def files_info(self):
         return self.__files_info
 
-    def open_files(self):
-        """
-        Loading files info into grid
-        :return:
-        """
-        self._ui.gFileInfo.setRowCount(0)
-
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFiles)
-        file_paths = file_dialog.getOpenFileNames()[0]
-        self.__files_info = self._get_file_info(file_paths=file_paths)
-
-        if self.__files_info is not None:
-            file_count = len(self.__files_info.keys())
-            self._ui.gFileInfo.setRowCount(file_count)
-            for index, key in enumerate(self.__files_info):
-                current_file_info = self.__files_info[key]
-                self._ui.gFileInfo.setItem(index, 0, QTableWidgetItem(key))
-                self._ui.gFileInfo.setItem(index, 1, QTableWidgetItem(
-                    current_file_info['file_type']))
-
-                cb_record_type = QComboBox()
-                cb_record_type.addItem('ZXY')
-                self._ui.gFileInfo.setCellWidget(index, 2, cb_record_type)
-
-                self._ui.gFileInfo.setItem(index, 3, QTableWidgetItem(
-                    str(current_file_info['frequency'])))
-
-                dt_start = datetime.strftime(
-                    current_file_info['datetime_start'], '%d.%m.%Y %H:%M:%S')
-                dt_stop = datetime.strftime(
-                    current_file_info['datetime_stop'], '%d.%m.%Y %H:%M:%S')
-                self._ui.gFileInfo.setItem(index, 4,
-                                           QTableWidgetItem(dt_start))
-                self._ui.gFileInfo.setItem(index, 5,
-                                           QTableWidgetItem(dt_stop))
-
     @staticmethod
     def _get_file_info(file_paths):
         """
@@ -122,13 +85,11 @@ class MainWindow:
             if extension in ('00', 'xx', 'bin'):
                 bin_data = BinaryFile()
                 bin_data.path = path
-                bin_data.record_type = 'XYZ'
 
                 file_info = dict()
                 file_info['path'] = path
                 file_info['file_type'] = bin_data.device_type
                 file_info['frequency'] = bin_data.signal_frequency
-                file_info['record_type'] = None
                 file_info['datetime_start'] = bin_data.datetime_start
                 file_info['datetime_stop'] = bin_data.datetime_stop
 
@@ -137,6 +98,41 @@ class MainWindow:
             return None
         else:
             return files_data
+
+    def open_files(self):
+        """
+        Loading files info into grid
+        :return:
+        """
+        current_row_count=self._ui.gFileInfo.rowCount()
+
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        file_paths = file_dialog.getOpenFileNames()[0]
+        self.__files_info = self._get_file_info(file_paths=file_paths)
+        if self.__files_info is None:
+            return
+
+        file_count = len(self.__files_info.keys())
+        self._ui.gFileInfo.setRowCount(current_row_count+file_count)
+        for index, key in enumerate(self.__files_info):
+            index += current_row_count
+            current_file_info = self.__files_info[key]
+            self._ui.gFileInfo.setItem(index, 0, QTableWidgetItem(key))
+            self._ui.gFileInfo.setItem(index, 1, QTableWidgetItem(
+                current_file_info['file_type']))
+
+            self._ui.gFileInfo.setItem(index, 2, QTableWidgetItem(
+                str(current_file_info['frequency'])))
+
+            dt_start = datetime.strftime(
+                current_file_info['datetime_start'], '%d.%m.%Y %H:%M:%S')
+            dt_stop = datetime.strftime(
+                current_file_info['datetime_stop'], '%d.%m.%Y %H:%M:%S')
+            self._ui.gFileInfo.setItem(index, 3,
+                                       QTableWidgetItem(dt_start))
+            self._ui.gFileInfo.setItem(index, 4,
+                                       QTableWidgetItem(dt_stop))
 
     def delete_selected_rows(self):
         indexes = self._ui.gFileInfo.selectionModel().selectedRows()
@@ -151,27 +147,21 @@ class MainWindow:
         deleting_keys = list()
         for key in self.__files_info:
             is_using = False
-            index = None
             for i in range(self._ui.gFileInfo.rowCount()):
                 file_name = self._ui.gFileInfo.item(i, 0).text()
                 if file_name == key:
                     is_using = True
-                    index = i
                     break
-            if is_using:
-                w = self._ui.gFileInfo.cellWidget(index, 2)
-                record_type = w.currentText()
-                self.__files_info[key]['record_type'] = record_type
-            else:
+            if not is_using:
                 deleting_keys.append(key)
 
         for item in deleting_keys:
             del self.__files_info[item]
 
     def open_spectrograms_form(self):
+        self._get_grid_data()
         if self.files_info is None:
             return
-        self._get_grid_data()
 
         start_time_analysis = None
         stop_time_analysis = None
@@ -206,9 +196,9 @@ class MainWindow:
         self.__spectrograms_form.window.show()
 
     def open_revise_form(self):
+        self._get_grid_data()
         if self.files_info is None:
             return
-        self._get_grid_data()
 
         cross_start_time_analysis = None
         cross_stop_time_analysis = None

@@ -53,12 +53,10 @@ class External(QThread):
         finished_parts_count = 0
         for index_a, key in enumerate(self.files_info):
             cur_file_data = self.files_info[key]
-            record_type = cur_file_data['record_type']
             file_path = cur_file_data['path']
 
             bin_data = BinaryFile()
             bin_data.path = file_path
-            bin_data.record_type = record_type
             bin_data.use_avg_values = True
             bin_data.resample_frequency = params['resample_frequency']
             bin_data.read_date_time_start = params['dt_start']
@@ -70,6 +68,7 @@ class External(QThread):
                     signals[:,i]=detrend(signal=signals[:,i],
                                          frequency=bin_data.resample_frequency,
                                          edge_frequency=params['detrend_frequency'])
+            record_type=bin_data.record_type
             for index_b, component in enumerate(params['components']):
                 compoment_signal = signals[:, record_type.index(component)]
                 joined_signal_array[index_b, :, index_a] = compoment_signal
@@ -135,8 +134,7 @@ class External(QThread):
                         f'{bin_file_name}_ClearSignal_{component_label}_{read_dt_start_label}'
                     plot_signal(time_start_sec=0,
                                 frequency=params['resample_frequency'],
-                                signal=joined_signal_array[index_b, :,
-                                       index_a],
+                                signal=joined_signal_array[index_b, :, index_a],
                                 label=png_file_name,
                                 output_folder=file_processing_result_folder,
                                 output_name=png_file_name)
