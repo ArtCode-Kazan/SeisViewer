@@ -189,3 +189,7 @@ Requires: SeisCore 0.3.8
 Code refactoring: column "Record type" was removed from main window (don't
  need, 'ZXY' record type setup by default in BinaryFile class)
  Requires: SeisCore 0.3.8 
+ 
+# version 1.1.2
+Code refactoring: code refactoring with SeisCore vers. 0.3.9
+ Requires: SeisCore 0.3.9

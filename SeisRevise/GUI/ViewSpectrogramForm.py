@@ -6,40 +6,13 @@ import pyqtgraph as pg
 from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
-from SeisCore.BinaryFile.BinaryFile import BinaryFile
 from SeisCore.Functions.Filter import band_pass_filter
-from SeisCore.Functions.Spectrogram import _specgram
+from SeisCore.Functions.Spectrogram import specgram
+from SeisCore.Functions.Spectrogram import scale_limits
+
+from SeisCore.BinaryFile.BinaryFile import BinaryFile
 
 from SeisRevise.GUI.Dialogs import show_file_dialog
-
-
-def scale_limits(amplitudes, f, f_min=None, f_max=None):
-    """
-    Функция для расчета параметров раскраски цветовой шкалы
-    :param amplitudes: матрица значений амплитуд (комплексные числа)
-    :return:
-    """
-    # расчет параметров для раскраски спектрограммы
-    # среднее значение амплитуды из выборки по частоте
-    if f_min is None:
-        f_min=0
-    if f_max is None:
-        f_max=f[-1]
-
-    amplitudes = amplitudes[((f_min <= f) & (f <= f_max))]
-    mid_amp = abs(amplitudes).mean()
-    disp_sum = 0  # сумма дисперсий для каждого интервала времени
-    for i in range(amplitudes.shape[1]):
-        d = np.std(abs(amplitudes[:, i]) - mid_amp)
-        disp_sum += d
-    # среднее значение дисперсии за все времена
-    disp_average = disp_sum / amplitudes.shape[1]
-
-    # минимальное значение цветовой шкалы (в децибелах!)
-    bmin = 20 * np.log10(abs(np.min(amplitudes)))
-    # максимальное значение цветовой шкалы (в децибелах!)
-    bmax = 20 * np.log10(mid_amp + 9 * disp_average)
-    return bmin, bmax
 
 
 class ViewSpectrogramForm:
@@ -163,7 +136,7 @@ class ViewSpectrogramForm:
                 index_channel='XYZ'.index(params['component'])
                 signal=bin_data.ordered_signal_by_components[:,index_channel]
                 self.__origin_signal=signal
-                self.__origin_spectrogram=_specgram(
+                self.__origin_spectrogram=specgram(
                     signal_data=signal,
                     frequency_of_signal=params['resample_frequency'])
 
@@ -182,7 +155,7 @@ class ViewSpectrogramForm:
                     frequency=params['resample_frequency'],
                     f_min=params['filter_min_frequency'],
                     f_max=params['filter_max_frequency'])
-                self.__filtered_spectrogram = _specgram(
+                self.__filtered_spectrogram = specgram(
                     signal_data=self.__filtered_signal,
                     frequency_of_signal=params['resample_frequency'])
 
@@ -215,9 +188,10 @@ class ViewSpectrogramForm:
             return
         params = self.__parameters
         min_val, max_val = scale_limits(
-            amplitudes, f=frequency,
-            f_min=params['visual_min_frequency'],
-            f_max=params['visual_max_frequency'])
+            amplitudes=amplitudes, frequencies=frequency,
+            low_f=params['visual_min_frequency'],
+            high_f=params['visual_max_frequency'])
+
         amplitudes = 20 * np.log10(abs(amplitudes))
         amplitudes = amplitudes.T
 
