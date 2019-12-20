@@ -142,6 +142,7 @@ class MainWindow:
         indexes = self._ui.gFileInfo.selectionModel().selectedRows()
         for index in indexes:
             self._ui.gFileInfo.removeRow(index.row())
+        self._get_grid_data()
 
     def _get_grid_data(self):
         if self.__files_info is None:
@@ -251,5 +252,15 @@ class MainWindow:
         self.__file_stitching_form.window.show()
 
     def open_view_spectrum_form(self):
+        child_ui=self.__view_spectrum_form.ui
+        files_data=self.files_info
+        child_ui.cbFileName.clear()
+
+        if files_data is not None:
+            for file_name in files_data.keys():
+                child_ui.cbFileName.addItem(file_name)
+
+            first_item=files_data[list(files_data.keys())[0]]
+            child_ui.leFilePath.setText(first_item['path'])
         self.__view_spectrum_form.window.show()
 

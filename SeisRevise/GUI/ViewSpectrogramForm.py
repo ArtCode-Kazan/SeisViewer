@@ -61,7 +61,9 @@ class ViewSpectrogramForm:
         ui_path = os.path.join(self.__forms_folder, 'ViewSpectrogramForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 
-        self.__ui.pbOpenFile.clicked.connect(self.set_file)
+        self.__ui.pbOpenFile.clicked.connect(self.open_file_from_folder)
+        self.__ui.cbFileName.currentTextChanged.connect(self.open_file_from_list)
+        self.__ui.bLoadData.clicked.connect(self.load_file)
         self.__ui.bShow.clicked.connect(self.show_data)
 
     @property
@@ -76,14 +78,25 @@ class ViewSpectrogramForm:
     def ui(self):
         return self.__ui
 
-    def set_file(self):
+    def open_file_from_folder(self):
         self.ui.leFilePath.clear()
         path = show_file_dialog()
         if path is None:
             return
-        extension=os.path.basename(path).split('.')[-1]
-        if extension not in ('00','xx','bin'):
+        extension = os.path.basename(path).split('.')[-1]
+        if extension in ('00', 'xx', 'bin'):
+            self.ui.leFilePath.setText(path)
+
+    def open_file_from_list(self):
+        file_name = self.ui.cbFileName.currentText()
+        path = self.parent.files_info[file_name]['path']
+        self.ui.leFilePath.setText(path)
+
+    def load_file(self):
+        path = self.ui.leFilePath.text()
+        if len(path)==0:
             return
+
         bin_data=BinaryFile()
         bin_data.path=path
         dt_start=bin_data.datetime_start

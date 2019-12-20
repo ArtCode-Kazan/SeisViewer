@@ -9,25 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1214</width>
+    <width>1296</width>
     <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Spectrorgam Viewer</string>
   </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="leFilePath">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="4">
+      <item row="2" column="0" colspan="7">
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
          <string>Fourier bandpass filter</string>
@@ -85,13 +81,20 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>File path</string>
+         <string>File name</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="4">
+      <item row="0" column="5">
+       <widget class="QPushButton" name="pbOpenFile">
+        <property name="text">
+         <string>📃</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="7">
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
          <string>Origin signal parameters</string>
@@ -185,14 +188,7 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pbOpenFile">
-        <property name="text">
-         <string>📃</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="4">
+      <item row="3" column="0" colspan="7">
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string>Spectrogram visualization parameters</string>
@@ -249,7 +245,7 @@
         </layout>
        </widget>
       </item>
-      <item row="4" column="0" colspan="4">
+      <item row="4" column="0" colspan="7">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <spacer name="horizontalSpacer">
@@ -286,6 +282,30 @@
         </item>
        </layout>
       </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>File path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLineEdit" name="leFilePath">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbFileName"/>
+      </item>
+      <item row="0" column="6">
+       <widget class="QPushButton" name="bLoadData">
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -309,6 +329,13 @@
           </item>
           <item>
            <widget class="PlotWidget" name="gwGraphOriginalSignal"/>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_12">
@@ -355,6 +382,13 @@
              <widget class="GraphicsLayoutWidget" name="gwGraphOriginalSpectrogram"/>
             </item>
             <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="GraphicsLayoutWidget" name="gwGraphFilteredSpectrogram"/>
             </item>
            </layout>
@@ -372,7 +406,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1214</width>
+     <width>1296</width>
      <height>22</height>
     </rect>
    </property>
