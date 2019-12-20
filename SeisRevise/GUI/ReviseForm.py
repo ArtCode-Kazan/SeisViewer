@@ -376,6 +376,8 @@ class ReviseForm:
         if self.__calc_thread is not None:
             return
 
+        self.ui.statusBar.showMessage('Wait please...')
+
         self.set_progress_value(0)
         self.collect_parameters()
         parts_amount = 2 * len(self.__parameters['components']) * len(self.files_info.keys())
@@ -389,6 +391,8 @@ class ReviseForm:
 
     def set_progress_value(self, value):
         self.ui.progressBar.setValue(value)
+        if self.ui.progressBar.value()==100:
+            self.ui.statusBar.showMessage('Done')
 
     def processing(self):
         self.thread_function()

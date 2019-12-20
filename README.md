@@ -175,3 +175,7 @@ Requires: SeisCore 0.3.7
 # version 1.0.6
 Fix bug - migration to SeisCore 0.3.8
 Requires: SeisCore 0.3.8
+
+# version 1.0.7
+Add new option - spectrogram viewer for seismic signal
+Requires: SeisCore 0.3.8

@@ -151,6 +151,8 @@ class SpectrogramsForm:
         if self.__calc_thread is not None:
             return
 
+        self.ui.statusBar.showMessage('Wait please...')
+
         self.set_progress_value(0)
         self.collect_parameters()
         params=self.__parameters
@@ -171,6 +173,9 @@ class SpectrogramsForm:
                 (cross_dt_stop - cross_dt_start).total_seconds() // (
                         params['interval_size'] * 60)))
 
+        if part_count==0:
+            self.ui.statusBar.showMessage('No data for processing')
+
         self.__calc_thread = External()
         self.__calc_thread.files_info = files_for_processing
         self.__calc_thread.parts_count = part_count
@@ -180,6 +185,8 @@ class SpectrogramsForm:
 
     def set_progress_value(self, value):
         self.ui.progressBar.setValue(value)
+        if self.ui.progressBar.value()==100:
+            self.ui.statusBar.showMessage('Done')
 
     def processing(self):
         self.thread_function()

@@ -6,83 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>827</width>
-    <height>564</height>
+    <width>909</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="gFileInfo">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>789</width>
-      <height>515</height>
-     </rect>
-    </property>
-    <property name="selectionMode">
-     <enum>QAbstractItemView::SingleSelection</enum>
-    </property>
-    <property name="selectionBehavior">
-     <enum>QAbstractItemView::SelectRows</enum>
-    </property>
-    <attribute name="horizontalHeaderDefaultSectionSize">
-     <number>130</number>
-    </attribute>
-    <column>
-     <property name="text">
-      <string>File name</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>File type</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Record type</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Frequency</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Time start</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Time stop</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QPushButton" name="bDelRow">
-    <property name="geometry">
-     <rect>
-      <x>792</x>
-      <y>242</y>
-      <width>31</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>❌</string>
-    </property>
-   </widget>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QTableWidget" name="gFileInfo">
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>130</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>File name</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>File type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Record type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Frequency</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Time start</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Time stop</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="bDelRow">
+      <property name="text">
+       <string>❌</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>827</width>
+     <width>909</width>
      <height>22</height>
     </rect>
    </property>
@@ -100,8 +90,15 @@
     <addaction name="aLoadFiles"/>
     <addaction name="aFileStitching"/>
    </widget>
+   <widget class="QMenu" name="menuViewer">
+    <property name="title">
+     <string>Viewer</string>
+    </property>
+    <addaction name="aSpectrumViewer"/>
+   </widget>
    <addaction name="menuArchive"/>
    <addaction name="menuProcessing"/>
+   <addaction name="menuViewer"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="aSpectrograms">
@@ -142,6 +139,11 @@
   <action name="aFileStitching">
    <property name="text">
     <string>Stitching</string>
+   </property>
+  </action>
+  <action name="aSpectrumViewer">
+   <property name="text">
+    <string>Spectrum Viewer</string>
    </property>
   </action>
  </widget>
