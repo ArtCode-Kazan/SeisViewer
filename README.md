@@ -183,4 +183,4 @@ Requires: SeisCore 0.3.8
 # version 1.1.0
 Add new option - spectrogram viewer for seismic signal. Add possibility for
  selection loading file  - from list or from need path 
-Requires: SeisCore 0.3.8
+Requires: SeisCore 0.3.8 
