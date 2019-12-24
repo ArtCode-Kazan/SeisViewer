@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1296</width>
-    <height>607</height>
+    <width>1157</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,50 +20,162 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_8">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0" colspan="7">
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>Fourier bandpass filter</string>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>File name</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>File path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="6">
+       <widget class="QGroupBox" name="gbViewMode">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="title">
+         <string>View mode</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QLabel" name="label_5">
+            <widget class="QRadioButton" name="rbTimeLimitsMode">
              <property name="text">
-              <string>Minimal frequency</string>
+              <string>By time limits</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="dsBandpassMinFrequency">
-             <property name="maximum">
-              <double>10000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_6">
+            <widget class="QRadioButton" name="rbTimeStepMode">
              <property name="text">
-              <string>Maximal frequency</string>
+              <string>By time step</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="dsBandpassMaxFrequency">
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Start time analysis</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateTimeEdit" name="dtStartTime">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="displayFormat">
+              <string>dd.MM.yyyy HH:mm:ss</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Stop time analysis</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateTimeEdit" name="dtStopTime">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="displayFormat">
+              <string>dd.MM.yyyy HH:mm:ss</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Time step size (minutes)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbTimeStepSize">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="maximum">
-              <double>10000.000000000000000</double>
+              <number>120</number>
              </property>
              <property name="value">
-              <double>0.000000000000000</double>
+              <number>60</number>
              </property>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer_6">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>Step number</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbTimeStepIndex">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="bShow">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Show</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -80,21 +192,14 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>File name</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="5">
-       <widget class="QPushButton" name="pbOpenFile">
+       <widget class="QPushButton" name="bLoadData">
         <property name="text">
-         <string>📃</string>
+         <string>Load</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="7">
+      <item row="1" column="0" colspan="6">
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
          <string>Origin signal parameters</string>
@@ -143,35 +248,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Start time analysis</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QDateTimeEdit" name="dtStartTime">
-             <property name="displayFormat">
-              <string>dd.MM.yyyy HH:mm:ss</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Stop time analysis</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QDateTimeEdit" name="dtStopTime">
-             <property name="displayFormat">
-              <string>dd.MM.yyyy HH:mm:ss</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_4">
+            <spacer name="horizontalSpacer_5">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -188,7 +265,24 @@
         </layout>
        </widget>
       </item>
-      <item row="3" column="0" colspan="7">
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="leFilePath">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="pbOpenFile">
+        <property name="text">
+         <string>📃</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbFileName"/>
+      </item>
+      <item row="2" column="0" colspan="6">
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string>Spectrogram visualization parameters</string>
@@ -245,67 +339,6 @@
         </layout>
        </widget>
       </item>
-      <item row="4" column="0" colspan="7">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="bShow">
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>File path</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLineEdit" name="leFilePath">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cbFileName"/>
-      </item>
-      <item row="0" column="6">
-       <widget class="QPushButton" name="bLoadData">
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -315,85 +348,21 @@
       </property>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Signals</string>
+        <string>Signal</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Origin</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="PlotWidget" name="gwGraphOriginalSignal"/>
-          </item>
-          <item>
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Filtered</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="PlotWidget" name="gwGraphFilteredSignal"/>
-          </item>
-         </layout>
+         <widget class="PlotWidget" name="gwGraphOriginalSignal"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Spectrograms</string>
+        <string>Spectrogram</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Origin</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>Filtered</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="GraphicsLayoutWidget" name="gwGraphOriginalSpectrogram"/>
-            </item>
-            <item>
-             <widget class="Line" name="line">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="GraphicsLayoutWidget" name="gwGraphFilteredSpectrogram"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         <widget class="GraphicsLayoutWidget" name="gwGraphOriginalSpectrogram"/>
         </item>
        </layout>
       </widget>
@@ -406,7 +375,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1296</width>
+     <width>1157</width>
      <height>22</height>
     </rect>
    </property>

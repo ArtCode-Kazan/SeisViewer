@@ -193,3 +193,10 @@ Code refactoring: column "Record type" was removed from main window (don't
 # version 1.1.2
 Code refactoring: code refactoring with SeisCore vers. 0.3.9
  Requires: SeisCore 0.3.9
+ 
+# version 1.1.3
+SpectrogramViewer was edited: remove Fourier filter (not need) and add
+spectrogram coordinate tracing for fixation datetime coordinate
+ Requires: SeisCore 0.3.9
+ 
+ 
