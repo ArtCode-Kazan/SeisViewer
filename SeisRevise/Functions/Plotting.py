@@ -64,7 +64,7 @@ def plot_all_smooth_spectrums(spectrums_name_list, frequency, spectrum_data,
                               output_folder, output_name):
     """
     Plotting all smooth average spectrums on one graph
-    :param spectrums_name_list: filenames for graph legend
+    :param spectrums_name_list: file names for graph legend
     :param frequency: vector of frequency of average spectrum
     :param spectrum_data: spectrum matrix: column - device, row - amplitude
     :param f_min_visualize:

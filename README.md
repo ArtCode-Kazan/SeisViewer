@@ -199,4 +199,8 @@ SpectrogramViewer was edited: remove Fourier filter (not need) and add
 spectrogram coordinate tracing for fixation datetime coordinate
  Requires: SeisCore 0.3.9
  
+# version 1.1.4
+Code refactoring: code refactoring with SeisCore vers. 0.3.11
+ Requires: SeisCore 0.3.11
+ 
  

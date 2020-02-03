@@ -77,7 +77,7 @@ class External(QThread):
                     signal=compoment_signal,
                     frequency=params['resample_frequency'],
                     window=params['window_size'],
-                    overlap=params['overlap_size'],
+                    offset=params['overlap_size'],
                     med_filter=None,
                     marmett_filter=None)
                 average_spectrum_data[index_b, 0, :, index_a] = \
@@ -88,7 +88,7 @@ class External(QThread):
                     signal=compoment_signal,
                     frequency=params['resample_frequency'],
                     window=params['window_size'],
-                    overlap=params['overlap_size'],
+                    offset=params['overlap_size'],
                     med_filter=params['median_filter'],
                     marmett_filter=params['marmett_filter'])
                 average_spectrum_data[index_b, 1, :, index_a] = \

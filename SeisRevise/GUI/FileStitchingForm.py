@@ -40,8 +40,7 @@ class External(QThread):
                     # channel_headers_hole.tofile(output_file)
                 signal = bin_data.signals
                 signal.astype(np.int32).tofile(output_file)
-                self.finished_part_stitching.emit((index_j+1)/len(
-                    file_stat)*100)
+                self.finished_part_stitching.emit((index_j+1)/len(file_stat)*100)
             self.finished_file.emit((index_i+1)/len(params)*100)
 
 

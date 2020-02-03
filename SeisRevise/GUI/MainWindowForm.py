@@ -104,8 +104,6 @@ class MainWindow:
         Loading files info into grid
         :return:
         """
-        current_row_count=self._ui.gFileInfo.rowCount()
-
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFiles)
         file_paths = file_dialog.getOpenFileNames()[0]
@@ -114,9 +112,8 @@ class MainWindow:
             return
 
         file_count = len(self.__files_info.keys())
-        self._ui.gFileInfo.setRowCount(current_row_count+file_count)
+        self._ui.gFileInfo.setRowCount(file_count)
         for index, key in enumerate(self.__files_info):
-            index += current_row_count
             current_file_info = self.__files_info[key]
             self._ui.gFileInfo.setItem(index, 0, QTableWidgetItem(key))
             self._ui.gFileInfo.setItem(index, 1, QTableWidgetItem(
