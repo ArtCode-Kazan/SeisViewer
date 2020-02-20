@@ -30,7 +30,7 @@ class External(QThread):
     def run(self):
         params = self.parameters
         dt = (params['dt_stop'] - params['dt_start']).total_seconds()
-        discrete_amount = int(round(dt * params['resample_frequency']))+1
+        discrete_amount = int(round(dt * params['resample_frequency']))
         components_amount = len(params['components'])
         files_amount = len(self.files_info.keys())
 
@@ -62,6 +62,9 @@ class External(QThread):
             bin_data.read_date_time_start = params['dt_start']
             bin_data.read_date_time_stop = params['dt_stop']
             signals = bin_data.signals
+
+            if signals.shape[0]>discrete_amount:
+                signals=signals[:discrete_amount]
 
             if params['detrend_frequency']!=0:
                 for i in range(signals.shape[1]):
@@ -145,10 +148,10 @@ class External(QThread):
                                                    component_label)
                     plot_average_spectrum(
                         frequency=frequencies_list,
-                        spectrum_begin_amplitudes=average_spectrum_data[
+                        origin_amplitudes=average_spectrum_data[
                                                   index_b, 0, :, index_a],
-                        spectrum_smooth_amplitudes=average_spectrum_data[
-                                                   index_b, 1, :, index_a],
+                        smooth_amplitudes=average_spectrum_data[
+                                                  index_b, 1, :, index_a],
                         f_min=params['visual_min_frequency'],
                         f_max=params['visual_max_frequency'],
                         output_folder=file_processing_result_folder,

@@ -203,4 +203,8 @@ spectrogram coordinate tracing for fixation datetime coordinate
 Code refactoring: code refactoring with SeisCore vers. 0.3.11
  Requires: SeisCore 0.3.11
  
+# version 1.1.5
+Fix bug in ReviseForm: fix collect binary signal in one array
+ Requires: SeisCore 0.3.14
+ 
  
