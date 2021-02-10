@@ -10,23 +10,23 @@
     <x>0</x>
     <y>0</y>
     <width>821</width>
-    <height>383</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>821</width>
-    <height>383</height>
+    <height>420</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>821</width>
-    <height>383</height>
+    <height>420</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Stream Spectrogram Creation</string>
+   <string>Stream Spectrogram Plotting</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
@@ -44,7 +44,7 @@
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>2</x>
+       <x>6</x>
        <y>30</y>
        <width>141</width>
        <height>17</height>
@@ -57,7 +57,7 @@
     <widget class="QSpinBox" name="sbResampleFrequency">
      <property name="geometry">
       <rect>
-       <x>146</x>
+       <x>150</x>
        <y>26</y>
        <width>77</width>
        <height>26</height>
@@ -70,7 +70,7 @@
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>226</x>
+       <x>230</x>
        <y>32</y>
        <width>129</width>
        <height>17</height>
@@ -83,7 +83,7 @@
     <widget class="QDateTimeEdit" name="dtStartTime">
      <property name="geometry">
       <rect>
-       <x>356</x>
+       <x>360</x>
        <y>26</y>
        <width>161</width>
        <height>26</height>
@@ -96,7 +96,7 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>518</x>
+       <x>522</x>
        <y>30</y>
        <width>129</width>
        <height>17</height>
@@ -109,7 +109,7 @@
     <widget class="QDateTimeEdit" name="dtStopTime">
      <property name="geometry">
       <rect>
-       <x>642</x>
+       <x>646</x>
        <y>26</y>
        <width>159</width>
        <height>26</height>
@@ -122,8 +122,8 @@
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>2</x>
-       <y>60</y>
+       <x>8</x>
+       <y>64</y>
        <width>153</width>
        <height>17</height>
       </rect>
@@ -135,8 +135,8 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
-       <x>2</x>
-       <y>90</y>
+       <x>4</x>
+       <y>88</y>
        <width>795</width>
        <height>59</height>
       </rect>
@@ -190,8 +190,8 @@
     <widget class="QSpinBox" name="sbIntervalSize">
      <property name="geometry">
       <rect>
-       <x>154</x>
-       <y>56</y>
+       <x>164</x>
+       <y>60</y>
        <width>77</width>
        <height>26</height>
       </rect>
@@ -275,9 +275,9 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>318</y>
-      <width>817</width>
+      <x>4</x>
+      <y>348</y>
+      <width>799</width>
       <height>19</height>
      </rect>
     </property>
@@ -288,8 +288,8 @@
    <widget class="QPushButton" name="pbStartProcess">
     <property name="geometry">
      <rect>
-      <x>362</x>
-      <y>288</y>
+      <x>348</x>
+      <y>320</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -304,7 +304,7 @@
       <x>6</x>
       <y>232</y>
       <width>799</width>
-      <height>55</height>
+      <height>87</height>
      </rect>
     </property>
     <property name="title">
@@ -313,8 +313,8 @@
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>16</x>
-       <y>28</y>
+       <x>8</x>
+       <y>62</y>
        <width>97</width>
        <height>17</height>
       </rect>
@@ -326,8 +326,8 @@
     <widget class="QLineEdit" name="leFolderPath">
      <property name="geometry">
       <rect>
-       <x>126</x>
-       <y>24</y>
+       <x>118</x>
+       <y>58</y>
        <width>609</width>
        <height>25</height>
       </rect>
@@ -339,14 +339,30 @@
     <widget class="QPushButton" name="pbOpenFolder">
      <property name="geometry">
       <rect>
-       <x>748</x>
-       <y>24</y>
+       <x>740</x>
+       <y>58</y>
        <width>39</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
       <string>📂</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbSaveSignalGraph">
+     <property name="geometry">
+      <rect>
+       <x>6</x>
+       <y>28</y>
+       <width>143</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save signal graph</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -363,6 +379,20 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
+ <tabstops>
+  <tabstop>sbResampleFrequency</tabstop>
+  <tabstop>dtStartTime</tabstop>
+  <tabstop>dtStopTime</tabstop>
+  <tabstop>sbIntervalSize</tabstop>
+  <tabstop>cbXComponent</tabstop>
+  <tabstop>cbYComponent</tabstop>
+  <tabstop>cbZComponent</tabstop>
+  <tabstop>dsMinFrequency</tabstop>
+  <tabstop>dsMaxFrequency</tabstop>
+  <tabstop>leFolderPath</tabstop>
+  <tabstop>pbOpenFolder</tabstop>
+  <tabstop>pbStartProcess</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

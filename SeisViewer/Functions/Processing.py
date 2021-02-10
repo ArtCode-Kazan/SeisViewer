@@ -13,14 +13,15 @@ def cross_correlation(frequency, f_min_analysis, f_max_analysis, amplitudes):
     selection_amplitudes = amplitudes[(f_min_analysis <= frequency) *
                                       (frequency <= f_max_analysis)]
 
-    correlation_matrix = np.empty((amplitudes.shape[1], amplitudes.shape[1]),
+    correlation_matrix = np.zeros((amplitudes.shape[1], amplitudes.shape[1]),
                                   dtype=np.float)
 
     for i in range(amplitudes.shape[1]):
         for j in range(amplitudes.shape[1]):
-            correlation = np.corrcoef(selection_amplitudes[:, i],
-                                      selection_amplitudes[:, j])[0, 1]
+            if i == j:
+                correlation = 1
+            else:
+                correlation = np.corrcoef(selection_amplitudes[:, i],
+                                          selection_amplitudes[:, j])[0, 1]
             correlation_matrix[i, j] = correlation
-
     return correlation_matrix
-
