@@ -58,7 +58,7 @@ class ReviseViewForm:
         self.__window_type = 'revise_view_form'
         self.__parent = parent
 
-        self.components = ['X', 'Y', 'Z']
+        self.components = ('X', 'Y', 'Z')
         self.files_info: List[FileInfo] = []
         self.static_colors = []
 
@@ -184,7 +184,8 @@ class ReviseViewForm:
             else:
                 item.setCheckState(Qt.Unchecked)
 
-    def get_form_data(self) -> FormParameters:
+    @property
+    def form_parameters(self) -> FormParameters:
         ui, params = self.ui, self.__form_parameters
         params.resample_freq = ui.sbResampleFrequency.value()
         params.detrend_freq = ui.sbDentendEdge.value()
@@ -224,7 +225,7 @@ class ReviseViewForm:
         if len(self.files_info) == 0:
             return
 
-        params = self.get_form_data()
+        params = self.form_parameters
         result = np.array([])
         for f_info in self.files_info:
             bin_data = BinaryFile(f_info.path, params.resample_freq, True)
@@ -255,7 +256,7 @@ class ReviseViewForm:
                 'No data for spectrums. Ready')
             return
 
-        params = self.get_form_data()
+        params = self.form_parameters
 
         result = np.array([])
         for i in range(1, self.signals.shape[1]):
@@ -288,7 +289,7 @@ class ReviseViewForm:
                 'No data for correlations. Ready')
             return
 
-        params = self.get_form_data()
+        params = self.form_parameters
         f_min, f_max = params.correlations_freq_limits
         if f_min >= f_max:
             self.ui.statusBar.showMessage('Invalid frequency limits')
@@ -322,7 +323,7 @@ class ReviseViewForm:
         if self.signals.shape[0] == 0:
             return
 
-        params = self.get_form_data()
+        params = self.form_parameters
 
         if len(params.selection_file_ids) == 0:
             return
@@ -401,7 +402,7 @@ class ReviseViewForm:
         if self.avg_spectrums.shape[0] == 0:
             return
 
-        params = self.get_form_data()
+        params = self.form_parameters
 
         file_ids = params.selection_file_ids
         if len(file_ids) == 0:
@@ -461,7 +462,7 @@ class ReviseViewForm:
         layout = self.ui.correlationsPlot
         layout.clear()
 
-        params = self.get_form_data()
+        params = self.form_parameters
 
         file_ids = params.selection_file_ids
         if len(file_ids) == 0:
@@ -494,7 +495,7 @@ class ReviseViewForm:
     def change_spectrum_x_limits(self):
         if self.spectrums_plot is None:
             return
-        params = self.get_form_data()
+        params = self.form_parameters
         freq_min, freq_max = params.sp_freq_limits
         if freq_min >= freq_max:
             return

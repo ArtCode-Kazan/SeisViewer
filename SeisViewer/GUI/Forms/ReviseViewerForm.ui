@@ -226,7 +226,7 @@
            <item>
             <widget class="QRadioButton" name="rbSmoothSpectrums">
              <property name="text">
-              <string>S&amp;mooth</string>
+              <string>Smoo&amp;th</string>
              </property>
              <property name="checked">
               <bool>true</bool>

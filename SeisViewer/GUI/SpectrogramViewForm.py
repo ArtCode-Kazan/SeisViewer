@@ -161,7 +161,8 @@ class SpectrogramViewForm:
         self.modify_time_step()
         self.modify_step_index()
 
-    def read_form_data(self):
+    @property
+    def form_parameters(self) -> FormParameters:
         ui = self.ui
         params = self.form_parameters
         params.resample_freq = ui.sbResampleFrequency.value()
@@ -173,6 +174,7 @@ class SpectrogramViewForm:
         params.min_freq = ui.dsMinFrequency.value()
         params.max_freq = ui.dsMaxFrequency.value()
         params.component_id = ui.cbComponents.currentIndex()
+        return params
 
     def change_analyzing_file(self):
         current_id = self.ui.cbFileName.currentIndex()
@@ -186,7 +188,6 @@ class SpectrogramViewForm:
         self.ui.gwGraphOriginalSignal.clear()
         self.ui.gwGraphOriginalSpectrogram.clear()
         self.signal, self.spectrograms = [], []
-        self.read_form_data()
         params = self.form_parameters
 
         bin_data = BinaryFile(self.files_info[params.file_id].path,
@@ -225,7 +226,6 @@ class SpectrogramViewForm:
         if len(self.signal) != len(self.components):
             return
 
-        self.read_form_data()
         params = self.form_parameters
 
         signal = self.signal[params.component_id]
@@ -249,7 +249,6 @@ class SpectrogramViewForm:
     def change_spectrogram_y_limits(self):
         if self.__spectrogram_plot is None:
             return
-        self.read_form_data()
         params = self.form_parameters
         freq_min, freq_max = params.min_freq, params.max_freq
         if freq_min >= freq_max:
@@ -272,9 +271,7 @@ class SpectrogramViewForm:
         if len(self.spectrograms) == 0:
             return
 
-        self.read_form_data()
         params = self.form_parameters
-
         current_spectrogram = self.spectrograms[params.component_id]
         sp_data = current_spectrogram.sp_data
 

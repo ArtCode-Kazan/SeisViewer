@@ -173,7 +173,8 @@ class ReviseExportForm:
         else:
             ui.cbCorrelationGraph.setEnabled(True)
 
-    def get_form_data(self) -> FormParameters:
+    @property
+    def form_parameters(self) -> FormParameters:
         ui, params = self.ui, self.__form_parameters
         params.export_folder = ui.eExportFolder.text()
         params.root_folder_name = ui.eRootFolderName.text()
@@ -222,7 +223,7 @@ class ReviseExportForm:
             return
 
         thread = External()
-        thread.parameters = self.get_form_data()
+        thread.parameters = self.form_parameters
         thread.files_info = self.files_info
         thread.signals = self.signals
         thread.spectrums = self.spectrums

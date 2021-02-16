@@ -208,4 +208,4 @@ Fix bug in ReviseForm: fix collect binary signal in one array
  Requires: SeisCore 0.3.14
 
 # version 2.0.0
-Full package upgrade with using new SeisCore version
+Full package upgrade with using new SeisCore version 0.4.1

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
 from SeisCore.BinaryFile.BinaryFile import BinaryFile
-from SeisCore.BinaryFile.BinaryFile import BadHeaderData, BadFilePath, InvalidChannelsCount
+from SeisCore.BinaryFile.BinaryFile import BadHeaderData, BadFilePath
 
 from SeisViewer.GUI.Dialogs import show_folder_dialog, show_message
 from SeisViewer.GUI.Structures import FileInfo
@@ -156,8 +156,21 @@ class MainWindow:
         index = self._ui.gFileInfo.currentRow()
         if index == -1:
             return
-        self._ui.gFileInfo.removeRow(index)
-        self.__files_info.pop(index)
+        grid = self._ui.gFileInfo
+
+        file_name = grid.item(index, 0).text()
+        frequency = int(grid.item(index, 2).text())
+        dt_start = datetime.strptime(grid.item(index, 3).text(),
+                                     '%d.%m.%Y %H:%M:%S.%f')
+        deleting_index = -1
+        for i, item in enumerate(self.files_info):
+            if (item.name == file_name and item.frequency == frequency and
+                    item.time_start == dt_start):
+                deleting_index = i
+                break
+        if deleting_index != -1:
+            self._ui.gFileInfo.removeRow(index)
+            self.__files_info.pop(index)
 
     def clear_grid_data(self):
         self._ui.gFileInfo.setRowCount(0)
@@ -185,8 +198,8 @@ class MainWindow:
 
         export_folder = show_folder_dialog()
         full_path = os.path.join(export_folder, 'FileDataTable.dat')
-        header=['FileName', 'Type', 'Frequency', 'DateTimeStart',
-                'DateTimeStop', 'Duration', 'Longitude', 'Latitude']
+        header = ['FileName', 'Type', 'Frequency', 'DateTimeStart',
+                  'DateTimeStop', 'Duration', 'Longitude', 'Latitude']
         dt_fmt = '%d.%m.%Y %H:%M:%S.%f'
         with open(full_path, 'w') as f:
             f.write('\t'.join(header))
