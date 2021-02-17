@@ -36,7 +36,7 @@ class SpectrogramViewForm:
 
         self.components = ('X', 'Y', 'Z')
         self.files_info: List[FileInfo] = []
-        self.form_parameters = FormParameters()
+        self.__form_parameters = FormParameters()
 
         self.signal: List[np.ndarray, np.ndarray, np.ndarray] = []
         self.spectrograms: List[Spectrogram, Spectrogram, Spectrogram] = []
@@ -51,6 +51,7 @@ class SpectrogramViewForm:
         self.__ui = loadUi(ui_path, self.__window)
 
         self.__ui.cbFileName.currentTextChanged.connect(self.change_analyzing_file)
+        self.__ui.cbResetFields.stateChanged.connect(self.modify_reset_fields)
         self.__ui.dtStartTime.dateTimeChanged.connect(self.modify_time_step)
         self.__ui.dtStopTime.dateTimeChanged.connect(self.modify_time_step)
         self.__ui.sbTimeStepSize.valueChanged.connect(self.modify_step_index)
@@ -74,6 +75,11 @@ class SpectrogramViewForm:
     def ui(self):
         return self.__ui
 
+    def modify_reset_fields(self):
+        ui = self.ui
+        file_id = ui.cbFileName.currentIndex()
+        self.modify_time_limits(file_id=file_id)
+
     def modify_resample_freq_widget(self, file_id):
         file_info = self.files_info[file_id]
         signal_freq = file_info.frequency
@@ -92,18 +98,21 @@ class SpectrogramViewForm:
         ui.dtStartTime.setMinimumDateTime(dt_start)
         ui.dtStopTime.setMaximumDateTime(dt_stop)
 
-        current_dt_start = ui.dtStartTime.dateTime().toPyDateTime()
-        current_dt_stop = ui.dtStopTime.dateTime().toPyDateTime()
-
-        if dt_start <= current_dt_start < dt_stop:
-            ui.dtStartTime.setDateTime(current_dt_start)
-        else:
+        if ui.cbResetFields.isChecked():
             ui.dtStartTime.setDateTime(dt_start)
-
-        if dt_start < current_dt_stop <= dt_stop:
-            ui.dtStopTime.setDateTime(current_dt_stop)
-        else:
             ui.dtStopTime.setDateTime(dt_stop)
+        else:
+            current_dt_start = ui.dtStartTime.dateTime().toPyDateTime()
+            current_dt_stop = ui.dtStopTime.dateTime().toPyDateTime()
+            if dt_start <= current_dt_start < dt_stop:
+                ui.dtStartTime.setDateTime(current_dt_start)
+            else:
+                ui.dtStartTime.setDateTime(dt_start)
+
+            if dt_start < current_dt_stop <= dt_stop:
+                ui.dtStopTime.setDateTime(current_dt_stop)
+            else:
+                ui.dtStopTime.setDateTime(dt_stop)
 
     def modify_time_step(self):
         ui = self.ui
@@ -156,6 +165,7 @@ class SpectrogramViewForm:
         ui.lSpectrogramTimeInterval.clear()
         ui.gwGraphOriginalSpectrogram.clear()
 
+        ui.cbResetFields.setChecked(True)
         self.modify_resample_freq_widget(file_id=0)
         self.modify_time_limits(file_id=0)
         self.modify_time_step()
@@ -164,7 +174,7 @@ class SpectrogramViewForm:
     @property
     def form_parameters(self) -> FormParameters:
         ui = self.ui
-        params = self.form_parameters
+        params = self.__form_parameters
         params.resample_freq = ui.sbResampleFrequency.value()
         params.file_id = ui.cbFileName.currentIndex()
         params.dt_start = ui.dtStartTime.dateTime().toPyDateTime()

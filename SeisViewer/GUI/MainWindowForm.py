@@ -123,6 +123,25 @@ class MainWindow:
         frame_geom.moveCenter(center_point)
         self.window.move(frame_geom.topLeft())
 
+    def add_grid_row(self, file_info: FileInfo):
+        grid = self._ui.gFileInfo
+        new_rows_count = grid.rowCount() + 1
+        grid.setRowCount(new_rows_count)
+        index = new_rows_count - 1
+        grid.setItem(index, 0, QTableWidgetItem(file_info.name))
+        grid.setItem(index, 1, QTableWidgetItem(file_info.format_type))
+        grid.setItem(index, 2, QTableWidgetItem(str(file_info.frequency)))
+        dt_start = datetime.strftime(file_info.time_start,
+                                     '%d.%m.%Y %H:%M:%S.%f')
+        dt_stop = datetime.strftime(file_info.time_stop,
+                                    '%d.%m.%Y %H:%M:%S.%f')
+        grid.setItem(index, 3, QTableWidgetItem(dt_start))
+        grid.setItem(index, 4, QTableWidgetItem(dt_stop))
+        grid.setItem(index, 5, QTableWidgetItem(file_info.duration))
+        grid.setItem(index, 6, QTableWidgetItem(str(file_info.longitude)))
+        grid.setItem(index, 7, QTableWidgetItem(str(file_info.latitude)))
+
+
     def open_files(self):
         """
         Loading files info into grid
@@ -135,22 +154,10 @@ class MainWindow:
         new_files = [x for x in new_files if x not in self.__files_info]
         self.__files_info += new_files
 
-        new_rows_count = len(self.__files_info)
         grid = self._ui.gFileInfo
-        grid.setRowCount(new_rows_count)
-        for index, file_info in enumerate(self.__files_info):
-            grid.setItem(index, 0, QTableWidgetItem(file_info.name))
-            grid.setItem(index, 1, QTableWidgetItem(file_info.format_type))
-            grid.setItem(index, 2, QTableWidgetItem(str(file_info.frequency)))
-            dt_start = datetime.strftime(file_info.time_start,
-                                         '%d.%m.%Y %H:%M:%S.%f')
-            dt_stop = datetime.strftime(file_info.time_stop,
-                                        '%d.%m.%Y %H:%M:%S.%f')
-            grid.setItem(index, 3, QTableWidgetItem(dt_start))
-            grid.setItem(index, 4, QTableWidgetItem(dt_stop))
-            grid.setItem(index, 5, QTableWidgetItem(file_info.duration))
-            grid.setItem(index, 6, QTableWidgetItem(str(file_info.longitude)))
-            grid.setItem(index, 7, QTableWidgetItem(str(file_info.latitude)))
+        grid.setRowCount(0)
+        for file_info in self.__files_info:
+            self.add_grid_row(file_info)
 
     def delete_selected_row(self):
         index = self._ui.gFileInfo.currentRow()

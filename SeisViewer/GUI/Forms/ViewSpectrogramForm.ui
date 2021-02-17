@@ -71,6 +71,16 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
+          <widget class="QCheckBox" name="cbResetFields">
+           <property name="text">
+            <string>Reset times after loading</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
             <widget class="QLabel" name="label_4">
