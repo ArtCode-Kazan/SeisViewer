@@ -8,8 +8,16 @@ plt.switch_backend('SVG')
 mpl.rcParams['agg.path.chunksize'] = 10000
 
 
-def plot_signals(data, output_folder, output_name, norm_coeff=1000,
-                 components_order=('X', 'Y', 'Z')):
+def plot_signals(data: np.ndarray, output_folder: str, output_name: str,
+                 norm_coeff=1000, components_order=('X', 'Y', 'Z')) -> None:
+    """
+    :param data: signal data [4 columns: Time, XChannel, YChannel, ZChannel]
+    :param output_folder:
+    :param output_name:
+    :param norm_coeff:
+    :param components_order:
+    :return:
+    """
     fig, axes = plt.subplots(3, 1)
     fig.set_size_inches(20, 18)
     fig.dpi = 96
@@ -30,8 +38,9 @@ def plot_signals(data, output_folder, output_name, norm_coeff=1000,
     plt.close(fig)
 
 
-def plot_spectrums(data, output_folder, output_name,
-                   components_order=('X', 'Y', 'Z'), freq_lims=(0, 10)):
+def plot_spectrums(data: np.ndarray, output_folder: str, output_name: str,
+                   components_order=('X', 'Y', 'Z'),
+                   freq_lims=(0, 10)) -> None:
     data = data[(data[:, 0] >= freq_lims[0]) * (data[:, 0] <= freq_lims[1])]
     fig, axes = plt.subplots(3, 1)
     fig.set_size_inches(15, 15)
@@ -56,11 +65,12 @@ def plot_spectrums(data, output_folder, output_name,
     plt.close(fig)
 
 
-def plot_correlation(all_devices, colors, correlation_matrix,
-                     output_folder, output_name):
+def plot_correlation(device_list: list, colors,
+                     correlation_matrix: np.ndarray,
+                     output_folder: str, output_name: str) -> None:
     """
-    Ploting general graph with all correlationf for devices
-    :param all_devices: list of file names
+    Plotting general graph with all correlationf for devices
+    :param device_list: list of file names
     :param colors: graph colors
     :param correlation_matrix: correlation matrix
     :param output_folder: export folder
@@ -80,10 +90,10 @@ def plot_correlation(all_devices, colors, correlation_matrix,
 
     axes.set_ylim(0, 1)
 
-    graph_count = len(all_devices)
+    graph_count = len(device_list)
 
     x_values = np.arange(1, graph_count + 1, 1)
-    x_labels = [x[:17]+'...' for x in all_devices]
+    x_labels = [x[:17] +'...' for x in device_list]
 
     axes.set_xticks(x_values)
     axes.set_xticklabels(x_labels, minor=False, rotation=90)
