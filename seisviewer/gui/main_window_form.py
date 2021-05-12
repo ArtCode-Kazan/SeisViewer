@@ -1,76 +1,24 @@
 import sys
 import os
-import imp
 from datetime import datetime
 from typing import List
 
 from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
-from SeisCore.BinaryFile.BinaryFile import BinaryFile
-from SeisCore.BinaryFile.BinaryFile import BadHeaderData, BadFilePath
+from seiscore import BinaryFile
+from seiscore.binaryfile.binaryfile import BadHeaderData, BadFilePath
+from seiscore.binaryfile.binaryfile import FileInfo
 
-from SeisViewer.GUI.Dialogs import show_folder_dialog, show_message
-from SeisViewer.GUI.Structures import FileInfo
+from seisviewer.gui.dialogs import show_folder_dialog, show_message
 
-from SeisViewer.GUI.ReviseViewForm import ReviseViewForm
-from SeisViewer.GUI.FilesJoiningForm import FilesJoiningForm
-from SeisViewer.GUI.SpectrogramViewForm import SpectrogramViewForm
-
-
-def duration_formatting(total_seconds: float) -> str:
-    days = int(total_seconds / (24 * 3600))
-    hours = int((total_seconds - days * 24 * 3600) / 3600)
-    minutes = int((total_seconds - days * 24 * 3600 - hours * 3600) / 60)
-    seconds = total_seconds - days * 24 * 3600 - hours * 3600 - \
-              minutes * 60
-
-    hours = '0' * (2 - len(str(hours))) + str(hours)
-    minutes = '0' * (2 - len(str(minutes))) + str(minutes)
-    whole_part, fractional_part = str(seconds).split('.')
-    seconds = '0' * (
-                2 - len(whole_part)) + whole_part + '.' + fractional_part[:2]
-    if days > 0:
-        duration_format = f'{days} days {hours}:{minutes}:{seconds}'
-    else:
-        duration_format = f'{hours}:{minutes}:{seconds}'
-    return duration_format
-
-
-def get_files_info(file_paths: list) -> List[FileInfo]:
-    """
-    Getting file info from file paths
-    :param file_paths: list of file paths
-    :return:
-    """
-    if len(file_paths) == 0:
-        return []
-
-    result = []
-    for path in file_paths:
-        file_name = os.path.basename(path)
-        try:
-            bin_data = BinaryFile(path)
-            header_data = bin_data.file_header
-        except (BadFilePath, BadHeaderData):
-            continue
-        format_type = bin_data.file_type
-        duration = duration_formatting(bin_data.seconds_duration)
-        file_info = FileInfo(path, file_name, format_type,
-                             bin_data.signal_frequency,
-                             bin_data.datetime_start, bin_data.datetime_stop,
-                             duration, bin_data.longitude, bin_data.latitude)
-        result.append(file_info)
-    return result
+from seisviewer.gui.revise_view_form import ReviseViewForm
+from seisviewer.gui.files_joining_form import FilesJoiningForm
+from seisviewer.gui.spectrogram_view_form import SpectrogramViewForm
 
 
 class MainWindow:
     def __init__(self):
-        self.__window_type = 'main_window'
-
-        module_folder = imp.find_module('SeisViewer')[1]
-        self.__forms_folder = os.path.join(module_folder, 'GUI', 'Forms')
-
         self.__app = QApplication(sys.argv)
         self.__window = QMainWindow()
 
@@ -80,7 +28,7 @@ class MainWindow:
         self.__files_joining_form = FilesJoiningForm(self)
         self.__spectrogram_form = SpectrogramViewForm(self)
 
-        ui_path = os.path.join(self.__forms_folder, 'MainWindowForm.ui')
+        ui_path = os.path.join(self.forms_folder, 'MainWindowForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
         self.__ui.bAddFiles.clicked.connect(self.open_files)
         self.__ui.bDelRow.clicked.connect(self.delete_selected_row)
@@ -97,10 +45,6 @@ class MainWindow:
         self.__app.exec()
 
     @property
-    def window_type(self):
-        return self.__window_type
-
-    @property
     def window(self):
         return self.__window
 
@@ -109,8 +53,10 @@ class MainWindow:
         return self.__ui
 
     @property
-    def form_folder(self):
-        return self.__forms_folder
+    def forms_folder(self):
+        import seisviewer
+        module_folder = os.path.dirname(seisviewer.__file__)
+        return os.path.join(module_folder, 'gui', 'forms')
 
     @property
     def files_info(self) -> List[FileInfo]:
@@ -137,10 +83,9 @@ class MainWindow:
                                     '%d.%m.%Y %H:%M:%S.%f')
         grid.setItem(index, 3, QTableWidgetItem(dt_start))
         grid.setItem(index, 4, QTableWidgetItem(dt_stop))
-        grid.setItem(index, 5, QTableWidgetItem(file_info.duration))
+        grid.setItem(index, 5, QTableWidgetItem(file_info.formatted_duration))
         grid.setItem(index, 6, QTableWidgetItem(str(file_info.longitude)))
         grid.setItem(index, 7, QTableWidgetItem(str(file_info.latitude)))
-
 
     def open_files(self):
         """
@@ -150,9 +95,17 @@ class MainWindow:
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFiles)
         file_paths = file_dialog.getOpenFileNames()[0]
-        new_files = get_files_info(file_paths=file_paths)
-        new_files = [x for x in new_files if x not in self.__files_info]
-        self.__files_info += new_files
+        if len(file_paths) == 0:
+            return
+
+        for path in file_paths:
+            try:
+                bin_data = BinaryFile(path)
+            except (BadFilePath, BadHeaderData):
+                continue
+            file_info = bin_data.short_file_info
+            if file_info not in self.__files_info:
+                self.__files_info.append(file_info)
 
         grid = self._ui.gFileInfo
         grid.setRowCount(0)
@@ -169,12 +122,15 @@ class MainWindow:
         frequency = int(grid.item(index, 2).text())
         dt_start = datetime.strptime(grid.item(index, 3).text(),
                                      '%d.%m.%Y %H:%M:%S.%f')
-        deleting_index = -1
+
         for i, item in enumerate(self.files_info):
             if (item.name == file_name and item.frequency == frequency and
                     item.time_start == dt_start):
                 deleting_index = i
                 break
+        else:
+            deleting_index = -1
+
         if deleting_index != -1:
             self._ui.gFileInfo.removeRow(index)
             self.__files_info.pop(index)
@@ -215,7 +171,7 @@ class MainWindow:
                 dt_start = datetime.strftime(item.time_start, dt_fmt)
                 dt_stop = datetime.strftime(item.time_stop, dt_fmt)
                 record = [item.name, item.format_type, item.frequency,
-                          dt_start, dt_stop, item.duration,
+                          dt_start, dt_stop, item.formatted_duration,
                           item.longitude, item.latitude]
                 f.write('\n' + '\t'.join(map(str, record)))
             show_message('File saving completed')

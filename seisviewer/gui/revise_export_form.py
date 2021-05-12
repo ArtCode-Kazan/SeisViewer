@@ -7,14 +7,15 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from SeisViewer.GUI.Structures import FileInfo
-from SeisViewer.GUI.Dialogs import show_folder_dialog
-from SeisViewer.Functions.Exporting import signal_to_file
-from SeisViewer.Functions.Exporting import spectrum_to_file
+from seiscore.binaryfile.binaryfile import FileInfo
 
-from SeisViewer.Functions.Plotting import plot_signals
-from SeisViewer.Functions.Plotting import plot_spectrums
-from SeisViewer.Functions.Plotting import plot_correlation
+from seisviewer.gui.dialogs import show_folder_dialog
+from seisviewer.functions.exporting import signal_to_file
+from seisviewer.functions.exporting import spectrum_to_file
+
+from seisviewer.functions.plotting import plot_signals
+from seisviewer.functions.plotting import plot_spectrums
+from seisviewer.functions.plotting import plot_correlation
 
 
 class FormParameters:
@@ -98,7 +99,6 @@ class External(QThread):
 
 class ReviseExportForm:
     def __init__(self, parent):
-        self.__window_type = 'revise_export_form'
         self.__parent = parent
 
         self.components = ['X', 'Y', 'Z']
@@ -111,7 +111,7 @@ class ReviseExportForm:
         self.__calc_thread = None
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.parent.form_folder
+        self.__forms_folder = parent.parent.forms_folder
         ui_path = os.path.join(self.__forms_folder, 'ReviseExportForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 

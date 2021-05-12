@@ -7,12 +7,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from SeisCore.BinaryFile.BinaryFile import BinaryFile
-from SeisCore.Functions.Spectrogram import Spectrogram
-from SeisCore.Plotting.Plotting import plot_signal
+from seiscore import BinaryFile
+from seiscore import Spectrogram
+from seiscore.binaryfile.binaryfile import FileInfo
 
-from SeisViewer.GUI.Dialogs import show_folder_dialog
-from SeisViewer.GUI.Structures import FileInfo
+from seiscore.plotting.plotting import plot_signal
+
+from seisviewer.gui.dialogs import show_folder_dialog
 
 
 class FormParameters(NamedTuple):
@@ -34,7 +35,7 @@ class External(QThread):
     finished_percent = pyqtSignal(float)
     status = pyqtSignal(str)
     files_info = List[FileInfo]
-    parameters = None   #type: FormParameters
+    parameters = None   # type: FormParameters
 
     def run(self):
         params = self.parameters
@@ -111,13 +112,12 @@ class External(QThread):
 
 class SpectrogramsExportForm:
     def __init__(self, parent):
-        self.__window_type = 'spectrograms_form'
         self.__parent = parent
 
         self.__calc_thread = None
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.parent.form_folder
+        self.__forms_folder = parent.parent.forms_folder
         ui_path = os.path.join(self.__forms_folder,
                                'SpectrogramExportForm.ui')
         self.__ui = loadUi(ui_path, self.__window)

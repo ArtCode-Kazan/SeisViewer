@@ -9,15 +9,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 from PyQt5.QtCore import Qt
 
-from SeisCore import BinaryFile
-from SeisCore.Functions.Wavelet import detrend
-from SeisCore.Functions.Spectrum import average_spectrum
-
 from pyqtgraph import PlotCurveItem
 
-from SeisViewer.GUI.Structures import FileInfo
-from SeisViewer.Functions.Processing import cross_correlation
-from SeisViewer.GUI.ReviseExportForm import ReviseExportForm
+from seiscore import BinaryFile
+from seiscore.functions.wavelet import detrend
+from seiscore.functions.spectrum import average_spectrum
+from seiscore.binaryfile.binaryfile import FileInfo
+
+from seisviewer.gui.revise_export_form import ReviseExportForm
 
 
 class FormParameters:
@@ -53,9 +52,36 @@ def normal_signal(signal: np.ndarray, norming_interval=(-1, 1)) -> np.ndarray:
            (signal - min_val) / (max_val - min_val) + norming_interval[0]
 
 
+def cross_correlation(frequency: np.ndarray, f_min_analysis: float,
+                      f_max_analysis: float,
+                      amplitudes: np.ndarray) -> np.ndarray:
+    """
+    Calculating cross-correlation between all devices
+    :param frequency: frequency vector
+    :param f_min_analysis: minimal frequency for calculating
+    :param f_max_analysis: maximal frequency for calculating
+    :param amplitudes: amplitudes matrix
+    :return: correlation matrix
+    """
+    selection_amplitudes = amplitudes[(f_min_analysis <= frequency) *
+                                      (frequency <= f_max_analysis)]
+
+    correlation_matrix = np.zeros((amplitudes.shape[1], amplitudes.shape[1]),
+                                  dtype=np.float)
+
+    for i in range(amplitudes.shape[1]):
+        for j in range(amplitudes.shape[1]):
+            if i == j:
+                correlation = 1
+            else:
+                correlation = np.corrcoef(selection_amplitudes[:, i],
+                                          selection_amplitudes[:, j])[0, 1]
+            correlation_matrix[i, j] = correlation
+    return correlation_matrix
+
+
 class ReviseViewForm:
     def __init__(self, parent):
-        self.__window_type = 'revise_view_form'
         self.__parent = parent
 
         self.components = ('X', 'Y', 'Z')
@@ -69,8 +95,8 @@ class ReviseViewForm:
         self.__form_parameters = FormParameters()
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.form_folder
-        ui_path = os.path.join(self.__forms_folder, 'ReviseViewerForm.ui')
+        forms_folder = parent.forms_folder
+        ui_path = os.path.join(forms_folder, 'ReviseViewerForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 
         self.signal_time_marker = PlotCurveItem([0, 0], [-1, 1],

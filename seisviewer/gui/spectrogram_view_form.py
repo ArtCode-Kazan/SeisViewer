@@ -10,11 +10,12 @@ from PyQt5.uic import *
 
 import pyqtgraph as pg
 
-from SeisCore.BinaryFile.BinaryFile import BinaryFile
-from SeisCore.Functions.Spectrogram import Spectrogram
+from seiscore import BinaryFile
+from seiscore import Spectrogram
 
-from SeisViewer.GUI.Structures import FileInfo
-from SeisViewer.GUI.SpectrogramsExportForm import SpectrogramsExportForm
+from seiscore.binaryfile.binaryfile import FileInfo
+
+from seisviewer.gui.spectrograms_export_form import SpectrogramsExportForm
 
 
 class FormParameters:
@@ -31,7 +32,6 @@ class FormParameters:
 
 class SpectrogramViewForm:
     def __init__(self, parent):
-        self.__window_type = 'view_spectrum_form'
         self.__parent = parent
 
         self.components = ('X', 'Y', 'Z')
@@ -46,7 +46,7 @@ class SpectrogramViewForm:
         self.__export_dorm = SpectrogramsExportForm(self)
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.form_folder
+        self.__forms_folder = parent.forms_folder
         ui_path = os.path.join(self.__forms_folder, 'ViewSpectrogramForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 
@@ -143,7 +143,7 @@ class SpectrogramViewForm:
         if time_step_size == 0:
             max_value = 0
         else:
-            if dt % time_step_size != 0:
+            if dt % time_step_size:
                 max_value = int(dt / time_step_size)
             else:
                 max_value = int(dt / time_step_size) - 1
@@ -267,10 +267,18 @@ class SpectrogramViewForm:
 
     def plot_spectrogram(self):
         def mouse_move(point):
-            position = plot.vb.mapSceneToView(point)
+            try:
+                position = plot.vb.mapSceneToView(point)
+            except np.linalg.LinAlgError:
+                pass
             seconds_val, frequency_val = position.x(), position.y()
             dt_start_part = self.ui.dtStartTime.dateTime().toPyDateTime()
-            current_datetime = dt_start_part + timedelta(seconds=seconds_val)
+            time_step_minutes_size = self.form_parameters.time_step_minutes
+            time_step_index = self.form_parameters.step_index
+            current_datetime = dt_start_part + timedelta(
+                seconds=seconds_val,
+                minutes=time_step_minutes_size * time_step_index
+            )
             datetime_label = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
             self.ui.statusBar.showMessage(f'DateTime: {datetime_label}')
 
@@ -324,7 +332,12 @@ class SpectrogramViewForm:
         plot.setLabel('left', "Frequency", units='Hz')
         self.change_spectrogram_y_limits()
 
-        label_val = f'Time interval: {params.dt_start} - {params.dt_stop}'
+        current_dt_start = params.dt_start + timedelta(
+                minutes=params.time_step_minutes * params.step_index)
+        current_dt_stop = current_dt_start + timedelta(
+            minutes=params.time_step_minutes)
+
+        label_val = f'Time interval: {current_dt_start} - {current_dt_stop}'
         self.ui.lSpectrogramTimeInterval.setText(label_val)
 
         canvas.scene().sigMouseMoved.connect(mouse_move)

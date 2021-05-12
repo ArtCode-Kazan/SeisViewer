@@ -10,11 +10,11 @@ from PyQt5.uic import *
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5 import QtGui
 
-from SeisCore.BinaryFile.BinaryFile import BinaryFile
-from SeisCore.BinaryFile.BinaryFile import UNSIGNED_INT_CTYPE
-from SeisCore.BinaryFile.BinaryFile import BadHeaderData, BadFilePath
+from seiscore import BinaryFile
+from seiscore.binaryfile.binaryfile import UNSIGNED_INT_CTYPE
+from seiscore.binaryfile.binaryfile import BadHeaderData, BadFilePath
 
-from SeisViewer.GUI.Dialogs import show_folder_dialog
+from seisviewer.gui.dialogs import show_folder_dialog
 
 
 class FileInfo(NamedTuple):
@@ -124,7 +124,6 @@ class External(QThread):
 
 class FilesJoiningForm:
     def __init__(self, parent):
-        self.__window_type = 'stitching_form'
         self.__parent = parent
 
         self.__files_info = List[FileInfo]
@@ -133,7 +132,7 @@ class FilesJoiningForm:
         self.__calc_thread = None
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.form_folder
+        self.__forms_folder = parent.forms_folder
         ui_path = os.path.join(self.__forms_folder, 'FilesJoiningForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 

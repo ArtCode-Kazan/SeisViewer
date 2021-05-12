@@ -18,7 +18,8 @@ def signal_to_file(signal_data: np.ndarray,
                comments='')
 
 
-def spectrum_to_file(data: np.ndarray, output_folder: str, output_name: str):
+def spectrum_to_file(data: np.ndarray, output_folder: str,
+                     output_name: str) -> None:
     export_path = os.path.join(output_folder, output_name + '.dat')
     header = ['Frequency']
     for component in 'XYZ':
@@ -29,29 +30,26 @@ def spectrum_to_file(data: np.ndarray, output_folder: str, output_name: str):
                header=header, comments='')
 
 
-def correlation_to_file(devices, correlation_matrix, output_folder,
-                        output_name):
+def correlation_to_file(device_list: list, correlation_matrix: np.ndarray,
+                        output_folder: str, output_name: str) -> None:
     """
-    Функция для записи корреляционной матрицы в файл
-    :param devices: список приборов
-    :param correlation_matrix: корреляционная матрица
-    :param output_folder: папка, куда будет сохранен файл
-    :param output_name: имя файла (без расширения)
+    Exporting method for correlation matrix
+    :param device_list: список приборов
+    :param correlation_matrix:
+    :param output_folder:
+    :param output_name: file name (without extension)
     :return: None
     """
-    # формирование заголовка столбцов
-    header = 'NULL\t' + '\t'.join(devices) + '\n'
-    # сборка строк для записив файл
+    header = 'NULL\t' + '\t'.join(device_list) + '\n'
     write_lines = list()
     write_lines.append(header)
     for i in range(correlation_matrix.shape[0]):
-        t = list()
-        t.append(devices[i])
+        t = [device_list[i]]
         for j in range(correlation_matrix.shape[1]):
             t.append(str(correlation_matrix[i, j]))
         s = '\t'.join(t) + '\n'
         write_lines.append(s)
-    # запись данных в файл
+
     export_path = os.path.join(output_folder, output_name + '.dat')
     f = open(export_path, 'w')
     for line in write_lines:
