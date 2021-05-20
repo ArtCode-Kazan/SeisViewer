@@ -100,8 +100,7 @@ class External(QThread):
 class ReviseExportForm:
     def __init__(self, parent):
         self.__parent = parent
-
-        self.components = ['X', 'Y', 'Z']
+        self.components = ('X', 'Y', 'Z')
         self.files_info: List[FileInfo] = []
         self.static_colors = []
         self.signals = np.array([])
@@ -111,7 +110,7 @@ class ReviseExportForm:
         self.__calc_thread = None
 
         self.__window = QMainWindow()
-        self.__forms_folder = parent.parent.forms_folder
+        self.__forms_folder = parent.forms_folder
         ui_path = os.path.join(self.__forms_folder, 'ReviseExportForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 

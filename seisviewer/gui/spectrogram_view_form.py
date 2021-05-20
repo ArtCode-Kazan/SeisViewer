@@ -267,10 +267,7 @@ class SpectrogramViewForm:
 
     def plot_spectrogram(self):
         def mouse_move(point):
-            try:
-                position = plot.vb.mapSceneToView(point)
-            except np.linalg.LinAlgError:
-                pass
+            position = plot.vb.mapSceneToView(point)
             seconds_val, frequency_val = position.x(), position.y()
             dt_start_part = self.ui.dtStartTime.dateTime().toPyDateTime()
             time_step_minutes_size = self.form_parameters.time_step_minutes

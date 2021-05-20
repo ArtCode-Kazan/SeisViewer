@@ -35,7 +35,7 @@ class FormParameters(NamedTuple):
     part_suffix: str
 
 
-def get_file_parts(files_info: list) -> List[List[int]]:
+def get_file_parts(files_info: List[FileInfo]) -> List[List[int]]:
     result = []
     if len(files_info) == 0:
         return result
@@ -48,7 +48,6 @@ def get_file_parts(files_info: list) -> List[List[int]]:
     last_part_dt_stop = files_info[result[0][-1]].dt_stop
     for id_val, item in enumerate(files_info[1:]):
         id_val += 1
-        item: FileInfo = item
         delta_time = (item.dt_start - last_part_dt_stop).total_seconds()
         if delta_time <= minimal_d_time and last_part_dt_stop < item.dt_stop:
             result[-1].append(id_val)
@@ -164,7 +163,6 @@ class FilesJoiningForm:
 
             try:
                 bin_data = BinaryFile(current_path)
-                header_data = bin_data.file_header
             except (BadFilePath, BadHeaderData):
                 continue
 
@@ -183,8 +181,8 @@ class FilesJoiningForm:
         for i, item in enumerate(self.__files_info):
             grid_data.setItem(i, 0, QTableWidgetItem(item.name))
             dt_start = datetime.strftime(item.dt_start, datetime_fmt)
-            dt_stop = datetime.strftime(item.dt_stop, datetime_fmt)
             grid_data.setItem(i, 1, QTableWidgetItem(dt_start))
+            dt_stop = datetime.strftime(item.dt_stop, datetime_fmt)
             grid_data.setItem(i, 2, QTableWidgetItem(dt_stop))
 
         for part_ids in self.__part_files_ids:

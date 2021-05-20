@@ -26,6 +26,7 @@ class FormParameters:
     stop_time = datetime.now()
     signal_component_id = 0
     time_marker = 0
+    render_factor_percent = 100
     sp_window = 8192
     sp_overlap = 4096
     marmett_filter = 7
@@ -56,7 +57,7 @@ def cross_correlation(frequency: np.ndarray, f_min_analysis: float,
                       f_max_analysis: float,
                       amplitudes: np.ndarray) -> np.ndarray:
     """
-    Calculating cross-correlation between all devices
+    Calculating cross-correlation between spectrums for one component
     :param frequency: frequency vector
     :param f_min_analysis: minimal frequency for calculating
     :param f_max_analysis: maximal frequency for calculating
@@ -86,7 +87,7 @@ class ReviseViewForm:
 
         self.components = ('X', 'Y', 'Z')
         self.files_info: List[FileInfo] = []
-        self.static_colors = []
+        self._static_colors = []
 
         self.signals = np.array([])
         self.avg_spectrums = np.array([])
@@ -95,8 +96,7 @@ class ReviseViewForm:
         self.__form_parameters = FormParameters()
 
         self.__window = QMainWindow()
-        forms_folder = parent.forms_folder
-        ui_path = os.path.join(forms_folder, 'ReviseViewerForm.ui')
+        ui_path = os.path.join(self.forms_folder, 'ReviseViewerForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
 
         self.signal_time_marker = PlotCurveItem([0, 0], [-1, 1],
@@ -105,12 +105,13 @@ class ReviseViewForm:
 
         self.__export_form = ReviseExportForm(self)
 
-        self.__ui.cbSelectAll.stateChanged.connect(self.set_all_files_check_state)
         self.__ui.bUpdateSignalData.clicked.connect(self.load_signal_data)
-
         self.__ui.cbSignalComponents.currentTextChanged.connect(self.render_signals)
-        self.__ui.bApply.clicked.connect(self.global_render)
+
         self.__ui.sbSignalTimeMarker.valueChanged.connect(self.set_signal_time_marker)
+
+        self.__ui.cbSelectAll.stateChanged.connect(self.set_all_files_check_state)
+        self.__ui.bApply.clicked.connect(self.global_render)
 
         self.__ui.bLoadSpectrums.clicked.connect(self.load_spectrums_data)
         self.__ui.cbSpectrumComponents.currentTextChanged.connect(self.render_spectrums)
@@ -122,6 +123,10 @@ class ReviseViewForm:
         self.__ui.bLoadCorrelations.clicked.connect(self.load_correlations)
         self.__ui.cbCorrelationComponents.currentTextChanged.connect(self.render_correlations)
         self.__ui.aExport.triggered.connect(self.open_export_form)
+
+    @property
+    def forms_folder(self) -> str:
+        return self.parent.forms_folder
 
     @property
     def window(self):
@@ -153,6 +158,8 @@ class ReviseViewForm:
                              resample_frequency: int) -> None:
         params = FormParameters()
         self.files_info = files_info
+        self._static_colors = []
+
         self.__form_parameters = params
         self.signals = np.array([])
         self.avg_spectrums = np.array([])
@@ -219,6 +226,7 @@ class ReviseViewForm:
         params.stop_time = ui.dtStopTime.dateTime().toPyDateTime()
         params.signal_component_id = ui.cbSignalComponents.currentIndex()
         params.time_marker = ui.sbSignalTimeMarker.value()
+        params.render_factor_percent = ui.sbRenderFactor.value()
 
         params.sp_window = ui.sbWindowSize.value()
         params.sp_overlap = ui.sbOverlapSize.value()
@@ -356,11 +364,14 @@ class ReviseViewForm:
 
         component_index = params.signal_component_id
 
+        render_parameter = params.render_factor_percent
+        resampling_param = int(100 / render_parameter)
+
         amplitude = 2
-        time_axis = self.signals[:, 0]
+        time_axis = self.signals[::resampling_param, 0]
         for i, file_id in enumerate(params.selection_file_ids):
             col_index = self.get_signal_column_index(file_id, component_index)
-            signal = self.signals[:, col_index]
+            signal = self.signals[::resampling_param, col_index]
 
             norming_interval = (-1 + amplitude * i, 1 + amplitude * i)
             signal = normal_signal(signal, norming_interval)
@@ -385,10 +396,10 @@ class ReviseViewForm:
 
     @property
     def line_colors(self) -> list:
-        if len(self.static_colors) != len(self.files_info):
-            self.static_colors = [generate_random_color() for _ in range(
+        if len(self._static_colors) != len(self.files_info):
+            self._static_colors = [generate_random_color() for _ in range(
                 len(self.files_info))]
-        return self.static_colors
+        return self._static_colors
 
     def render_spectrums(self):
         def mouse_move(point):
@@ -534,7 +545,7 @@ class ReviseViewForm:
 
     def open_export_form(self):
         self.__export_form.set_start_form_state(
-            self.files_info, self.static_colors, self.signals,
+            self.files_info, self._static_colors, self.signals,
             self.avg_spectrums, self.correlations)
         self.__export_form.window.show()
 
