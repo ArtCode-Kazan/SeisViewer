@@ -30,6 +30,10 @@ class FormParameters:
     component_id = 0
 
 
+FORM_FILENAME = 'ViewSpectrogramForm.ui'
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+
 class SpectrogramViewForm:
     def __init__(self, parent):
         self.__parent = parent
@@ -47,7 +51,7 @@ class SpectrogramViewForm:
 
         self.__window = QMainWindow()
         self.__forms_folder = parent.forms_folder
-        ui_path = os.path.join(self.__forms_folder, 'ViewSpectrogramForm.ui')
+        ui_path = os.path.join(self.__forms_folder, FORM_FILENAME)
         self.__ui = loadUi(ui_path, self.__window)
 
         self.__ui.cbFileName.currentTextChanged.connect(self.change_analyzing_file)
@@ -229,9 +233,24 @@ class SpectrogramViewForm:
         self.general_plotting()
 
     def plot_signal(self):
+        def mouse_move(point):
+            position = plot.vb.mapSceneToView(point)
+            seconds_val, frequency_val = position.x(), position.y()
+            dt_start_part = self.ui.dtStartTime.dateTime().toPyDateTime()
+            time_step_minutes_size = self.form_parameters.time_step_minutes
+            time_step_index = self.form_parameters.step_index
+            current_datetime = dt_start_part + timedelta(
+                seconds=seconds_val,
+                minutes=time_step_minutes_size * time_step_index
+            )
+            datetime_label = current_datetime.strftime(DATETIME_FORMAT)
+            self.ui.statusBar.showMessage(f'DateTime: {datetime_label}')
+
         canvas = self.ui.gwGraphOriginalSignal
         canvas.clear()
         self.ui.lSignalTimeInterval.clear()
+
+        plot, curve = canvas.addPlot(), pg.PlotCurveItem()
 
         if len(self.signal) != len(self.components):
             return
@@ -245,16 +264,19 @@ class SpectrogramViewForm:
         time_length = signal.shape[0] / params.resample_freq
         data[:, 0] = np.linspace(0, time_length, signal.shape[0])
         data[:, 1] = signal
-        canvas.plot(data, pen=color)
+        curve.setData(x=data[:, 0], y=data[:, 1], pen=color)
+        plot.addItem(curve)
 
         dt_start = params.dt_start + timedelta(
             minutes=params.time_step_minutes * params.step_index)
-        dt_start = datetime.strftime(dt_start, '%m.%d.%Y %H:%M:%S')
+        dt_start = datetime.strftime(dt_start, DATETIME_FORMAT)
         dt_stop = params.dt_start + timedelta(
             minutes=params.time_step_minutes * (params.step_index + 1))
-        dt_stop = datetime.strftime(dt_stop, '%m.%d.%Y %H:%M:%S')
+        dt_stop = datetime.strftime(dt_stop, DATETIME_FORMAT)
         label_val = f'Time interval: {dt_start} - {dt_stop}'
         self.ui.lSignalTimeInterval.setText(label_val)
+
+        canvas.scene().sigMouseMoved.connect(mouse_move)
 
     def change_spectrogram_y_limits(self):
         if self.__spectrogram_plot is None:
@@ -276,7 +298,7 @@ class SpectrogramViewForm:
                 seconds=seconds_val,
                 minutes=time_step_minutes_size * time_step_index
             )
-            datetime_label = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
+            datetime_label = current_datetime.strftime(DATETIME_FORMAT)
             self.ui.statusBar.showMessage(f'DateTime: {datetime_label}')
 
         canvas = self.ui.gwGraphOriginalSpectrogram

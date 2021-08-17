@@ -212,7 +212,7 @@
          </widget>
         </item>
         <item>
-         <widget class="PlotWidget" name="gwGraphOriginalSignal"/>
+         <widget class="GraphicsLayoutWidget" name="gwGraphOriginalSignal"/>
         </item>
        </layout>
       </widget>
@@ -310,11 +310,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>pyqtgraph.h</header>
-  </customwidget>
   <customwidget>
    <class>GraphicsLayoutWidget</class>
    <extends>QGraphicsView</extends>
