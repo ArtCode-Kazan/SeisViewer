@@ -113,6 +113,7 @@ class ReviseViewForm:
         self.__ui.cbSelectAll.stateChanged.connect(self.set_all_files_check_state)
         self.__ui.bApply.clicked.connect(self.global_render)
 
+        self.__ui.cbWindowSizes.currentTextChanged.connect(self.set_optimal_overlap_window_size)
         self.__ui.bLoadSpectrums.clicked.connect(self.load_spectrums_data)
         self.__ui.cbSpectrumComponents.currentTextChanged.connect(self.render_spectrums)
         self.__ui.rbOriginalSpectrums.toggled.connect(self.render_spectrums)
@@ -193,8 +194,10 @@ class ReviseViewForm:
         ui.sbSignalTimeMarker.setValue(params.time_marker)
 
         ui.spectrumsPlot.clear()
-        ui.sbWindowSize.setValue(params.sp_window)
+
+        ui.cbWindowSizes.setCurrentText(str(params.sp_window))
         ui.sbOverlapSize.setValue(params.sp_overlap)
+
         ui.sbMarmettFilter.setValue(params.marmett_filter)
         ui.sbMedianFilter.setValue(params.median_filter)
         ui.sbMinVisualFrequency.setValue(params.sp_freq_limits[0])
@@ -228,7 +231,7 @@ class ReviseViewForm:
         params.time_marker = ui.sbSignalTimeMarker.value()
         params.render_factor_percent = ui.sbRenderFactor.value()
 
-        params.sp_window = ui.sbWindowSize.value()
+        params.sp_window = int(ui.cbWindowSizes.currentText())
         params.sp_overlap = ui.sbOverlapSize.value()
         params.marmett_filter = ui.sbMarmettFilter.value()
         params.median_filter = ui.sbMedianFilter.value()
@@ -512,9 +515,11 @@ class ReviseViewForm:
 
         component_id = params.correlation_component_id
         data = self.correlations[component_id][:, file_ids]
+        data = data[file_ids, :]
 
-        x_ticks_data = [(i, x.name[:5]+'...') for i, x in enumerate(
-            self.files_info)]
+        x_ticks_data = [(i, self.files_info[x].name[:5] + '...') for i, x in
+                        enumerate(file_ids)
+                        ]
         plot.getAxis('bottom').setTicks([x_ticks_data])
 
         for i, id_val in enumerate(file_ids):
@@ -528,6 +533,11 @@ class ReviseViewForm:
         value = self.ui.sbSignalTimeMarker.value()
         _, y_data = self.signal_time_marker.getData()
         self.signal_time_marker.setData([value, value], y_data)
+
+    def set_optimal_overlap_window_size(self):
+        window_size = self.form_parameters.sp_window
+        overlap_size = int(window_size / 2)
+        self.ui.sbOverlapSize.setValue(overlap_size)
 
     def change_spectrum_x_limits(self):
         if self.spectrums_plot is None:
@@ -548,8 +558,3 @@ class ReviseViewForm:
             self.files_info, self._static_colors, self.signals,
             self.avg_spectrums, self.correlations)
         self.__export_form.window.show()
-
-
-
-
-
