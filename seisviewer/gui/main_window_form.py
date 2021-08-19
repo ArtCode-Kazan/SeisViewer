@@ -17,6 +17,9 @@ from seisviewer.gui.files_joining_form import FilesJoiningForm
 from seisviewer.gui.spectrogram_view_form import SpectrogramViewForm
 
 
+DATETIME_FORMAT = '%d.%m.%Y %H:%M:%S.%f'
+
+
 class MainWindow:
     def __init__(self):
         self.__app = QApplication(sys.argv)
@@ -70,22 +73,26 @@ class MainWindow:
         self.window.move(frame_geom.topLeft())
 
     def add_grid_row(self, file_info: FileInfo):
-        grid = self._ui.gFileInfo
+        grid: QTableWidget = self._ui.gFileInfo
+        grid.setSortingEnabled(False)
         new_rows_count = grid.rowCount() + 1
         grid.setRowCount(new_rows_count)
         index = new_rows_count - 1
+
         grid.setItem(index, 0, QTableWidgetItem(file_info.name))
         grid.setItem(index, 1, QTableWidgetItem(file_info.format_type))
         grid.setItem(index, 2, QTableWidgetItem(str(file_info.frequency)))
-        dt_start = datetime.strftime(file_info.time_start,
-                                     '%d.%m.%Y %H:%M:%S.%f')
-        dt_stop = datetime.strftime(file_info.time_stop,
-                                    '%d.%m.%Y %H:%M:%S.%f')
+
+        dt_start = file_info.time_start.strftime(DATETIME_FORMAT)
         grid.setItem(index, 3, QTableWidgetItem(dt_start))
+
+        dt_stop = file_info.time_stop.strftime(DATETIME_FORMAT)
         grid.setItem(index, 4, QTableWidgetItem(dt_stop))
+
         grid.setItem(index, 5, QTableWidgetItem(file_info.formatted_duration))
         grid.setItem(index, 6, QTableWidgetItem(str(file_info.longitude)))
         grid.setItem(index, 7, QTableWidgetItem(str(file_info.latitude)))
+        grid.setSortingEnabled(True)
 
     def open_files(self):
         """
@@ -106,26 +113,23 @@ class MainWindow:
             file_info = bin_data.short_file_info
             if file_info not in self.__files_info:
                 self.__files_info.append(file_info)
+                self.add_grid_row(file_info)
 
-        grid = self._ui.gFileInfo
-        grid.setRowCount(0)
-        for file_info in self.__files_info:
-            self.add_grid_row(file_info)
+        # grid = self._ui.gFileInfo
+        # grid.setRowCount(0)
+        # for file_info in self.__files_info:
+        #     self.add_grid_row(file_info)
 
     def delete_selected_row(self):
-        index = self._ui.gFileInfo.currentRow()
+        grid = self._ui.gFileInfo
+        index = grid.currentRow()
+
         if index == -1:
             return
-        grid = self._ui.gFileInfo
 
         file_name = grid.item(index, 0).text()
-        frequency = int(grid.item(index, 2).text())
-        dt_start = datetime.strptime(grid.item(index, 3).text(),
-                                     '%d.%m.%Y %H:%M:%S.%f')
-
         for i, item in enumerate(self.files_info):
-            if (item.name == file_name and item.frequency == frequency and
-                    item.time_start == dt_start):
+            if item.name == file_name:
                 deleting_index = i
                 break
         else:
@@ -133,7 +137,7 @@ class MainWindow:
 
         if deleting_index != -1:
             self._ui.gFileInfo.removeRow(index)
-            self.__files_info.pop(index)
+            self.__files_info.pop(deleting_index)
 
     def clear_grid_data(self):
         self._ui.gFileInfo.setRowCount(0)
@@ -163,13 +167,12 @@ class MainWindow:
         full_path = os.path.join(export_folder, 'FileDataTable.dat')
         header = ['FileName', 'Type', 'Frequency', 'DateTimeStart',
                   'DateTimeStop', 'Duration', 'Longitude', 'Latitude']
-        dt_fmt = '%d.%m.%Y %H:%M:%S.%f'
         with open(full_path, 'w') as f:
             f.write('\t'.join(header))
             for item in self.files_info:
                 item: FileInfo = item
-                dt_start = datetime.strftime(item.time_start, dt_fmt)
-                dt_stop = datetime.strftime(item.time_stop, dt_fmt)
+                dt_start = datetime.strftime(item.time_start, DATETIME_FORMAT)
+                dt_stop = datetime.strftime(item.time_stop, DATETIME_FORMAT)
                 record = [item.name, item.format_type, item.frequency,
                           dt_start, dt_stop, item.formatted_duration,
                           item.longitude, item.latitude]
