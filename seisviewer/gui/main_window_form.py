@@ -159,6 +159,11 @@ class MainWindow:
             return
 
         export_folder = show_folder_dialog()
+        if not export_folder:
+            show_message('File saving was cancelled - export folder not '
+                         'selected')
+            return
+
         full_path = os.path.join(export_folder, 'FileDataTable.dat')
         header = ['FileName', 'Type', 'Frequency', 'DateTimeStart',
                   'DateTimeStop', 'Duration', 'Longitude', 'Latitude']
