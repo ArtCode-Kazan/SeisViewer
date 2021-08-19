@@ -115,11 +115,6 @@ class MainWindow:
                 self.__files_info.append(file_info)
                 self.add_grid_row(file_info)
 
-        # grid = self._ui.gFileInfo
-        # grid.setRowCount(0)
-        # for file_info in self.__files_info:
-        #     self.add_grid_row(file_info)
-
     def delete_selected_row(self):
         grid = self._ui.gFileInfo
         index = grid.currentRow()
