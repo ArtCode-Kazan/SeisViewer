@@ -211,7 +211,7 @@ class MainWindow:
         if len(self.files_info) == 0:
             show_message('No files')
             return
-        
+
         self.__spectrogram_form.set_start_form_state(self.files_info)
         self.__spectrogram_form.window.show()
 
