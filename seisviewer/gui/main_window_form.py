@@ -177,10 +177,11 @@ class MainWindow:
                           dt_start, dt_stop, item.formatted_duration,
                           item.longitude, item.latitude]
                 f.write('\n' + '\t'.join(map(str, record)))
-            show_message('File saving completed')
+        show_message('File saving completed')
 
     def open_revise_form(self):
         if len(self.files_info) == 0:
+            show_message('No files')
             return
 
         cross_start_time_analysis = self.files_info[0].time_start
@@ -208,7 +209,9 @@ class MainWindow:
 
     def open_spectrograms_form(self):
         if len(self.files_info) == 0:
+            show_message('No files')
             return
+        
         self.__spectrogram_form.set_start_form_state(self.files_info)
         self.__spectrogram_form.window.show()
 
