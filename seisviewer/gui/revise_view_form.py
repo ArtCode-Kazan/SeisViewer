@@ -1,7 +1,8 @@
 import os
 from random import randint
 from datetime import datetime
-from typing import List
+from datetime import timedelta
+from typing import List, Tuple
 
 import numpy as np
 
@@ -17,6 +18,7 @@ from seiscore.functions.spectrum import average_spectrum
 from seiscore.binaryfile.binaryfile import FileInfo
 
 from seisviewer.gui.revise_export_form import ReviseExportForm
+from seisviewer.gui.time_correction_form import TimeCorrectionForm
 
 
 class FormParameters:
@@ -93,6 +95,9 @@ class ReviseViewForm:
         self.avg_spectrums = np.array([])
         self.correlations: List[np.ndarray] = []
 
+        # dict: key is id of fileinfo, value: delay
+        self.time_corrections = {}
+
         self.__form_parameters = FormParameters()
 
         self.__window = QMainWindow()
@@ -104,6 +109,7 @@ class ReviseViewForm:
         self.spectrums_plot = None
 
         self.__export_form = ReviseExportForm(self)
+        self.__time_correction_form = TimeCorrectionForm(self)
 
         self.__ui.bUpdateSignalData.clicked.connect(self.load_signal_data)
         self.__ui.cbSignalComponents.currentTextChanged.connect(self.render_signals)
@@ -124,6 +130,7 @@ class ReviseViewForm:
         self.__ui.bLoadCorrelations.clicked.connect(self.load_correlations)
         self.__ui.cbCorrelationComponents.currentTextChanged.connect(self.render_correlations)
         self.__ui.aExport.triggered.connect(self.open_export_form)
+        self.__ui.bTimeCorrection.clicked.connect(self.open_time_correction_form)
 
     @property
     def forms_folder(self) -> str:
@@ -264,10 +271,13 @@ class ReviseViewForm:
 
         params = self.form_parameters
         result = np.array([])
-        for f_info in self.files_info:
+        for id_val, f_info in enumerate(self.files_info):
+            time_correction = self.time_corrections.get(id_val, 0)
             bin_data = BinaryFile(f_info.path, params.resample_freq, True)
-            bin_data.read_date_time_start = params.start_time
-            bin_data.read_date_time_stop = params.stop_time
+            dt_start = params.start_time + timedelta(seconds=time_correction)
+            dt_stop = params.stop_time + timedelta(seconds=time_correction)
+            bin_data.read_date_time_start = dt_start
+            bin_data.read_date_time_stop = dt_stop
             for component in self.components:
                 signal = bin_data.read_signal(component)
                 if params.detrend_freq != 0:
@@ -558,3 +568,18 @@ class ReviseViewForm:
             self.files_info, self._static_colors, self.signals,
             self.avg_spectrums, self.correlations)
         self.__export_form.window.show()
+
+    def get_time_correction_data(self) -> List[Tuple[int, str, float]]:
+        for id_val in self.form_parameters.selection_file_ids:
+            if id_val not in self.time_corrections:
+                self.time_corrections[id_val] = 0
+
+        result = []
+        for id_val, time_correction in self.time_corrections.items():
+            file_name = self.files_info[id_val].name
+            result.append((id_val, file_name, time_correction))
+        return result
+
+    def open_time_correction_form(self):
+        self.__time_correction_form.set_start_form_state()
+        self.__time_correction_form.window.show()
