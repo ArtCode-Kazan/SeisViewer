@@ -14,6 +14,7 @@ from seiscore.binaryfile.binaryfile import FileInfo
 from seiscore.plotting.plotting import plot_signal
 
 from seisviewer.gui.dialogs import show_folder_dialog
+from seisviewer.gui.dialogs import show_message
 
 
 class FormParameters(NamedTuple):
@@ -26,9 +27,14 @@ class FormParameters(NamedTuple):
     is_save_signal_graph: bool
     output_folder: str
 
+    @property
+    def is_dates_correct(self):
+        return self.dt_start < self.dt_stop
+
 
 SIGNAL_DURATION_UNIT_SECONDS = 60
 MINIMAL_PERCENT_SIGNAL_PART = 0.25
+X_COMPONENT, Y_COMPONENT, Z_COMPONENT = 'X', 'Y', 'Z'
 
 
 class External(QThread):
@@ -152,11 +158,11 @@ class SpectrogramsExportForm:
         ui = self.ui
         components = list()
         if ui.cbXComponent.isChecked():
-            components.append('X')
+            components.append(X_COMPONENT)
         if ui.cbYComponent.isChecked():
-            components.append('Y')
+            components.append(Y_COMPONENT)
         if ui.cbZComponent.isChecked():
-            components.append('Z')
+            components.append(Z_COMPONENT)
         freq_lims = [ui.dsMinFrequency.value(), ui.dsMaxFrequency.value()]
         params = FormParameters(ui.sbResampleFrequency.value(),
                                 ui.dtStartTime.dateTime().toPyDateTime(),
@@ -195,6 +201,10 @@ class SpectrogramsExportForm:
         self.ui.statusBar.showMessage(value)
 
     def processing(self):
+        if not self.form_parameters.is_dates_correct:
+            show_message('Incorrect date interval')
+            return
+
         self.thread_function()
 
     def set_start_form_state(self, dt_start: datetime, dt_stop: datetime,

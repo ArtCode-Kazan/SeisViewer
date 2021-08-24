@@ -20,6 +20,8 @@ from seiscore.binaryfile.binaryfile import FileInfo
 from seisviewer.gui.revise_export_form import ReviseExportForm
 from seisviewer.gui.time_correction_form import TimeCorrectionForm
 
+from seisviewer.gui.dialogs import show_message
+
 
 class FormParameters:
     resample_freq = 0
@@ -40,6 +42,10 @@ class FormParameters:
     is_using_smooth_for_correlations = True
     correlation_component_id = 0
     selection_file_ids: List[int] = []
+
+    @property
+    def is_date_correct(self):
+        return self.start_time < self.stop_time
 
 
 def generate_random_color():
@@ -262,6 +268,11 @@ class ReviseViewForm:
         return params
 
     def load_signal_data(self) -> None:
+        params = self.form_parameters
+        if not params.is_date_correct:
+            show_message('Invalid date limit')
+            return
+
         self.ui.statusBar.showMessage('Loading signals data. Wait please...')
         self.signals = np.array([])
         self.avg_spectrums = np.array([])
@@ -269,7 +280,6 @@ class ReviseViewForm:
         if len(self.files_info) == 0:
             return
 
-        params = self.form_parameters
         result = np.array([])
         for id_val, f_info in enumerate(self.files_info):
             time_correction = self.time_corrections.get(id_val, 0)

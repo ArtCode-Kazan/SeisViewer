@@ -16,6 +16,7 @@ from seiscore import Spectrogram
 from seiscore.binaryfile.binaryfile import FileInfo
 
 from seisviewer.gui.spectrograms_export_form import SpectrogramsExportForm
+from seisviewer.gui.dialogs import show_message
 
 
 class FormParameters:
@@ -29,16 +30,20 @@ class FormParameters:
     max_freq = 20
     component_id = 0
 
+    @property
+    def is_date_correct(self):
+        return self.dt_start < self.dt_stop
+
 
 FORM_FILENAME = 'ViewSpectrogramForm.ui'
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+COMPONENTS = ('X', 'Y', 'Z')
 
 
 class SpectrogramViewForm:
     def __init__(self, parent):
         self.__parent = parent
 
-        self.components = ('X', 'Y', 'Z')
         self.files_info: List[FileInfo] = []
         self.__form_parameters = FormParameters()
 
@@ -161,7 +166,7 @@ class SpectrogramViewForm:
         ui.cbFileName.addItems([x.name for x in files_info])
 
         ui.cbComponents.clear()
-        ui.cbComponents.addItems(self.components)
+        ui.cbComponents.addItems(COMPONENTS)
 
         ui.lSignalTimeInterval.clear()
         ui.gwGraphOriginalSignal.clear()
@@ -198,11 +203,15 @@ class SpectrogramViewForm:
         self.modify_step_index()
 
     def load_data(self):
+        params = self.form_parameters
+        if not params.is_date_correct:
+            show_message('Incorrect date interval')
+            return
+
         self.ui.statusBar.showMessage('Loading file... Wait please')
         self.ui.gwGraphOriginalSignal.clear()
         self.ui.gwGraphOriginalSpectrogram.clear()
         self.signal, self.spectrograms = [], []
-        params = self.form_parameters
 
         bin_data = BinaryFile(self.files_info[params.file_id].path,
                               params.resample_freq, True)
@@ -217,7 +226,7 @@ class SpectrogramViewForm:
             dt_stop = params.dt_stop
         bin_data.read_date_time_stop = dt_stop
 
-        for component in self.components:
+        for component in COMPONENTS:
             signal = bin_data.read_signal(component)
             self.signal.append(signal)
             sp_data = Spectrogram(signal, params.resample_freq)
@@ -250,10 +259,10 @@ class SpectrogramViewForm:
         canvas.clear()
         self.ui.lSignalTimeInterval.clear()
 
-        plot, curve = canvas.addPlot(), pg.PlotCurveItem()
-
-        if len(self.signal) != len(self.components):
+        if len(self.signal) != len(COMPONENTS):
             return
+
+        plot, curve = canvas.addPlot(), pg.PlotCurveItem()
 
         params = self.form_parameters
 
