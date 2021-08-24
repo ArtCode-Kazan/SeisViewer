@@ -26,6 +26,7 @@ class MainWindow:
         self.__window = QMainWindow()
 
         self.__files_info: List[FileInfo] = []
+        self.__bad_file_names: List[str] = []
 
         self.__revise_form = ReviseViewForm(self)
         self.__files_joining_form = FilesJoiningForm(self)
@@ -65,6 +66,10 @@ class MainWindow:
     def files_info(self) -> List[FileInfo]:
         return self.__files_info
 
+    @property
+    def bad_file_names(self) -> List[str]:
+        return self.__bad_file_names
+
     def screen_center(self):
         frame_geom = self.window.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -94,6 +99,14 @@ class MainWindow:
         grid.setItem(index, 7, QTableWidgetItem(str(file_info.latitude)))
         grid.setSortingEnabled(True)
 
+    def show_bad_files(self):
+        if not self.bad_file_names:
+            return
+
+        message_text = 'Files with bad headers:\n'
+        message_text += '\n'.join(self.bad_file_names)
+        show_message(message_text)
+
     def open_files(self):
         """
         Loading files info into grid
@@ -102,18 +115,28 @@ class MainWindow:
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFiles)
         file_paths = file_dialog.getOpenFileNames()[0]
+
+        self.__bad_file_names = []
         if len(file_paths) == 0:
             return
 
         for path in file_paths:
             try:
                 bin_data = BinaryFile(path)
-            except (BadFilePath, BadHeaderData):
+            except BadFilePath:
                 continue
-            file_info = bin_data.short_file_info
+
+            try:
+                file_info = bin_data.short_file_info
+            except BadHeaderData:
+                self.__bad_file_names.append(os.path.basename(path))
+                continue
+
             if file_info not in self.__files_info:
                 self.__files_info.append(file_info)
                 self.add_grid_row(file_info)
+
+        self.show_bad_files()
 
     def delete_selected_row(self):
         grid = self._ui.gFileInfo
