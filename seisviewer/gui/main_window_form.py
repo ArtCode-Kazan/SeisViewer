@@ -9,6 +9,7 @@ from PyQt5.uic import *
 from seiscore import BinaryFile
 from seiscore.binaryfile.binaryfile import BadHeaderData, BadFilePath
 from seiscore.binaryfile.binaryfile import FileInfo
+from seiscore.binaryfile.binaryfile import BINARY_FILE_FORMATS
 
 from seisviewer.gui.dialogs import show_folder_dialog, show_message
 
@@ -114,7 +115,9 @@ class MainWindow:
         """
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFiles)
-        file_paths = file_dialog.getOpenFileNames()[0]
+        base_filter = ' '.join(['*.' + x for x in BINARY_FILE_FORMATS.values()])
+        file_filter = f'Binaries ({base_filter})'
+        file_paths = file_dialog.getOpenFileNames(filter=file_filter)[0]
 
         self.__bad_file_names = []
         if len(file_paths) == 0:

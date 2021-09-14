@@ -18,7 +18,7 @@ def show_file_dialog():
     file_dialog = QFileDialog()
     file_dialog.setFileMode(QFileDialog.ExistingFile)
     file_list = file_dialog.getOpenFileNames()[0]
-    if len(file_list)==1:
+    if len(file_list) == 1:
         return file_list[0]
     else:
         return None
