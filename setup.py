@@ -11,4 +11,5 @@ setup(name='seisviewer',
       license='MIT',
       include_package_data=True,
       zip_safe=False,
-      package_data={'seisviewer': ['gui/forms/*.ui']})
+      package_data={'seisviewer': ['gui/forms/*.ui']}
+      )
