@@ -11,7 +11,7 @@ install-python:
 	sudo apt autoremove -y
 
 	sudo add-apt-repository ppa:deadsnakes/ppa
-	sudo apt install -y python3.8 python3.8-dev
+	sudo apt install -y python3.8 python3.8-dev python3.8-distutils
 
 	wget https://bootstrap.pypa.io/get-pip.py
 	sudo python3.8 get-pip.py
