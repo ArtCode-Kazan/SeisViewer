@@ -1,3 +1,5 @@
+VERSION=2.2.1
+
 python_version_full := $(wordlist 2,4,$(subst ., ,$(shell python3 --version 2>&1)))
 python_version_major := $(word 1,${python_version_full})
 python_version_minor := $(word 2,${python_version_full})
@@ -39,7 +41,8 @@ else
 endif
 
 	sudo make install-dependencies
-	sudo python3.8 setup.py install
+	python3.8 setup.py bdist_wheel
+	cd $(CURDIR)/dist && sudo python3.8 -m pip install seisviewer-$(VERSION)-py3-none-any.whl
 
 	python3.8 alias_install.py
 	$(shell source ~/.bashrc)
