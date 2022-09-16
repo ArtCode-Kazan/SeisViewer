@@ -38,8 +38,8 @@ else
 	make install-python
 endif
 
-	make install-dependencies
-	python3.8 setup.py install
+	sudo make install-dependencies
+	sudo python3.8 setup.py install
 
 	python3.8 alias_install.py
 	$(shell source ~/.bashrc)
