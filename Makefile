@@ -12,6 +12,9 @@ install-python:
 
 	sudo add-apt-repository ppa:deadsnakes/ppa
 	sudo apt install -y python3.8 python3.8-dev
+
+	wget https://bootstrap.pypa.io/get-pip.py
+	sudo python3.8 get-pip.py
 	sudo python3.8 -m pip install --upgrade pip
 
 
