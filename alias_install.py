@@ -21,7 +21,7 @@ def set_alias(bash_file_path: str):
         return
 
     with open(bash_file_path, 'a') as file_ctx:
-        line = f'alias {ALIAS_NAME}=\'{ALIAS_COMMAND}\''
+        line = f'alias {ALIAS_NAME}=\'{ALIAS_COMMAND}\'\n'
         file_ctx.write(line)
 
 
