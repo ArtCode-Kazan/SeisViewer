@@ -57,9 +57,7 @@ class External(QThread):
             file_path = file_data.path
 
             file_base_name = os.path.basename(file_path).split('.')[0]
-            bin_data = BinaryFile(file_path, True)
-
-            bin_data.resample_frequency = params.resample_frequency
+            bin_data = BinaryFile(file_path, params.resample_frequency, True)
             for i in range(parts_count):
                 read_dt_start = params.dt_start + timedelta(
                     seconds=part_duration * i)
