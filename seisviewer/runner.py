@@ -13,3 +13,7 @@ def get_lib_path() -> list:
 def run():
     QtCore.QCoreApplication.setLibraryPaths(get_lib_path())
     MainWindow()
+
+
+if __name__ == '__main__':
+    run()
