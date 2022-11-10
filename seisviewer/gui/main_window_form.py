@@ -16,6 +16,7 @@ from seisviewer.gui.dialogs import show_folder_dialog, show_message
 from seisviewer.gui.revise_view_form import ReviseViewForm
 from seisviewer.gui.files_joining_form import FilesJoiningForm
 from seisviewer.gui.spectrogram_view_form import SpectrogramViewForm
+from seisviewer.gui.file_header_redactor_form import FileHeaderRedactorForm
 
 
 DATETIME_FORMAT = '%d.%m.%Y %H:%M:%S.%f'
@@ -32,6 +33,7 @@ class MainWindow:
         self.__revise_form = ReviseViewForm(self)
         self.__files_joining_form = FilesJoiningForm(self)
         self.__spectrogram_form = SpectrogramViewForm(self)
+        self.__file_header_redactor_form = FileHeaderRedactorForm(self)
 
         ui_path = os.path.join(self.forms_folder, 'MainWindowForm.ui')
         self.__ui = loadUi(ui_path, self.__window)
@@ -43,7 +45,13 @@ class MainWindow:
 
         self.__ui.aSpectrograms.triggered.connect(self.open_spectrograms_form)
         self.__ui.aRevise.triggered.connect(self.open_revise_form)
-        self.__ui.aFilesJoining.triggered.connect(self.open_files_joining_form)
+
+        self.__ui.aFilesJoining.triggered.connect(
+            self.open_files_joining_form
+        )
+        self.__ui.aFileHeaderRedactor.triggered.connect(
+            self.open_file_header_redactor_form
+        )
 
         self.screen_center()
         self.__window.show()
@@ -244,3 +252,7 @@ class MainWindow:
     def open_files_joining_form(self):
         self.__files_joining_form.set_start_form_state()
         self.__files_joining_form.window.show()
+
+    def open_file_header_redactor_form(self):
+        show_message('File header redactor works only sigma files now')
+        self.__file_header_redactor_form.window.show()

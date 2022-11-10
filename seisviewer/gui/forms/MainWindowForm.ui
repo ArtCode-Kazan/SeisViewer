@@ -266,9 +266,16 @@
     </property>
     <addaction name="aSpectrograms"/>
     <addaction name="aRevise"/>
+   </widget>
+   <widget class="QMenu" name="menuUtilities">
+    <property name="title">
+     <string>&amp;Utilities</string>
+    </property>
     <addaction name="aFilesJoining"/>
+    <addaction name="aFileHeaderRedactor"/>
    </widget>
    <addaction name="menuProcessing"/>
+   <addaction name="menuUtilities"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="aSpectrograms">
@@ -308,12 +315,17 @@
   </action>
   <action name="aFilesJoining">
    <property name="text">
-    <string>Files joining</string>
+    <string>&amp;Files joining</string>
    </property>
   </action>
   <action name="aSpectrumViewer">
    <property name="text">
     <string>&amp;Spectrum Viewer</string>
+   </property>
+  </action>
+  <action name="aFileHeaderRedactor">
+   <property name="text">
+    <string>File header redactor</string>
    </property>
   </action>
  </widget>
