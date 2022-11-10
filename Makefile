@@ -31,6 +31,7 @@ install:
 
 	python3.8 aliases.py --install
 	$(shell source ~/.bashrc)
+	history -c
 
 
 uninstall:
@@ -38,6 +39,7 @@ uninstall:
 
 	python3.8 aliases.py --remove
 	$(shell source ~/.bashrc)
+	history -c
 
 
 update:
@@ -45,3 +47,7 @@ update:
 	make install-dependencies
 	make create-build
 	cd $(CURDIR)/dist && sudo python3.8 -m pip install seisviewer-$(VERSION)-py3-none-any.whl
+
+	python3.8 aliases.py --install
+	$(shell source ~/.bashrc)
+	history -c
