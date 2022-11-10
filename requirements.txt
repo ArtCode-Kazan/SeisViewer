@@ -13,5 +13,5 @@ pyqtgraph==0.12.1
 python-dateutil==2.8.1
 PyWavelets==1.1.1
 scipy==1.6.3
-seiscore==1.0.0
+seiscore==1.0.1
 six==1.16.0
