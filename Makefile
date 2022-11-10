@@ -42,5 +42,6 @@ uninstall:
 
 update:
 	make uninstall
+	make install-dependencies
 	make create-build
 	cd $(CURDIR)/dist && sudo python3.8 -m pip install seisviewer-$(VERSION)-py3-none-any.whl
