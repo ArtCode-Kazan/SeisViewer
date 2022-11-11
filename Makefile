@@ -31,7 +31,6 @@ install:
 
 	python3.8 aliases.py --install
 	$(shell source ~/.bashrc)
-	history -c
 
 
 uninstall:
@@ -39,7 +38,6 @@ uninstall:
 
 	python3.8 aliases.py --remove
 	$(shell source ~/.bashrc)
-	history -c
 
 
 update:
@@ -50,4 +48,3 @@ update:
 
 	python3.8 aliases.py --install
 	$(shell source ~/.bashrc)
-	history -c
