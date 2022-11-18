@@ -7,12 +7,12 @@ python_version_patch := $(word 3,${python_version_full})
 
 
 install-dependencies:
-	sudo python3.8 -m pip install pyQt5 pyqtgraph==0.12.1
-
 	wget https://github.com/MikkoArtik/SeisCore/archive/refs/heads/main.zip
 	unzip main.zip -d seiscore-package
 	cd seiscore-package/SeisCore-main && make install
 	sudo rm -rf main.zip seiscore-package
+
+	sudo python3.8 -m pip install pyQt5 pyqtgraph==0.12.1
 
 
 after-build:
