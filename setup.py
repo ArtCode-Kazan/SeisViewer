@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 
 setup(name='seisviewer',
-      version='2.2.4',
+      version='2.2.5',
       packages=find_packages(),
       description='Package for processing of microseismic data',
       author='Michael Chernov',
