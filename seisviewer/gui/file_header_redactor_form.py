@@ -82,12 +82,22 @@ class FileHeaderRedactorForm:
                     continue
                 path = os.path.join(root, filename)
                 bin_data = BinaryFile(file_path=path)
+                origin_datetime = bin_data.origin_datetime_start
+                correct_datetime = datetime(
+                    year=datetime.now().year,
+                    month=datetime.now().month,
+                    day=datetime.now().day,
+                    hour=origin_datetime.hour,
+                    minute=origin_datetime.minute,
+                    second=origin_datetime.second,
+                    microsecond=origin_datetime.microsecond
+                )
                 rows.append(
                     TableRow(
                         root_folder=root,
                         filename=filename,
-                        origin_datetime=bin_data.datetime_start,
-                        correct_datetime=datetime.now()
+                        origin_datetime=origin_datetime,
+                        correct_datetime=correct_datetime
                     )
                 )
         self.form_parameters.table_rows = rows
@@ -103,7 +113,6 @@ class FileHeaderRedactorForm:
         for i, row in enumerate(self.form_parameters.table_rows):
             table.setItem(i, 0, QTableWidgetItem(row.root_folder))
             table.setItem(i, 1, QTableWidgetItem(row.filename))
-
             table.setItem(i, 2, QTableWidgetItem(row.origin_datetime_str))
 
             redact_datetime_widget = QDateTimeEdit()
