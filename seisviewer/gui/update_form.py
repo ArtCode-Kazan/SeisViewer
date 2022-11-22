@@ -61,6 +61,16 @@ def update_package():
     )
     subprocess.call(command, shell=True)
 
+    if os.path.exists(archive_file_path):
+        os.remove(archive_file_path)
+
+    if os.path.exists(unpack_archive_path):
+        command = (
+            f'echo {user_password} | sudo -S chown -R {username}'
+            f' {unpack_archive_path}'
+        )
+        subprocess.call(command, shell=True)
+
     print('Program was closed after updating. Please run again manually')
     os.kill(os.getpid(), signal.SIGKILL)
 
