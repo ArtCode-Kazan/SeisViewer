@@ -61,7 +61,7 @@ def update_package():
     )
     subprocess.call(command, shell=True)
 
-    subprocess.call('seisviewer', shell=True)
+    print('Program was closed after updating. Please run again manually')
     os.kill(os.getpid(), signal.SIGKILL)
 
 

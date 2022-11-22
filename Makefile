@@ -1,4 +1,4 @@
-VERSION=2.2.5
+VERSION=2.2.6
 
 python_version_full := $(wordlist 2,4,$(subst ., ,$(shell python3 --version 2>&1)))
 python_version_major := $(word 1,${python_version_full})
