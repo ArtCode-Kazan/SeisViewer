@@ -34,7 +34,7 @@ install:
 
 
 uninstall:
-	sudo python3.8 -m pip uninstall seisviewer
+	sudo python3.8 -m pip uninstall -y seisviewer
 
 	python3.8 aliases.py --remove
 	$(shell source ~/.bashrc)
