@@ -274,8 +274,15 @@
     <addaction name="aFilesJoining"/>
     <addaction name="aFileHeaderRedactor"/>
    </widget>
+   <widget class="QMenu" name="menuProgram">
+    <property name="title">
+     <string>&amp;Program</string>
+    </property>
+    <addaction name="aUpdate"/>
+   </widget>
    <addaction name="menuProcessing"/>
    <addaction name="menuUtilities"/>
+   <addaction name="menuProgram"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="aSpectrograms">
@@ -325,7 +332,12 @@
   </action>
   <action name="aFileHeaderRedactor">
    <property name="text">
-    <string>File header redactor</string>
+    <string>File &amp;header redactor</string>
+   </property>
+  </action>
+  <action name="aUpdate">
+   <property name="text">
+    <string>Check for update</string>
    </property>
   </action>
  </widget>
