@@ -58,10 +58,6 @@ class FileHeaderRedactorForm:
         self.__ui.bOpen.clicked.connect(self.open_folder)
         self.__ui.bRedact.clicked.connect(self.create_redact_versions)
 
-        # self.__ui.bOpenFolder.clicked.connect(self.open_folder)
-        # self.__ui.cbSpectrumGraphs.stateChanged.connect(self.activate_spectrum_limits)
-        # self.__ui.bExport.clicked.connect(self.start_proc)
-
     @property
     def window(self):
         return self.__window
