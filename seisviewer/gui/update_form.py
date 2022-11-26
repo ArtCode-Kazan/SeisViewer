@@ -1,7 +1,7 @@
 import os
 import signal
 import urllib.request
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 import subprocess
 import getpass
 import zipfile
@@ -29,7 +29,7 @@ def get_available_version() -> str:
                 continue
             return line.strip().split('\'')[1]
         return ZERO_VERSION
-    except HTTPError:
+    except (HTTPError, URLError):
         return ZERO_VERSION
 
 
