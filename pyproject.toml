@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "seisviewer"
+version = "0.1.0"
+description = ""
+authors = ["Michael <mihail.tchernov@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.8.12"
+pyqtgraph = "0.12.1"
+pyqt5 = "5.15.4"
+matplotlib = "3.4.2"
+seiscore = {git = "git@github.com:ArtCode-Kazan/SeisCore.git", rev = "main"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
