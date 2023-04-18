@@ -1,27 +1,24 @@
 VERSION=2.2.9
 
-python_version_full := $(wordlist 2,4,$(subst ., ,$(shell python3 --version 2>&1)))
-python_version_major := $(word 1,${python_version_full})
-python_version_minor := $(word 2,${python_version_full})
-python_version_patch := $(word 3,${python_version_full})
-
 
 install-dependencies:
-	wget https://github.com/MikkoArtik/SeisCore/archive/refs/heads/main.zip
+	wget https://github.com/ArtCode-Kazan/SeisCore/archive/refs/heads/main.zip
 	unzip main.zip -d seiscore-package
 	cd seiscore-package/SeisCore-main && make install
 	sudo rm -rf main.zip seiscore-package
+	sudo poetry install --no-root
 
-	sudo python3.8 -m pip install pyQt5 pyqtgraph==0.12.1
 
-
-after-build:
-	rm -rf build && rm -rf seisviewer.egg-info
+update-dependencies:
+	wget https://github.com/ArtCode-Kazan/SeisCore/archive/refs/heads/main.zip
+	unzip main.zip -d seiscore-package
+	cd seiscore-package/SeisCore-main && make update
+	sudo rm -rf main.zip seiscore-package
 
 
 create-build:
 	python3.8 setup.py bdist_wheel
-	make after-build
+	rm -rf build && rm -rf seisviewer.egg-info
 
 
 install:
@@ -42,7 +39,7 @@ uninstall:
 
 update:
 	make uninstall
-	make install-dependencies
+	make update-dependencies
 	make create-build
 	cd $(CURDIR)/dist && sudo python3.8 -m pip install seisviewer-$(VERSION)-py3-none-any.whl
 
