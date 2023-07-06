@@ -12,6 +12,6 @@ PyQt5-stubs==5.15.2.0
 pyqtgraph==0.12.1
 python-dateutil==2.8.1
 PyWavelets==1.1.1
-scipy==1.6.3
+scipy==1.10.0
 seiscore==1.0.1
 six==1.16.0
